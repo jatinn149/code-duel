@@ -1,17 +1,21 @@
 import { create } from 'zustand';
-import { Room, MatchState } from '@code-duel/types';
+import { Room, MatchState, JudgeResult } from '@code-duel/types';
 
 interface RoomState {
   currentRoom: Room | null;
   isLoading: boolean;
   error: string | null;
   latency: number;
+  lastJudgeResult: JudgeResult | null;
+  countdown: number | null;
 
   setRoom: (room: Room | null) => void;
   setLoading: (isLoading: boolean) => void;
   setError: (error: string | null) => void;
   setLatency: (latency: number) => void;
   updateMatchState: (state: MatchState) => void;
+  setJudgeResult: (result: JudgeResult | null) => void;
+  setCountdown: (seconds: number | null) => void;
 }
 
 export const useRoomStore = create<RoomState>((set) => ({
@@ -19,6 +23,8 @@ export const useRoomStore = create<RoomState>((set) => ({
   isLoading: false,
   error: null,
   latency: 0,
+  lastJudgeResult: null,
+  countdown: null,
 
   setRoom: (room) => set({ currentRoom: room }),
   setLoading: (isLoading) => set({ isLoading }),
@@ -28,4 +34,6 @@ export const useRoomStore = create<RoomState>((set) => ({
     set((prev) => ({
       currentRoom: prev.currentRoom ? { ...prev.currentRoom, state } : null,
     })),
+  setJudgeResult: (lastJudgeResult) => set({ lastJudgeResult }),
+  setCountdown: (countdown) => set({ countdown }),
 }));

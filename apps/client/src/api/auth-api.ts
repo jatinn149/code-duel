@@ -1,38 +1,27 @@
-import axios from 'axios';
 import { SignupInput, LoginInput } from '@code-duel/validation';
 import { AuthResponse, User } from '@code-duel/types';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-
-export const authApi = axios.create({
-  baseURL: `${API_URL}/api/v1/auth`,
-  withCredentials: true,
-});
+import { apiClient } from './api-client';
 
 export const signup = async (data: SignupInput): Promise<AuthResponse> => {
-  const response = await authApi.post('/signup', data);
+  const response = await apiClient.post('/auth/signup', data);
   return response.data.data;
 };
 
 export const login = async (data: LoginInput): Promise<AuthResponse> => {
-  const response = await authApi.post('/login', data);
+  const response = await apiClient.post('/auth/login', data);
   return response.data.data;
 };
 
 export const logout = async (): Promise<void> => {
-  await authApi.post('/logout');
+  await apiClient.post('/auth/logout');
 };
 
 export const refresh = async (): Promise<AuthResponse> => {
-  const response = await authApi.post('/refresh');
+  const response = await apiClient.post('/auth/refresh');
   return response.data.data;
 };
 
-export const getMe = async (token: string): Promise<Omit<User, 'passwordHash'>> => {
-  const response = await authApi.get('/me', {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export const getMe = async (): Promise<Omit<User, 'passwordHash'>> => {
+  const response = await apiClient.get('/auth/me');
   return response.data.data;
 };

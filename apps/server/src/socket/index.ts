@@ -6,6 +6,7 @@ import { logger } from '@/utils/logger';
 import { IUserRepository } from '@/repositories/interfaces';
 import { JWTPayload } from '@/middleware/auth-middleware';
 import { SocketEvents } from '@code-duel/shared';
+import { MatchState } from '@code-duel/types';
 import { roomManager } from './room-manager';
 import { createRoomSchema, joinRoomSchema, pingSyncSchema } from '@code-duel/validation';
 
@@ -95,6 +96,29 @@ export const initSocket = (server: HttpServer, userRepository: IUserRepository) 
         const message = error instanceof Error ? error.message : 'Failed to join room';
         socket.emit(SocketEvents.ROOM_ERROR, message);
       }
+    });
+
+    // Start Countdown
+    socket.on(SocketEvents.START_COUNTDOWN, () => {
+      const room = roomManager.getRoomByPlayerId(user.id);
+      if (!room || room.ownerId !== user.id || room.state !== MatchState.WAITING) return;
+
+      room.state = MatchState.COUNTDOWN;
+      const countdownDuration = 3000; // 3 seconds
+      room.countdownStartAt = new Date(Date.now() + countdownDuration).toISOString();
+      room.updatedAt = new Date().toISOString();
+
+      io.to(room.id).emit(SocketEvents.ROOM_UPDATED, room);
+
+      setTimeout(() => {
+        const currentRoom = roomManager.getRoom(room.id);
+        if (currentRoom && currentRoom.state === MatchState.COUNTDOWN) {
+          currentRoom.state = MatchState.PLAYING;
+          currentRoom.matchStartAt = new Date().toISOString();
+          currentRoom.updatedAt = new Date().toISOString();
+          io.to(room.id).emit(SocketEvents.ROOM_UPDATED, currentRoom);
+        }
+      }, countdownDuration);
     });
 
     // Leave Room
