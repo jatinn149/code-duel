@@ -1,0 +1,16 @@
+{
+  "name": "@code-duel/types",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc -w",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@code-duel/config": "*",
+    "typescript": "^5.1.6"
+  }
+}

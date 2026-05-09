@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+    networks:
+      - code-duel-network
+
+  client:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+    ports:
+      - "3000:3000"
+    networks:
+      - code-duel-network
+
+  judge:
+    build:
+      context: .
+      dockerfile: docker/judge.Dockerfile
+    ports:
+      - "3002:3002"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - PORT=3002
+      - NODE_ENV=production
+    networks:
+      - code-duel-network
+
+networks:
+  code-duel-network:
+    driver: bridge
