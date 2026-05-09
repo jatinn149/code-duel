@@ -4,6 +4,9 @@ import { env } from './config/env';
 import { logger } from './utils/logger';
 import { jsonStorage } from './storage/json-adapter';
 
+import { initSocket } from './socket';
+import { JsonUserRepository } from './repositories/json-user-repository';
+
 let server: Server;
 
 async function bootstrap() {
@@ -12,9 +15,15 @@ async function bootstrap() {
     await jsonStorage.initialize();
     logger.info('Storage initialized');
 
+    const userRepository = new JsonUserRepository(jsonStorage);
+
     server = app.listen(env.PORT, () => {
       logger.info(`Server running on port ${env.PORT} in ${env.NODE_ENV} mode`);
     });
+
+    // Initialize Sockets
+    initSocket(server, userRepository);
+    logger.info('Socket.io initialized');
 
     const exitHandler = () => {
       if (server) {
