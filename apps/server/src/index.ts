@@ -1,20 +1,57 @@
-import express from 'express';
-import pino from 'pino';
-import { APP_NAME } from '@code-duel/shared';
+import { Server } from 'http';
+import { app } from './app';
+import { env } from './config/env';
+import { logger } from './utils/logger';
+import { jsonStorage } from './storage/json-adapter';
 
-const logger = pino({
-  transport: {
-    target: 'pino-pretty',
-  },
-});
+let server: Server;
 
-const app = express();
-const port = process.env.PORT || 3001;
+async function bootstrap() {
+  try {
+    // Initialize storage
+    await jsonStorage.initialize();
+    logger.info('Storage initialized');
 
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', app: APP_NAME });
-});
+    server = app.listen(env.PORT, () => {
+      logger.info(`Server running on port ${env.PORT} in ${env.NODE_ENV} mode`);
+    });
 
-app.listen(port, () => {
-  logger.info(`${APP_NAME} Server running on port ${port}`);
-});
+    const exitHandler = () => {
+      if (server) {
+        server.close(() => {
+          logger.info('Server closed');
+          process.exit(1);
+        });
+      } else {
+        process.exit(1);
+      }
+    };
+
+    const unexpectedErrorHandler = (error: unknown) => {
+      logger.error({ error }, 'Unexpected error');
+      exitHandler();
+    };
+
+    process.on('uncaughtException', unexpectedErrorHandler);
+    process.on('unhandledRejection', unexpectedErrorHandler);
+
+    process.on('SIGTERM', () => {
+      logger.info('SIGTERM received');
+      if (server) {
+        server.close();
+      }
+    });
+
+    process.on('SIGINT', () => {
+      logger.info('SIGINT received');
+      if (server) {
+        server.close();
+      }
+    });
+  } catch (error) {
+    logger.error({ error }, 'Failed to start server');
+    process.exit(1);
+  }
+}
+
+bootstrap();
