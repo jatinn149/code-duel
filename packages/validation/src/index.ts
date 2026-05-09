@@ -40,3 +40,20 @@ export const joinRoomSchema = z.object({
 export const pingSyncSchema = z.object({
   clientTime: z.string(),
 });
+
+export const testCaseSchema = z.object({
+  id: z.string(),
+  input: z.string(),
+  expectedOutput: z.string(),
+  isHidden: z.boolean(),
+  weight: z.number().min(0),
+});
+
+export const judgeRequestSchema = z.object({
+  submissionId: z.string(),
+  language: z.enum(['python']),
+  code: z.string(),
+  testCases: z.array(testCaseSchema),
+  timeLimitMs: z.number().min(100).max(10000).default(5000),
+  memoryLimitMb: z.number().min(32).max(512).default(128),
+});

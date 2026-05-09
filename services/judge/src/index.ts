@@ -1,6 +1,9 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import pino from 'pino';
 import { APP_NAME } from '@code-duel/shared';
+import { executionQueue } from './execution-queue';
+import { judgeRequestSchema } from '@code-duel/validation';
+import { ZodError } from 'zod';
 
 const logger = pino({
   transport: {
@@ -9,10 +12,28 @@ const logger = pino({
 });
 
 const app = express();
+app.use(express.json());
+
 const port = process.env.PORT || 3002;
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', service: 'Judge Service', app: APP_NAME });
+});
+
+app.post('/api/v1/judge', async (req: Request, res: Response) => {
+  try {
+    const parsed = judgeRequestSchema.parse(req.body);
+    const result = await executionQueue.submit(parsed);
+    res.json({ success: true, data: result });
+  } catch (error: unknown) {
+    if (error instanceof ZodError) {
+      return res
+        .status(400)
+        .json({ success: false, error: 'Invalid judge request', details: error.errors });
+    }
+    logger.error({ error }, 'Judge request failed');
+    res.status(500).json({ success: false, error: 'Internal Judge Error' });
+  }
 });
 
 app.listen(port, () => {

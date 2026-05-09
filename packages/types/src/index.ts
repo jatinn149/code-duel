@@ -75,3 +75,37 @@ export interface ServerTimeResponse {
   serverTime: string;
   latency: number;
 }
+
+export interface TestCase {
+  id: string;
+  input: string;
+  expectedOutput: string;
+  isHidden: boolean;
+  weight: number;
+}
+
+export interface JudgeRequest {
+  submissionId: string;
+  language: 'python';
+  code: string;
+  testCases: TestCase[];
+  timeLimitMs: number;
+  memoryLimitMb: number;
+}
+
+export interface TestCaseResult {
+  testCaseId: string;
+  status: 'passed' | 'failed' | 'error' | 'timeout' | 'memory_limit';
+  actualOutput?: string;
+  error?: string;
+  executionTimeMs: number;
+  memoryUsageMb: number;
+}
+
+export interface JudgeResult {
+  submissionId: string;
+  overallStatus: 'passed' | 'failed' | 'error' | 'timeout';
+  totalScore: number;
+  maxScore: number;
+  testResults: TestCaseResult[];
+}
