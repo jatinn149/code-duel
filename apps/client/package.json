@@ -14,15 +14,16 @@
     "@code-duel/shared": "*",
     "@code-duel/types": "*",
     "@code-duel/validation": "*",
+    "@monaco-editor/react": "^4.5.1",
+    "@tanstack/react-query": "^4.29.25",
+    "axios": "^1.16.0",
+    "clsx": "^2.0.0",
+    "lucide-react": "^0.263.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "zustand": "^4.3.9",
-    "@tanstack/react-query": "^4.29.25",
     "socket.io-client": "^4.7.1",
-    "lucide-react": "^0.263.1",
-    "clsx": "^2.0.0",
     "tailwind-merge": "^1.14.0",
-    "@monaco-editor/react": "^4.5.1"
+    "zustand": "^4.3.9"
   },
   "devDependencies": {
     "@code-duel/config": "*",

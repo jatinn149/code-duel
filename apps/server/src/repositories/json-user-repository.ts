@@ -17,6 +17,11 @@ export class JsonUserRepository implements IUserRepository {
     return users.find((u) => u.email === email) || null;
   }
 
+  async findByUsername(username: string): Promise<User | null> {
+    const users = await this.storage.read<User>(this.collection);
+    return users.find((u) => u.username === username) || null;
+  }
+
   async create(user: User): Promise<User> {
     const users = await this.storage.read<User>(this.collection);
     users.push(user);

@@ -6,6 +6,7 @@ import compression from 'compression';
 import { requestLogger } from '@/middleware/request-logger';
 import { errorHandler } from '@/middleware/error-handler';
 import { env } from '@/config/env';
+import { createAuthRouter } from '@/routes/auth-routes';
 
 const app = express();
 
@@ -26,6 +27,9 @@ app.use(compression());
 
 // Request Tracking
 app.use(requestLogger);
+
+// Routes
+app.use('/api/v1/auth', createAuthRouter());
 
 // Health Check
 app.get('/api/v1/health', (_req, res) => {

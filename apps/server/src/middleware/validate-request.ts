@@ -9,12 +9,14 @@ export const validateRequest = (schema: z.ZodSchema) => {
         body: req.body,
         query: req.query,
         params: req.params,
+        cookies: req.cookies,
       });
 
       // Replace req data with parsed/sanitized data
       req.body = parsed.body;
       req.query = parsed.query;
       req.params = parsed.params;
+      req.cookies = parsed.cookies;
 
       next();
     } catch (error) {
