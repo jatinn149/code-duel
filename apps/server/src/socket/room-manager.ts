@@ -40,8 +40,14 @@ export class RoomManager {
   joinRoom(roomId: string, user: User): Room {
     const room = this.rooms.get(roomId);
     if (!room) throw new Error('ROOM_NOT_FOUND');
+
+    const existingRoomId = this.playerToRoom.get(user.id);
+    if (existingRoomId === roomId) {
+      return room; // Already in this room
+    }
+
+    if (existingRoomId) throw new Error('ALREADY_IN_A_ROOM');
     if (room.players.length >= room.maxPlayers) throw new Error('ROOM_FULL');
-    if (this.playerToRoom.has(user.id)) throw new Error('ALREADY_IN_A_ROOM');
 
     const player: Player = {
       id: user.id,
@@ -58,6 +64,19 @@ export class RoomManager {
     this.playerToRoom.set(user.id, roomId);
 
     logger.info({ roomId, userId: user.id }, 'Player joined room');
+    return room;
+  }
+
+  toggleReady(userId: string): Room | null {
+    const room = this.getRoomByPlayerId(userId);
+    if (!room) return null;
+
+    const player = room.players.find((p) => p.id === userId);
+    if (player) {
+      player.isReady = !player.isReady;
+      room.updatedAt = new Date().toISOString();
+    }
+
     return room;
   }
 

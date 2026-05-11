@@ -18,6 +18,7 @@ import {
   AlertCircle,
   Wifi,
   Trophy,
+  LogOut,
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -28,6 +29,7 @@ function cn(...inputs: ClassValue[]) {
 
 import { useRoomEvents } from '@/hooks/use-room-events';
 import { useAuthStore } from '@/store/auth-store';
+import { useTelemetry } from '@/hooks/use-telemetry';
 
 export const BattlePage = () => {
   const { roomId } = useParams<{ roomId: string }>();
@@ -37,10 +39,25 @@ export const BattlePage = () => {
   const { currentRoom, countdown, latency, error } = useRoomStore();
   const [code, setCode] = useState('def solution():\n    # Write your code here\n    pass');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [cheatWarning, setCheatWarning] = useState<string | null>(null);
 
   useLatency(socket);
   useCountdown(currentRoom?.countdownStartAt);
   useRoomEvents(socket, roomId);
+  const { getKeystrokeCount } = useTelemetry(socket, roomId);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on(SocketEvents.CHEAT_WARNING, (message: string) => {
+      setCheatWarning(message);
+      setTimeout(() => setCheatWarning(null), 10000);
+    });
+
+    return () => {
+      socket.off(SocketEvents.CHEAT_WARNING);
+    };
+  }, [socket]);
 
   useEffect(() => {
     if (!socket || !roomId) return;
@@ -51,9 +68,25 @@ export const BattlePage = () => {
   }, [socket, roomId, currentRoom]);
 
   const isHost = useMemo(() => user?.id === currentRoom?.ownerId, [user, currentRoom]);
+  const allReady = useMemo(() => {
+    if (!currentRoom || currentRoom.players.length < 2) return false;
+    return currentRoom.players.every((p) => p.isReady || p.isOwner);
+  }, [currentRoom]);
+
+  const handleToggleReady = () => {
+    if (!socket) return;
+    socket.emit(SocketEvents.TOGGLE_READY);
+  };
+
+  const handleLeaveRoom = () => {
+    if (!socket) return;
+    socket.emit(SocketEvents.LEAVE_ROOM);
+    useRoomStore.getState().setRoom(null);
+    navigate('/');
+  };
 
   const handleStartDuel = () => {
-    if (!socket || !isHost) return;
+    if (!socket || !isHost || !allReady) return;
     socket.emit(SocketEvents.START_COUNTDOWN);
   };
 
@@ -67,9 +100,12 @@ export const BattlePage = () => {
   };
 
   const handleSubmitCode = async () => {
-    console.log('Submitting code...', code);
+    if (!socket) return;
     setIsSubmitting(true);
-    setTimeout(() => setIsSubmitting(false), 2000);
+    socket.emit(SocketEvents.SUBMIT_CODE, {
+      code,
+      keystrokes: getKeystrokeCount(),
+    });
   };
 
   if (error) {
@@ -99,16 +135,34 @@ export const BattlePage = () => {
     );
   }
 
+  const currentPlayer = currentRoom.players.find((p) => p.id === user?.id);
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-slate-950">
+      {cheatWarning && (
+        <div className="bg-amber-500/90 text-slate-950 px-6 py-2 text-center text-sm font-bold flex items-center justify-center space-x-2 animate-in slide-in-from-top duration-300">
+          <AlertCircle className="w-4 h-4" />
+          <span>{cheatWarning}</span>
+        </div>
+      )}
       {/* Duel Header */}
       <div className="flex items-center justify-between px-6 py-3 bg-slate-900 border-b border-slate-800 shadow-sm relative z-10">
         <div className="flex items-center space-x-6">
-          <div className="flex items-center space-x-2 text-slate-400">
-            <Users className="w-4 h-4" />
-            <span className="text-sm font-semibold tracking-tight">
-              {currentRoom.players.length}/{currentRoom.maxPlayers} Players
-            </span>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 text-slate-400">
+              <Users className="w-4 h-4" />
+              <span className="text-sm font-semibold tracking-tight">
+                {currentRoom.players.length}/{currentRoom.maxPlayers} Players
+              </span>
+            </div>
+            <div className="flex items-center space-x-2 bg-slate-800/50 px-3 py-1 rounded-lg border border-slate-700">
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                Room Code:
+              </span>
+              <span className="text-xs font-mono text-indigo-400 font-bold">
+                {currentRoom.id.split('-')[0]}
+              </span>
+            </div>
           </div>
 
           <div className="flex items-center space-x-2 text-slate-500">
@@ -159,6 +213,13 @@ export const BattlePage = () => {
               <Send className="w-4 h-4" />
             )}
             <span>Submit Solution</span>
+          </button>
+          <button
+            onClick={handleLeaveRoom}
+            className="flex items-center space-x-2 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 text-sm font-bold rounded-lg transition-all border border-red-500/20 active:scale-95"
+            title="Leave Room"
+          >
+            <LogOut className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -231,7 +292,7 @@ export const BattlePage = () => {
                           HOST
                         </div>
                       )}
-                      {player.isReady ? (
+                      {player.isReady || player.isOwner ? (
                         <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                       ) : (
                         <div className="w-4 h-4 rounded-full border border-slate-700" />
@@ -246,26 +307,77 @@ export const BattlePage = () => {
 
         {/* Editor & Console */}
         <div className="flex-1 flex flex-col relative">
-          {currentRoom.state === MatchState.WAITING && (
+          {(currentRoom.state === MatchState.WAITING ||
+            currentRoom.state === MatchState.COUNTDOWN) && (
             <div className="absolute inset-0 z-20 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center text-center p-12">
               <div className="p-4 bg-indigo-500/10 rounded-3xl mb-6">
                 <Clock className="w-12 h-12 text-indigo-500" />
               </div>
               <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">
-                Waiting for Host
+                {currentRoom.state === MatchState.COUNTDOWN ? 'Get Ready!' : 'Waiting for Host'}
               </h2>
               <p className="text-slate-400 max-w-md mb-8">
-                The battle will begin as soon as everyone is ready. Prepare your weapons (code).
+                {currentRoom.state === MatchState.COUNTDOWN
+                  ? 'The duel is about to begin. Focus!'
+                  : 'The battle will begin as soon as everyone is ready. Prepare your weapons.'}
               </p>
-              {isHost && (
-                <button
-                  onClick={handleStartDuel}
-                  className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20 active:scale-95 flex items-center space-x-2"
-                >
-                  <Play className="w-5 h-5 fill-current" />
-                  <span>Start Duel</span>
-                </button>
-              )}
+
+              <div className="flex flex-col items-center space-y-4">
+                {isHost ? (
+                  <button
+                    onClick={handleStartDuel}
+                    disabled={!allReady || currentRoom.state === MatchState.COUNTDOWN}
+                    className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20 active:scale-95 flex items-center space-x-2"
+                  >
+                    <Play className="w-5 h-5 fill-current" />
+                    <span>{allReady ? 'Start Duel' : 'Waiting for Players...'}</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleToggleReady}
+                    disabled={currentRoom.state === MatchState.COUNTDOWN}
+                    className={cn(
+                      'px-8 py-3 font-bold rounded-xl transition-all active:scale-95 flex items-center space-x-2',
+                      currentPlayer?.isReady
+                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                        : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700',
+                    )}
+                  >
+                    {currentPlayer?.isReady ? (
+                      <CheckCircle2 className="w-5 h-5" />
+                    ) : (
+                      <Play className="w-5 h-5" />
+                    )}
+                    <span>{currentPlayer?.isReady ? 'Ready!' : 'Click to Ready'}</span>
+                  </button>
+                )}
+                {!allReady && isHost && (
+                  <p className="text-xs text-amber-500 font-medium">
+                    All players must be ready to start
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {currentRoom.state === MatchState.RESULTS && (
+            <div className="absolute inset-0 z-30 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center text-center p-12">
+              <div className="p-4 bg-amber-500/10 rounded-3xl mb-6">
+                <Trophy className="w-12 h-12 text-amber-500" />
+              </div>
+              <h2 className="text-4xl font-black text-white mb-2 tracking-tighter uppercase">
+                Duel Finished
+              </h2>
+              <p className="text-slate-400 max-w-md mb-12">
+                Great performance by both competitors. The results are in.
+              </p>
+
+              <button
+                onClick={() => navigate('/')}
+                className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20 active:scale-95"
+              >
+                Return to Dashboard
+              </button>
             </div>
           )}
 
@@ -288,6 +400,7 @@ export const BattlePage = () => {
                 cursorSmoothCaretAnimation: 'on',
                 renderLineHighlight: 'all',
                 fontLigatures: true,
+                readOnly: currentRoom.state !== MatchState.PLAYING,
               }}
             />
           </div>
@@ -303,7 +416,7 @@ export const BattlePage = () => {
               </div>
             </div>
             <div className="flex-1 p-6 font-mono text-sm text-slate-400 overflow-y-auto scrollbar-hide">
-              {isSubmitting ? (
+              {isSubmitting || currentRoom.state === MatchState.JUDGING ? (
                 <div className="flex flex-col space-y-3">
                   <div className="flex items-center space-x-3 text-indigo-400">
                     <Loader2 className="w-4 h-4 animate-spin" />

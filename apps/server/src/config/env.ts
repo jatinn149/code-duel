@@ -6,14 +6,20 @@ dotenv.config();
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.string().transform(Number).default('3001'),
-  JWT_SECRET: z.string().min(1),
-  REFRESH_TOKEN_SECRET: z.string().min(1),
+  JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters in production'),
+  REFRESH_TOKEN_SECRET: z
+    .string()
+    .min(32, 'REFRESH_TOKEN_SECRET must be at least 32 characters in production'),
 });
 
 const parsed = envSchema.safeParse(process.env);
 
 if (!parsed.success) {
-  console.error('❌ Invalid environment variables:', parsed.error.format());
+  const { fieldErrors } = parsed.error.flatten();
+  console.error('❌ CRITICAL: Invalid environment configuration:');
+  Object.entries(fieldErrors).forEach(([field, errors]) => {
+    console.error(`  - ${field}: ${errors?.join(', ')}`);
+  });
   process.exit(1);
 }
 

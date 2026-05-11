@@ -4,6 +4,8 @@ import { APP_NAME } from '@code-duel/shared';
 import { executionQueue } from './execution-queue';
 import { judgeRequestSchema } from '@code-duel/validation';
 import { ZodError } from 'zod';
+import { judgeService } from './judge-service';
+import { Server } from 'http';
 
 const logger = pino({
   transport: {
@@ -36,6 +38,29 @@ app.post('/api/v1/judge', async (req: Request, res: Response) => {
   }
 });
 
-app.listen(port, () => {
+const server: Server = app.listen(port, () => {
   logger.info(`Judge Service for ${APP_NAME} running on port ${port}`);
+});
+
+const exitHandler = async () => {
+  logger.info('Shutting down judge service...');
+
+  // Prune any judge containers before exiting
+  await judgeService.pruneOrphans();
+
+  server.close(() => {
+    logger.info('Judge service closed');
+    process.exit(0);
+  });
+};
+
+process.on('SIGTERM', exitHandler);
+process.on('SIGINT', exitHandler);
+process.on('uncaughtException', (error) => {
+  logger.error({ error }, 'Uncaught Exception');
+  exitHandler();
+});
+process.on('unhandledRejection', (error) => {
+  logger.error({ error }, 'Unhandled Rejection');
+  exitHandler();
 });

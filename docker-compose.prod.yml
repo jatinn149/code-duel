@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/frontend.prod.Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+    networks:
+      - code-duel-frontend
+      - code-duel-backend
+    restart: always
+    healthcheck:
+      test: ["CMD", "service", "nginx", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  server:
+    build:
+      context: .
+      dockerfile: docker/backend.prod.Dockerfile
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET}
+      - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
+    volumes:
+      - server-data:/app/data
+      - server-backups:/app/backups
+    networks:
+      - code-duel-backend
+      - code-duel-internal
+    restart: always
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  judge:
+    build:
+      context: .
+      dockerfile: docker/judge.prod.Dockerfile
+    environment:
+      - PORT=3002
+      - NODE_ENV=production
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - code-duel-internal
+    restart: always
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  code-duel-frontend:
+    driver: bridge
+  code-duel-backend:
+    driver: bridge
+  code-duel-internal:
+    internal: true
+
+volumes:
+  server-data:
+  server-backups:

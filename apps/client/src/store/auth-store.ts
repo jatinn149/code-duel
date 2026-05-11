@@ -15,6 +15,7 @@ interface AuthState {
   accessToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isInitialized: boolean;
   error: string | null;
 
   signup: (data: SignupInput) => Promise<void>;
@@ -22,6 +23,7 @@ interface AuthState {
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
   setError: (error: string | null) => void;
+  setInitialized: (value: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -31,13 +33,14 @@ export const useAuthStore = create<AuthState>()(
       accessToken: null,
       isAuthenticated: false,
       isLoading: false,
+      isInitialized: false,
       error: null,
 
       signup: async (data) => {
         set({ isLoading: true, error: null });
         try {
           const { user, accessToken } = await signupApi(data);
-          set({ user, accessToken, isAuthenticated: true, isLoading: false });
+          set({ user, accessToken, isAuthenticated: true, isLoading: false, isInitialized: true });
         } catch (error: unknown) {
           let message = 'Signup failed';
           if (axios.isAxiosError(error)) {
@@ -52,7 +55,7 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null });
         try {
           const { user, accessToken } = await loginApi(data);
-          set({ user, accessToken, isAuthenticated: true, isLoading: false });
+          set({ user, accessToken, isAuthenticated: true, isLoading: false, isInitialized: true });
         } catch (error: unknown) {
           let message = 'Login failed';
           if (axios.isAxiosError(error)) {
@@ -68,20 +71,34 @@ export const useAuthStore = create<AuthState>()(
         try {
           await logoutApi();
         } finally {
-          set({ user: null, accessToken: null, isAuthenticated: false, isLoading: false });
+          set({
+            user: null,
+            accessToken: null,
+            isAuthenticated: false,
+            isLoading: false,
+            isInitialized: true,
+          });
         }
       },
 
       refresh: async () => {
+        set({ isLoading: true });
         try {
           const { user, accessToken } = await refreshApi();
-          set({ user, accessToken, isAuthenticated: true });
+          set({ user, accessToken, isAuthenticated: true, isInitialized: true, isLoading: false });
         } catch {
-          set({ user: null, accessToken: null, isAuthenticated: false });
+          set({
+            user: null,
+            accessToken: null,
+            isAuthenticated: false,
+            isInitialized: true,
+            isLoading: false,
+          });
         }
       },
 
       setError: (error) => set({ error }),
+      setInitialized: (isInitialized) => set({ isInitialized }),
     }),
     {
       name: 'auth-storage',

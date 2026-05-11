@@ -1,30 +1,50 @@
 import { Server as HttpServer } from 'http';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import { env } from '@/config/env';
 import { logger } from '@/utils/logger';
 import { IUserRepository } from '@/repositories/interfaces';
 import { JWTPayload } from '@/middleware/auth-middleware';
 import { SocketEvents } from '@code-duel/shared';
-import { MatchState } from '@code-duel/types';
+import {
+  MatchState,
+  User,
+  ServerToClientEvents,
+  ClientToServerEvents,
+  InterServerEvents,
+  SocketData,
+  TelemetryEvent,
+  PasteTelemetry,
+} from '@code-duel/types';
 import { roomManager } from './room-manager';
-import { createRoomSchema, joinRoomSchema, pingSyncSchema } from '@code-duel/validation';
+import {
+  createRoomSchema,
+  joinRoomSchema,
+  pingSyncSchema,
+  telemetrySyncSchema,
+} from '@code-duel/validation';
+import { antiCheatService } from '@/services/anti-cheat-service';
+import { matchmakingService } from '@/services/matchmaking-service';
 
 export const initSocket = (server: HttpServer, userRepository: IUserRepository) => {
-  const io = new Server(server, {
-    cors: {
-      origin: env.NODE_ENV === 'development' ? true : ['your-production-domain.com'],
-      credentials: true,
+  const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(
+    server,
+    {
+      cors: {
+        origin: env.NODE_ENV === 'development' ? true : ['your-production-domain.com'],
+        credentials: true,
+      },
+      pingTimeout: 10000,
+      pingInterval: 5000,
     },
-    pingTimeout: 10000,
-    pingInterval: 5000,
-  });
+  );
 
   // Auth Middleware
   io.use(async (socket, next) => {
     try {
       const token =
-        socket.handshake.auth.token || socket.handshake.headers.authorization?.split(' ')[1];
+        socket.handshake.auth.token ||
+        (socket.handshake.headers.authorization?.split(' ')[1] as string | undefined);
       if (!token) {
         return next(new Error('AUTHENTICATION_REQUIRED'));
       }
@@ -44,8 +64,9 @@ export const initSocket = (server: HttpServer, userRepository: IUserRepository) 
     }
   });
 
-  io.on(SocketEvents.CONNECTION, (socket: Socket) => {
+  io.on(SocketEvents.CONNECTION, (socket) => {
     const user = socket.data.user;
+    if (!user) return;
     logger.info({ userId: user.id, socketId: socket.id }, 'User connected to socket');
 
     // Sync presence
@@ -60,7 +81,7 @@ export const initSocket = (server: HttpServer, userRepository: IUserRepository) 
     }
 
     // Ping/Pong Sync
-    socket.on(SocketEvents.PING_SYNC, (data) => {
+    socket.on(SocketEvents.PING_SYNC, (data: { clientTime: string }) => {
       try {
         const parsed = pingSyncSchema.parse(data);
         socket.emit(SocketEvents.PONG_SYNC, {
@@ -73,7 +94,7 @@ export const initSocket = (server: HttpServer, userRepository: IUserRepository) 
     });
 
     // Create Room
-    socket.on(SocketEvents.CREATE_ROOM, (data) => {
+    socket.on(SocketEvents.CREATE_ROOM, (data: { maxPlayers: number }) => {
       try {
         const parsed = createRoomSchema.parse(data);
         const room = roomManager.createRoom(user, parsed.maxPlayers);
@@ -86,7 +107,7 @@ export const initSocket = (server: HttpServer, userRepository: IUserRepository) 
     });
 
     // Join Room
-    socket.on(SocketEvents.JOIN_ROOM, (data) => {
+    socket.on(SocketEvents.JOIN_ROOM, (data: { roomId: string }) => {
       try {
         const parsed = joinRoomSchema.parse(data);
         const room = roomManager.joinRoom(parsed.roomId, user);
@@ -95,6 +116,14 @@ export const initSocket = (server: HttpServer, userRepository: IUserRepository) 
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Failed to join room';
         socket.emit(SocketEvents.ROOM_ERROR, message);
+      }
+    });
+
+    // Toggle Ready
+    socket.on(SocketEvents.TOGGLE_READY, () => {
+      const room = roomManager.toggleReady(user.id);
+      if (room) {
+        io.to(room.id).emit(SocketEvents.ROOM_UPDATED, room);
       }
     });
 
@@ -121,6 +150,70 @@ export const initSocket = (server: HttpServer, userRepository: IUserRepository) 
       }, countdownDuration);
     });
 
+    // Telemetry Sync
+    socket.on(
+      SocketEvents.TELEMETRY_SYNC,
+      async (data: { roomId: string; events: TelemetryEvent[] }) => {
+        try {
+          const parsed = telemetrySyncSchema.parse(data);
+          // Map to ensure we use the TelemetryEvent union properly
+          const typedEvents: TelemetryEvent[] = parsed.events as TelemetryEvent[];
+
+          const result = await antiCheatService.processTelemetry({
+            roomId: parsed.roomId,
+            userId: user.id,
+            events: typedEvents,
+            totalKeystrokes: typedEvents.filter((e: TelemetryEvent) => e.type === 'keystroke')
+              .length,
+            totalPastedChars: typedEvents.reduce((acc: number, e: TelemetryEvent) => {
+              if (e.type === 'paste') {
+                return acc + (e as PasteTelemetry).data.length;
+              }
+              return acc;
+            }, 0),
+            tabSwitches: typedEvents.filter((e: TelemetryEvent) => e.type === 'tab_switch').length,
+          });
+
+          if (result.isSuspicious) {
+            socket.emit(
+              SocketEvents.CHEAT_WARNING,
+              'Suspicious behavior detected. Competitive integrity is monitored.',
+            );
+            logger.warn({ userId: user.id, score: result.score }, 'User triggered suspicion');
+          }
+        } catch {
+          // Validation errors ignored for telemetry
+        }
+      },
+    );
+
+    // Submit Code
+    socket.on(SocketEvents.SUBMIT_CODE, async (data: { code: string; keystrokes?: number }) => {
+      const room = roomManager.getRoomByPlayerId(user.id);
+      if (!room || room.state !== MatchState.PLAYING) return;
+
+      // Anti-cheat validation (simplified for now)
+      const isValid = antiCheatService.validateSubmission(user.id, data.code, data.keystrokes || 0);
+      if (!isValid) {
+        return socket.emit(
+          SocketEvents.ROOM_ERROR,
+          'Submission rejected due to anomaly detection.',
+        );
+      }
+
+      // Placeholder for actual judge logic integration
+      room.state = MatchState.JUDGING;
+      io.to(room.id).emit(SocketEvents.ROOM_UPDATED, room);
+
+      // Simulate judge response
+      setTimeout(() => {
+        room.state = MatchState.RESULTS;
+        room.updatedAt = new Date().toISOString();
+        io.to(room.id).emit(SocketEvents.ROOM_UPDATED, room);
+        io.to(room.id).emit(SocketEvents.GAME_END, { winnerId: user.id });
+      }, 2000);
+    });
+
     // Leave Room
     socket.on(SocketEvents.LEAVE_ROOM, () => {
       const result = roomManager.leaveRoom(user.id);
@@ -133,8 +226,10 @@ export const initSocket = (server: HttpServer, userRepository: IUserRepository) 
     });
 
     // Disconnect
-    socket.on(SocketEvents.DISCONNECT, (reason) => {
+    socket.on(SocketEvents.DISCONNECT, (reason: string) => {
       logger.info({ userId: user.id, reason }, 'User disconnected from socket');
+
+      matchmakingService.handleDisconnect(user.id);
 
       const room = roomManager.updatePlayerStatus(user.id, false);
       if (room) {
@@ -144,7 +239,51 @@ export const initSocket = (server: HttpServer, userRepository: IUserRepository) 
       // Sync presence
       io.emit(SocketEvents.PRESENCE_UPDATED, { userId: user.id, status: 'OFFLINE' });
     });
+
+    // --- Matchmaking Events ---
+
+    socket.on(SocketEvents.JOIN_QUEUE, () => {
+      matchmakingService.joinQueue(user, socket.id);
+      socket.emit(SocketEvents.QUEUE_STATUS, matchmakingService.getQueueStatus(user.id));
+    });
+
+    socket.on(SocketEvents.LEAVE_QUEUE, () => {
+      matchmakingService.leaveQueue(user.id);
+      socket.emit(SocketEvents.QUEUE_STATUS, null);
+    });
+
+    socket.on(SocketEvents.ACCEPT_MATCH, async (data: { matchId: string }) => {
+      try {
+        const result = matchmakingService.acceptMatch(user.id, data.matchId);
+        if (result?.ready) {
+          const users = await Promise.all(
+            result.players.map((pid: string) => userRepository.findById(pid)),
+          );
+          const validUsers = users.filter((u): u is User => u !== null);
+
+          if (validUsers.length === 2) {
+            const room = roomManager.createRoom(validUsers[0], 2);
+            roomManager.joinRoom(room.id, validUsers[1]);
+            io.to(room.id).emit(SocketEvents.ROOM_UPDATED, room);
+          }
+        }
+      } catch (error) {
+        logger.error({ error, userId: user.id }, 'Error accepting match');
+        socket.emit(SocketEvents.ROOM_ERROR, 'An error occurred while starting the match');
+      }
+    });
   });
+
+  // Matchmaking Ticker
+  setInterval(() => {
+    matchmakingService.cleanupStaleMatches();
+    const foundMatches = matchmakingService.findMatches();
+    foundMatches.forEach((match) => {
+      match.players.forEach((p) => {
+        io.to(p.socketId).emit(SocketEvents.MATCH_FOUND, { matchId: match.matchId });
+      });
+    });
+  }, 5000);
 
   // Room Cleanup Interval
   setInterval(

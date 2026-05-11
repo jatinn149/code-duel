@@ -18,20 +18,26 @@ const queryClient = new QueryClient({
 });
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const { isAuthenticated, isLoading, isInitialized } = useAuthStore();
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading || (!isInitialized && isAuthenticated)) return <div>Loading...</div>;
   if (!isAuthenticated) return <Navigate to="/login" />;
 
   return <>{children}</>;
 };
 
 export const App = () => {
-  const refresh = useAuthStore((state) => state.refresh);
+  const { refresh, isInitialized, isAuthenticated, setInitialized } = useAuthStore();
 
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    if (!isInitialized) {
+      if (isAuthenticated) {
+        refresh();
+      } else {
+        setInitialized(true);
+      }
+    }
+  }, [refresh, isInitialized, isAuthenticated, setInitialized]);
 
   return (
     <QueryClientProvider client={queryClient}>

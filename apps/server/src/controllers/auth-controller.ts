@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthService } from '@/services/auth-service';
 import { env } from '@/config/env';
+import { UnauthorizedError } from '@/errors';
 
 export class AuthController {
   constructor(private authService: AuthService) {}
@@ -42,6 +43,9 @@ export class AuthController {
   refresh = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const oldRefreshToken = req.cookies.refreshToken;
+      if (!oldRefreshToken) {
+        throw new UnauthorizedError('Refresh token missing');
+      }
       const {
         user,
         accessToken,

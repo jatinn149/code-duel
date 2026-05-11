@@ -15,7 +15,9 @@
     "type-check": "turbo run type-check",
     "test": "turbo run test",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "docker:prod": "docker compose -f docker-compose.prod.yml up --build -d",
+    "docker:stop": "docker compose -f docker-compose.prod.yml down"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.59.2",
@@ -24,7 +26,10 @@
     "eslint-config-prettier": "^10.1.8",
     "husky": "^8.0.3",
     "lint-staged": "^13.2.3",
+    "nodemon": "^3.1.14",
     "prettier": "^3.0.0",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "turbo": "^1.10.12",
     "typescript": "^5.1.6"
   },

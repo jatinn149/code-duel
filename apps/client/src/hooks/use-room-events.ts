@@ -22,17 +22,25 @@ export const useRoomEvents = (socket: Socket | null, roomId: string | undefined)
       setError(error);
     };
 
+    const handleGameStart = () => updateMatchState(MatchState.PLAYING);
+    const handleStartCountdown = () => updateMatchState(MatchState.COUNTDOWN);
+    const handleGameEnd = (_data: { winnerId: string }) => {
+      updateMatchState(MatchState.RESULTS);
+    };
+
     socket.on(SocketEvents.ROOM_UPDATED, handleRoomUpdated);
-    socket.on(SocketEvents.GAME_START, () => updateMatchState(MatchState.PLAYING));
-    socket.on(SocketEvents.START_COUNTDOWN, () => updateMatchState(MatchState.COUNTDOWN));
+    socket.on(SocketEvents.GAME_START, handleGameStart);
+    socket.on(SocketEvents.START_COUNTDOWN, handleStartCountdown);
+    socket.on(SocketEvents.GAME_END, handleGameEnd);
     socket.on(SocketEvents.ROOM_ERROR, handleRoomError);
     // Future judge result event
     socket.on('judge:result', handleJudgeResult);
 
     return () => {
       socket.off(SocketEvents.ROOM_UPDATED, handleRoomUpdated);
-      socket.off(SocketEvents.GAME_START);
-      socket.off(SocketEvents.START_COUNTDOWN);
+      socket.off(SocketEvents.GAME_START, handleGameStart);
+      socket.off(SocketEvents.START_COUNTDOWN, handleStartCountdown);
+      socket.off(SocketEvents.GAME_END, handleGameEnd);
       socket.off(SocketEvents.ROOM_ERROR, handleRoomError);
       socket.off('judge:result', handleJudgeResult);
     };

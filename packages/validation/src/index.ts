@@ -21,7 +21,7 @@ export const signupSchema = z.object({
 
 export const refreshTokenSchema = z.object({
   cookies: z.object({
-    refreshToken: z.string().min(1, 'Refresh token is required'),
+    refreshToken: z.string().optional(),
   }),
 });
 
@@ -39,6 +39,22 @@ export const joinRoomSchema = z.object({
 
 export const pingSyncSchema = z.object({
   clientTime: z.string(),
+});
+
+export const telemetryEventSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('keystroke'), timestamp: z.string() }),
+  z.object({
+    type: z.literal('paste'),
+    timestamp: z.string(),
+    data: z.object({ length: z.number() }),
+  }),
+  z.object({ type: z.literal('tab_switch'), timestamp: z.string() }),
+  z.object({ type: z.literal('focus_loss'), timestamp: z.string() }),
+]);
+
+export const telemetrySyncSchema = z.object({
+  roomId: z.string().uuid(),
+  events: z.array(telemetryEventSchema),
 });
 
 export const testCaseSchema = z.object({
