@@ -2,28 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@layer base {
+  :root {
+    --brand-primary: 79 70 229; /* indigo-600 */
+    --brand-secondary: 244 63 94; /* rose-500 */
+  }
 
-  color-scheme: dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #0f172a;
+  body {
+    @apply bg-slate-950 text-slate-200 antialiased overflow-x-hidden;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-800 rounded-full hover:bg-indigo-500/50 transition-colors;
+  }
 }
 
-body {
-  margin: 0;
-  display: flex;
-  min-width: 320px;
-  min-height: 100vh;
+@layer components {
+  .esports-card {
+    @apply bg-slate-900/50 border border-slate-800/50 backdrop-blur-xl rounded-2xl;
+  }
+
+  .esports-button-primary {
+    @apply relative overflow-hidden px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20 active:scale-95 disabled:opacity-50;
+  }
+
+  .esports-button-secondary {
+    @apply px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl transition-all border border-slate-700 active:scale-95;
+  }
+
+  .glass-panel {
+    @apply bg-white/[0.02] border border-white/[0.05] backdrop-blur-md;
+  }
 }
 
-#root {
-  width: 100%;
+.glow-indigo {
+  box-shadow: 0 0 20px -5px rgba(79, 70, 229, 0.3);
 }
+
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-slate-500;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+

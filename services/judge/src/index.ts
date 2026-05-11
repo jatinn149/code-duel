@@ -28,10 +28,21 @@ app.post('/api/v1/judge', async (req: Request, res: Response) => {
     const result = await executionQueue.submit(parsed);
     res.json({ success: true, data: result });
   } catch (error: unknown) {
-    if (error instanceof ZodError) {
-      return res
-        .status(400)
-        .json({ success: false, error: 'Invalid judge request', details: error.errors });
+    const isZodError =
+      error instanceof ZodError ||
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (typeof error === 'object' &&
+        error !== null &&
+        'name' in error &&
+        (error as any).name === 'ZodError');
+
+    if (isZodError) {
+      return (
+        res
+          .status(400)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .json({ success: false, error: 'Invalid judge request', details: (error as any).errors })
+      );
     }
     logger.error({ error }, 'Judge request failed');
     res.status(500).json({ success: false, error: 'Internal Judge Error' });

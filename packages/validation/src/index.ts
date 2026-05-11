@@ -20,9 +20,11 @@ export const signupSchema = z.object({
 });
 
 export const refreshTokenSchema = z.object({
-  cookies: z.object({
-    refreshToken: z.string().optional(),
-  }),
+  cookies: z
+    .object({
+      refreshToken: z.string().optional(),
+    })
+    .optional(),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>['body'];

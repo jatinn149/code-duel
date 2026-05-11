@@ -44,22 +44,24 @@ export class JsonStorageAdapter {
 
     // Sequence writes using a simple promise lock to prevent race conditions on the same collection
     // Note: In a real production system with high concurrency, we might need a more robust file locking mechanism.
-    this.lock = this.lock.then(async () => {
-      try {
-        const json = JSON.stringify(data, null, 2);
-        await fs.writeFile(tempPath, json, 'utf-8');
-        await fs.rename(tempPath, filePath);
-      } catch (error) {
-        logger.error({ error, collection }, 'Failed to write to JSON storage');
-        // Attempt to clean up temp file
+    this.lock = this.lock
+      .catch(() => {}) // Ensure previous failures don't block the next write in the chain
+      .then(async () => {
         try {
-          await fs.unlink(tempPath);
-        } catch {
-          // Ignore unlink error
+          const json = JSON.stringify(data, null, 2);
+          await fs.writeFile(tempPath, json, 'utf-8');
+          await fs.rename(tempPath, filePath);
+        } catch (error) {
+          logger.error({ error, collection }, 'Failed to write to JSON storage');
+          // Attempt to clean up temp file
+          try {
+            await fs.unlink(tempPath);
+          } catch {
+            // Ignore unlink error
+          }
+          throw error;
         }
-        throw error;
-      }
-    });
+      });
 
     return this.lock;
   }

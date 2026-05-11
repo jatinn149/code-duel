@@ -1,0 +1,36 @@
+[
+  {
+    "id": "c1fb260d-0c8a-498e-b022-9c4adce60a81",
+    "userId": "049d6e2f-affa-4c52-b4dc-3e624d310545",
+    "refreshTokenHash": "$2b$10$70ibfLXQRU09Oo7OTtSuQuZX0IhBQPjIQ3XVV1prL4L0q6p175GVi",
+    "expiresAt": "2026-05-18T12:18:50.011Z",
+    "createdAt": "2026-05-11T12:18:50.011Z",
+    "revokedAt": "2026-05-11T12:19:58.852Z"
+  },
+  {
+    "id": "d17c46eb-f9a0-4fab-a1d7-9bdac5cfd1c8",
+    "userId": "049d6e2f-affa-4c52-b4dc-3e624d310545",
+    "refreshTokenHash": "$2b$10$P3NPth73HY.bkHLetT6bROgUPg3I/F4jfH3cW.dyoeGjp/7su.toS",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+    "ipAddress": "::1",
+    "expiresAt": "2026-05-18T12:19:58.994Z",
+    "createdAt": "2026-05-11T12:19:58.994Z",
+    "revokedAt": "2026-05-11T12:21:16.209Z"
+  },
+  {
+    "id": "63a5b908-8ecb-4fdf-bc91-bfc7201714b6",
+    "userId": "4da91fe2-6787-431e-bedc-3d90f0f028b7",
+    "refreshTokenHash": "$2b$10$dV2Hqbw9.O6xbxLBcx/kVOUR/Zj4gzjB6rqMIa45/WDIzQQ4DEIlW",
+    "expiresAt": "2026-05-18T12:23:48.986Z",
+    "createdAt": "2026-05-11T12:23:48.987Z"
+  },
+  {
+    "id": "fac43d1a-dd27-451b-845d-0e3f85d381f2",
+    "userId": "049d6e2f-affa-4c52-b4dc-3e624d310545",
+    "refreshTokenHash": "$2b$10$WYabVcttYf35F1aqjxNuZOMwiKM/pRJKV9iU31HtaCldJ1Nd4yB3C",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+    "ipAddress": "::1",
+    "expiresAt": "2026-05-18T12:24:12.182Z",
+    "createdAt": "2026-05-11T12:24:12.182Z"
+  }
+]
