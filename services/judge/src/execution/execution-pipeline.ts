@@ -13,6 +13,103 @@ export class ExecutionPipeline {
       state: ExecutionState.COMPILING,
     });
 
+    const useEvaluator = process.env.USE_EVALUATOR_SERVICE === 'true';
+
+    if (useEvaluator) {
+      const testResults: TestCaseResult[] = [];
+      let hasInternalError = false;
+      let totalDuration = 0;
+
+      await ResultStream.publishEvent({
+        ...this.getBaseEvent(payload),
+        state: ExecutionState.RUNNING_PRETESTS,
+      });
+
+      try {
+        const evaluatorUrl = process.env.CODE_EVALUATOR_URL || 'http://127.0.0.1:5000';
+        
+        for (let i = 0; i < payload.testCases.length; i++) {
+          const testCase = payload.testCases[i];
+          
+          if (testCase.isHidden && i > 0 && !payload.testCases[i - 1].isHidden) {
+            await ResultStream.publishEvent({
+              ...this.getBaseEvent(payload),
+              state: ExecutionState.RUNNING_HIDDEN,
+              progress: { passed: i, total: payload.testCases.length },
+            });
+          }
+
+          // Call Code Evaluator Microservice
+          const response = await fetch(`${evaluatorUrl}/api/evaluate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              code: payload.code,
+              language: payload.language,
+              testCases: [{ input: testCase.input, expectedOutput: testCase.expectedOutput }],
+              timeoutMs: payload.timeLimitMs,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Evaluator returned HTTP ${response.status}`);
+          }
+
+          const data: any = await response.json();
+          if (!data.success || !data.results || data.results.length === 0) {
+            throw new Error('Evaluator failed to return results');
+          }
+
+          const res = data.results[0];
+          const isTimeout = res.status === 'TIMEOUT';
+          
+          totalDuration += res.timeMs;
+
+          const status = OutputNormalizer.getResultStatus(
+            res.actualOutput,
+            testCase.expectedOutput,
+            res.exitCode,
+            res.stderr,
+            isTimeout
+          );
+
+          testResults.push({
+            testCaseId: testCase.id,
+            status,
+            actualOutput: testCase.isHidden ? undefined : res.actualOutput,
+            error: res.stderr || undefined,
+            executionTimeMs: res.timeMs,
+            memoryUsageMb: 0,
+          });
+
+          await ResultStream.publishEvent({
+            ...this.getBaseEvent(payload),
+            state: testCase.isHidden ? ExecutionState.RUNNING_HIDDEN : ExecutionState.RUNNING_PRETESTS,
+            progress: { passed: testResults.filter(r => r.status === 'passed').length, total: payload.testCases.length },
+          });
+
+          if (status !== 'passed' && payload.mode === 'QUICKODE') {
+             break;
+          }
+        }
+      } catch (error) {
+        logger.error({ error, submissionId: payload.submissionId }, 'Evaluator execution pipeline error');
+        hasInternalError = true;
+      }
+
+      const verdict = VerdictEngine.determineVerdict(testResults, false, hasInternalError);
+
+      await ResultStream.publishEvent({
+        ...this.getBaseEvent(payload),
+        state: ExecutionState.FINISHED,
+        verdict,
+        results: testResults,
+        executionTimeMs: totalDuration,
+      });
+
+      return;
+    }
+
     // Check if infrastructure is degraded
     const overallHealth = healthService.getOverallStatus();
     if (overallHealth === JudgeInfrastructureStatus.OFFLINE) {

@@ -1,0 +1,14 @@
+{
+  "name": "code-evaluator",
+  "version": "1.0.0",
+  "description": "Standalone Code Evaluation Microservice and Test UI",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "zod": "^3.23.8"
+  }
+}

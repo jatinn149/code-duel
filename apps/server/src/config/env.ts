@@ -14,6 +14,8 @@ const envSchema = z.object({
   REDIS_HOST: z.string().default('127.0.0.1'),
   REDIS_PORT: z.string().transform(Number).default('6379'),
   REDIS_PASSWORD: z.string().optional(),
+  USE_EVALUATOR_SERVICE: z.preprocess((val) => val === 'true' || val === true, z.boolean()).default(false),
+  CODE_EVALUATOR_URL: z.string().default('http://127.0.0.1:5000'),
 });
 
 const parsed = envSchema.safeParse(process.env);

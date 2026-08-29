@@ -1,5 +1,6 @@
 import Docker from 'dockerode';
 import { logger } from '../utils/logger';
+import { env } from '../config/env';
 
 export interface RunCodeResult {
   success: boolean;
@@ -167,6 +168,59 @@ export class PlayerContainerManager {
    * Runs the code inside the player's persistent container.
    */
   async runCodeForPlayer(playerId: string, code: string, input: string, isFree?: boolean): Promise<RunCodeResult> {
+    if (env.USE_EVALUATOR_SERVICE) {
+      const runsLeft = this.remainingRuns.get(playerId) ?? 0;
+      if (!isFree && runsLeft <= 0) {
+        return { success: false, error: `Execution limit reached (${this.maxRunsPerMatch} runs max per match).`, remainingRuns: 0 };
+      }
+
+      const nextRuns = isFree ? runsLeft : runsLeft - 1;
+      if (!isFree) {
+        this.remainingRuns.set(playerId, nextRuns);
+      }
+
+      try {
+        const response = await fetch(`${env.CODE_EVALUATOR_URL}/api/evaluate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            code,
+            language: 'python',
+            testCases: [{ input, expectedOutput: '' }],
+            timeoutMs: 5000,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Evaluator HTTP ${response.status}`);
+        }
+
+        const data: any = await response.json();
+        if (!data.success || !data.results || data.results.length === 0) {
+          throw new Error('Evaluator returned unsuccessful status');
+        }
+
+        const res = data.results[0];
+        const isTimeout = res.status === 'TIMEOUT';
+
+        return {
+          success: true,
+          remainingRuns: nextRuns,
+          stdout: res.actualOutput,
+          stderr: isTimeout ? 'Time Limit Exceeded (5000ms)' : res.stderr,
+          executionTimeMs: res.timeMs,
+          exitCode: isTimeout ? 137 : res.exitCode,
+        };
+      } catch (err: any) {
+        logger.error({ err, playerId }, 'Error calling code evaluator service for dry run');
+        return {
+          success: false,
+          error: 'Execution failed due to sandbox environment error.',
+          remainingRuns: nextRuns,
+        };
+      }
+    }
+
     let container = this.containers.get(playerId);
     
     // 1. Container Health Verification & Automatic Recovery
