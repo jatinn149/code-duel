@@ -1,12 +1,25 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
-import { User, UserRole, PresenceStatus, AuthResponse } from '@code-duel/types';
+import crypto from 'crypto';
+import { User, UserRole, PresenceStatus, AuthResponse, Rank } from '@code-duel/types';
 import { SignupInput, LoginInput } from '@code-duel/validation';
 import { IUserRepository } from '@/repositories/interfaces';
 import { SessionService } from './session-service';
 import { env } from '@/config/env';
 import { UnauthorizedError, ConflictError } from '@/errors';
+
+function generatePlayerId(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const rand = (len: number) => {
+    let result = '';
+    for (let i = 0; i < len; i++) {
+      result += chars.charAt(crypto.randomInt(chars.length));
+    }
+    return result;
+  };
+  return `CD-${rand(4)}-${rand(4)}`;
+}
 
 export class AuthService {
   constructor(
@@ -25,6 +38,13 @@ export class AuthService {
       throw new ConflictError('Username already in use');
     }
 
+    let playerId = generatePlayerId();
+    let collisionCheck = await this.userRepository.findByPlayerId(playerId);
+    while (collisionCheck) {
+      playerId = generatePlayerId();
+      collisionCheck = await this.userRepository.findByPlayerId(playerId);
+    }
+
     const passwordHash = await bcrypt.hash(input.password, 12);
     const now = new Date().toISOString();
 
@@ -32,12 +52,30 @@ export class AuthService {
       id: uuidv4(),
       username: input.username,
       email: input.email,
+      playerId,
       passwordHash,
       role: UserRole.USER,
       tokenVersion: 0,
       matchesPlayed: 0,
       matchesWon: 0,
-      rating: 1200,
+      rating: 0,
+      xp: 0,
+      level: 1,
+      rank: Rank.INITIATE,
+      wins: 0,
+      losses: 0,
+      streak: 0,
+      highestStreak: 0,
+      highestRating: 0,
+      dailyChallengeWins: 0,
+      dailyChallengeBestRank: 0,
+      placementMatchesPlayed: 0,
+      seasonalTier: 'UNRANKED',
+      
+      // Phase 3: Retention
+      dailyWins: 0,
+      streakGraceAvailable: 1,
+      
       status: PresenceStatus.OFFLINE,
       createdAt: now,
       updatedAt: now,

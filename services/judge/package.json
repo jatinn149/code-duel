@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "nodemon --watch \"src/**/*.ts\" --exec \"ts-node -r tsconfig-paths/register src/index.ts\"",
+    "dev": "nodemon --watch \"src/**/*.ts\" --watch \"../../packages/*/dist\" --exec \"ts-node -r tsconfig-paths/register src/index.ts\"",
     "start": "node dist/index.js",
     "lint": "eslint \"src/**/*.ts\"",
     "type-check": "tsc --noEmit",
@@ -15,10 +15,12 @@
     "@code-duel/shared": "*",
     "@code-duel/types": "*",
     "@code-duel/validation": "*",
+    "bullmq": "^5.76.8",
     "dockerode": "^3.3.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "fastq": "^1.20.1",
+    "ioredis": "^5.10.1",
     "pino": "^8.14.1",
     "pino-pretty": "^10.0.1"
   },

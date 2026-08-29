@@ -28,6 +28,7 @@ services:
       - NODE_ENV=production
       - JWT_SECRET=${JWT_SECRET}
       - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
+      - DATABASE_URL=${DATABASE_URL}
     volumes:
       - server-data:/app/data
       - server-backups:/app/backups

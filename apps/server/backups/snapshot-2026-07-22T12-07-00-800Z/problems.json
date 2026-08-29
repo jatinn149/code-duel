@@ -1,0 +1,3087 @@
+[
+  {
+    "id": "1",
+    "title": "Chaos FizzBuzz: Cash Flow Stream",
+    "description": "Given an integer N, return a list of strings from 1 to N. Multiples of 3 are replaced by 'Cash', multiples of 5 by 'Flow', and multiples of both by 'CashFlow'.\n\nInput Format:\nA single integer N.\n\nOutput Format:\nStrings from 1 to N printed on separate lines.\n\nConstraints:\n1 <= N <= 100",
+    "difficulty": 2,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "SPEED",
+      "COMPLETION"
+    ],
+    "speedRating": 9,
+    "pressureRating": 5,
+    "estimatedSolveTimeSec": 60,
+    "tags": [
+      "loops",
+      "conditions",
+      "basics"
+    ],
+    "questionType": "SIGNATURE_FUNCTION",
+    "questionFamilyId": "FAM_FIZZBUZZ_REMIX",
+    "realWorldDomain": "fintech",
+    "initialCode": "import sys\n\ndef solution(n: int):\n    # Write your code here\n    pass\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        n = int(input_data)\n        res = solution(n)\n        for val in res:\n            print(val)",
+    "solutionCode": "import sys\n\ndef solution(n: int):\n    results = []\n    for i in range(1, n + 1):\n        if i % 3 == 0 and i % 5 == 0:\n            results.append(\"CashFlow\")\n        elif i % 3 == 0:\n            results.append(\"Cash\")\n        elif i % 5 == 0:\n            results.append(\"Flow\")\n        else:\n            results.append(str(i))\n    return results\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        n = int(input_data)\n        res = solution(n)\n        for val in res:\n            print(val)",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "3",
+        "expectedOutput": "1\n2\nCash",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "5",
+        "expectedOutput": "1\n2\nCash\n4\nFlow",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "15",
+        "expectedOutput": "1\n2\nCash\n4\nFlow\nCash\n7\n8\nCash\nFlow\n11\nCash\n13\n14\nCashFlow",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": "1",
+        "expectedOutput": "1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "2",
+        "expectedOutput": "1\n2",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "6",
+        "expectedOutput": "1\n2\nCash\n4\nFlow\nCash",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "10",
+        "expectedOutput": "1\n2\nCash\n4\nFlow\nCash\n7\n8\nCash\nFlow",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "12",
+        "expectedOutput": "1\n2\nCash\n4\nFlow\nCash\n7\n8\nCash\nFlow\n11\nCash",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "16",
+        "expectedOutput": "1\n2\nCash\n4\nFlow\nCash\n7\n8\nCash\nFlow\n11\nCash\n13\n14\nCashFlow\n16",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "20",
+        "expectedOutput": "1\n2\nCash\n4\nFlow\nCash\n7\n8\nCash\nFlow\n11\nCash\n13\n14\nCashFlow\n16\n17\nCash\n19\nFlow",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "22",
+        "expectedOutput": "1\n2\nCash\n4\nFlow\nCash\n7\n8\nCash\nFlow\n11\nCash\n13\n14\nCashFlow\n16\n17\nCash\n19\nFlow\nCash\n22",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "25",
+        "expectedOutput": "1\n2\nCash\n4\nFlow\nCash\n7\n8\nCash\nFlow\n11\nCash\n13\n14\nCashFlow\n16\n17\nCash\n19\nFlow\nCash\n22\n23\nCash\nFlow",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "30",
+        "expectedOutput": "1\n2\nCash\n4\nFlow\nCash\n7\n8\nCash\nFlow\n11\nCash\n13\n14\nCashFlow\n16\n17\nCash\n19\nFlow\nCash\n22\n23\nCash\nFlow\n26\nCash\n28\n29\nCashFlow",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "title": "Chaos Counter: Even Transactions",
+    "description": "Given a list of transaction amounts, count how many amounts are even.",
+    "difficulty": 2,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "SPEED",
+      "COMPLETION"
+    ],
+    "speedRating": 9,
+    "pressureRating": 4,
+    "estimatedSolveTimeSec": 60,
+    "tags": [
+      "loops",
+      "basics",
+      "arrays"
+    ],
+    "questionType": "SIGNATURE_FUNCTION",
+    "questionFamilyId": "FAM_EVEN_COUNTER",
+    "realWorldDomain": "fintech",
+    "initialCode": "import sys\nimport json\n\ndef countEven(transactions: list) -> int:\n    # Write your code here\n    pass\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        transactions = json.loads(input_data)\n        print(countEven(transactions))",
+    "solutionCode": "import sys\nimport json\n\ndef countEven(transactions: list) -> int:\n    return sum(1 for x in transactions if x % 2 == 0)\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        transactions = json.loads(input_data)\n        print(countEven(transactions))",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "[1, 2, 3, 4, 5]",
+        "expectedOutput": "2",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "[10, 20, 30]",
+        "expectedOutput": "3",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "[]",
+        "expectedOutput": "0",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": "[1]",
+        "expectedOutput": "0",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "[2]",
+        "expectedOutput": "1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "[-2, -4, -5]",
+        "expectedOutput": "2",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "[0, 0, 0]",
+        "expectedOutput": "3",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "[1, 3, 5, 7]",
+        "expectedOutput": "0",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "[2, 4, 6, 8]",
+        "expectedOutput": "4",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "[1000000000, 1000000001]",
+        "expectedOutput": "1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "[12, 14, 15, 16, 17, 18]",
+        "expectedOutput": "4",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "[101, 103, 105, 108]",
+        "expectedOutput": "1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "[200, 300, 401, 502, 600, 700]",
+        "expectedOutput": "5",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  },
+  {
+    "id": "3",
+    "title": "Code Collapse: Vowel Purge",
+    "description": "The gaming username processor has collapsed! Reconstruct the loop checking and vowel counting logic inside the marked collapse tags.",
+    "difficulty": 2,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "SPEED",
+      "COMPLETION"
+    ],
+    "speedRating": 8,
+    "pressureRating": 5,
+    "estimatedSolveTimeSec": 90,
+    "tags": [
+      "strings",
+      "basics",
+      "loops"
+    ],
+    "questionType": "CODE_COMPLETION",
+    "questionFamilyId": "FAM_VOWEL_COUNTER",
+    "realWorldDomain": "gaming",
+    "initialCode": "import sys\n\ndef countVowels(s: str) -> int:\n    vowels = set(\"aeiouAEIOU\")\n    count = 0\n    # --- COLLAPSE START ---\n    _____\n    # --- COLLAPSE END ---\n    return count\n\nif __name__ == '__main__':\n    s = sys.stdin.read().strip()\n    print(countVowels(s))",
+    "solutionCode": "import sys\n\ndef countVowels(s: str) -> int:\n    vowels = set(\"aeiouAEIOU\")\n    count = 0\n    # --- COLLAPSE START ---\n    for char in s:\n        if char in vowels:\n            count += 1\n    # --- COLLAPSE END ---\n    return count\n\nif __name__ == '__main__':\n    s = sys.stdin.read().strip()\n    print(countVowels(s))",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "hello",
+        "expectedOutput": "2",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "AEIOU",
+        "expectedOutput": "5",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "xyz",
+        "expectedOutput": "0",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": "",
+        "expectedOutput": "0",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "a",
+        "expectedOutput": "1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "b",
+        "expectedOutput": "0",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "abracadabra",
+        "expectedOutput": "5",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "coding battle",
+        "expectedOutput": "4",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "12345",
+        "expectedOutput": "0",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "AEIOUaeiou",
+        "expectedOutput": "10",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "Python",
+        "expectedOutput": "1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "Rhythm",
+        "expectedOutput": "0",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "A e I o U",
+        "expectedOutput": "5",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  },
+  {
+    "id": "4",
+    "title": "Code Collapse: Linear Scanner",
+    "description": "Complete the linear scanning algorithm inside the marked collapse tags to find the index of target in the array or return -1.",
+    "difficulty": 2,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "SPEED",
+      "COMPLETION"
+    ],
+    "speedRating": 8,
+    "pressureRating": 5,
+    "estimatedSolveTimeSec": 90,
+    "tags": [
+      "arrays",
+      "searching",
+      "basics"
+    ],
+    "questionType": "CODE_COMPLETION",
+    "questionFamilyId": "FAM_LINEAR_SEARCH",
+    "realWorldDomain": "logistics",
+    "initialCode": "import sys\nimport json\n\ndef search(arr: list, target: int) -> int:\n    # --- COLLAPSE START ---\n    _____\n    # --- COLLAPSE END ---\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        arr, target = json.loads(input_data)\n        print(search(arr, target))",
+    "solutionCode": "import sys\nimport json\n\ndef search(arr: list, target: int) -> int:\n    # --- COLLAPSE START ---\n    for i in range(len(arr)):\n        if arr[i] == target:\n            return i\n    return -1\n    # --- COLLAPSE END ---\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        arr, target = json.loads(input_data)\n        print(search(arr, target))",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "[[1, 3, 5, 7], 5]",
+        "expectedOutput": "2",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "[[10, 20, 30], 40]",
+        "expectedOutput": "-1",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "[[], 10]",
+        "expectedOutput": "-1",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": "[[1], 1]",
+        "expectedOutput": "0",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "[[1], 2]",
+        "expectedOutput": "-1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "[[10, 20, 30, 40, 50, 60], 60]",
+        "expectedOutput": "5",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "[[10, 20, 30, 40, 50, 60], 10]",
+        "expectedOutput": "0",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "[[5, 5, 5], 5]",
+        "expectedOutput": "0",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "[[-5, 0, 5], 0]",
+        "expectedOutput": "1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "[[-5, 0, 5], -5]",
+        "expectedOutput": "0",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "[[-5, 0, 5], 5]",
+        "expectedOutput": "2",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 7]",
+        "expectedOutput": "6",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 11]",
+        "expectedOutput": "-1",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  },
+  {
+    "id": "5",
+    "title": "Emergency Patch: Palindrome Tag Check",
+    "description": "An e-commerce release had a Broken Deployment! The palindrome tag checker has exactly two logical bugs: it fails to ignore case, and it does not clean non-alphanumeric characters (like commas, spaces, punctuation). Apply an emergency patch to resolve this.",
+    "difficulty": 2,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "SPEED",
+      "COMPLETION"
+    ],
+    "speedRating": 8,
+    "pressureRating": 5,
+    "estimatedSolveTimeSec": 90,
+    "tags": [
+      "strings",
+      "pointers",
+      "basics"
+    ],
+    "questionType": "DEBUGGING",
+    "questionFamilyId": "FAM_STRING_PALINDROME_FIX",
+    "realWorldDomain": "ecommerce",
+    "initialCode": "import sys\n\ndef isPalindrome(s: str) -> bool:\n    # Bug 1 & 2: Fails to ignore case and fails to clean non-alphanumeric chars\n    left, right = 0, len(s) - 1\n    while left < right:\n        if s[left] != s[right]:\n            return False\n        left += 1\n        right -= 1\n    return True\n\nif __name__ == '__main__':\n    s = sys.stdin.read().strip()\n    print(isPalindrome(s))",
+    "solutionCode": "import sys\n\ndef isPalindrome(s: str) -> bool:\n    cleaned = \"\".join(c.lower() for c in s if c.isalnum())\n    left, right = 0, len(cleaned) - 1\n    while left < right:\n        if cleaned[left] != cleaned[right]:\n            return False\n        left += 1\n        right -= 1\n    return True\n\nif __name__ == '__main__':\n    s = sys.stdin.read().strip()\n    print(isPalindrome(s))",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "A man, a plan, a canal: Panama",
+        "expectedOutput": "True",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "race a car",
+        "expectedOutput": "False",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "aba",
+        "expectedOutput": "True",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": " ",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "ab_a",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "a",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "No 'x' in Nixon",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "12321",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "Hello",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "0P",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "aA",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "!!!",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "abcba!!!",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  },
+  {
+    "id": "6",
+    "title": "Chaos Integrity: Unique Char Hashes",
+    "description": "Check if a password hash consists of entirely unique characters.",
+    "difficulty": 4,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "SPEED",
+      "COMPLETION",
+      "ALGORITHMIC"
+    ],
+    "speedRating": 8,
+    "pressureRating": 5,
+    "estimatedSolveTimeSec": 120,
+    "tags": [
+      "strings",
+      "hashing",
+      "basics"
+    ],
+    "questionType": "SIGNATURE_FUNCTION",
+    "questionFamilyId": "FAM_UNIQUE_CHARS",
+    "realWorldDomain": "security",
+    "initialCode": "import sys\n\ndef isUnique(s: str) -> bool:\n    # Write your code here\n    pass\n\nif __name__ == '__main__':\n    s = sys.stdin.read().strip()\n    print(isUnique(s))",
+    "solutionCode": "import sys\n\ndef isUnique(s: str) -> bool:\n    return len(s) == len(set(s))\n\nif __name__ == '__main__':\n    s = sys.stdin.read().strip()\n    print(isUnique(s))",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "abcdef",
+        "expectedOutput": "True",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "aab",
+        "expectedOutput": "False",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "",
+        "expectedOutput": "True",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": "a",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "ab",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "aba",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "unique",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "algorithm",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "hash",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "security",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "password",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "1234567890",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "1234567890aA",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  },
+  {
+    "id": "7",
+    "title": "Chaos Range: Sales Prefix Sums",
+    "description": "Given a list of sales amounts, handle a query for the total sales between indices L and R (inclusive). Optimize it using prefix sums for O(1) query time.",
+    "difficulty": 4,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "SPEED",
+      "COMPLETION",
+      "ALGORITHMIC"
+    ],
+    "speedRating": 7,
+    "pressureRating": 5,
+    "estimatedSolveTimeSec": 150,
+    "tags": [
+      "prefix_sums",
+      "arrays",
+      "basics"
+    ],
+    "questionType": "SIGNATURE_FUNCTION",
+    "questionFamilyId": "FAM_PREFIX_SUM_QUERY",
+    "realWorldDomain": "ecommerce",
+    "initialCode": "import sys\nimport json\n\ndef getRangeSum(arr: list, L: int, R: int) -> int:\n    # Write your code here\n    pass\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        arr, L, R = json.loads(input_data)\n        print(getRangeSum(arr, L, R))",
+    "solutionCode": "import sys\nimport json\n\ndef getRangeSum(arr: list, L: int, R: int) -> int:\n    prefix = [0] * (len(arr) + 1)\n    for i in range(len(arr)):\n        prefix[i + 1] = prefix[i] + arr[i]\n    return prefix[R + 1] - prefix[L]\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        arr, L, R = json.loads(input_data)\n        print(getRangeSum(arr, L, R))",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "[[10, 20, 30, 40, 50], 1, 3]",
+        "expectedOutput": "90",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "[[1, 2, 3, 4, 5], 0, 4]",
+        "expectedOutput": "15",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "[[100, 200, 300], 1, 1]",
+        "expectedOutput": "200",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": "[[10], 0, 0]",
+        "expectedOutput": "10",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "[[5, 5, 5, 5, 5], 2, 4]",
+        "expectedOutput": "15",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "[[1, -2, 3, -4, 5], 1, 3]",
+        "expectedOutput": "-3",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "[[0, 0, 0, 0], 0, 3]",
+        "expectedOutput": "0",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "[[10, 20, 30, 40, 50], 0, 1]",
+        "expectedOutput": "30",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "[[10, 20, 30, 40, 50], 3, 4]",
+        "expectedOutput": "90",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "[[10, 20, 30, 40, 50], 0, 4]",
+        "expectedOutput": "150",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "[[-100, -200, -300], 0, 2]",
+        "expectedOutput": "-600",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "[[-100, -200, -300], 0, 1]",
+        "expectedOutput": "-300",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "[[-100, -200, -300], 1, 2]",
+        "expectedOutput": "-500",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  },
+  {
+    "id": "8",
+    "title": "Emergency Patch: Two Sum Target Pointers",
+    "description": "Apply an emergency patch! The two-pointer binary lookup has two critical logic bugs: 1. Loop allows identical element reuse by using left <= right. 2. Pointer updates are broken, causing an infinite loop. Fix the logic.",
+    "difficulty": 4,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "SPEED",
+      "COMPLETION",
+      "ALGORITHMIC"
+    ],
+    "speedRating": 7,
+    "pressureRating": 6,
+    "estimatedSolveTimeSec": 180,
+    "tags": [
+      "sorting",
+      "two_pointers",
+      "debugging"
+    ],
+    "questionType": "DEBUGGING",
+    "questionFamilyId": "FAM_TWO_SUM_POINTERS",
+    "realWorldDomain": "fintech",
+    "initialCode": "import sys\nimport json\n\ndef hasPair(arr: list, target: int) -> bool:\n    left, right = 0, len(arr) - 1\n    # Bug 1: Should be left < right to prevent matching same element\n    while left <= right:\n        s = arr[left] + arr[right]\n        if s == target:\n            # Bug 2: Returns incorrect state if left == right\n            if left == right:\n                return False\n            return True\n        elif s < target:\n            # Bug 3: decrements left instead of incrementing\n            left -= 1\n        else:\n            # Bug 4: increments right instead of decrementing\n            right += 1\n    return False\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        arr, target = json.loads(input_data)\n        print(hasPair(arr, target))",
+    "solutionCode": "import sys\nimport json\n\ndef hasPair(arr: list, target: int) -> bool:\n    left, right = 0, len(arr) - 1\n    while left < right:\n        s = arr[left] + arr[right]\n        if s == target:\n            return True\n        elif s < target:\n            left += 1\n        else:\n            right -= 1\n    return False\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        arr, target = json.loads(input_data)\n        print(hasPair(arr, target))",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "[[1, 2, 3, 9], 8]",
+        "expectedOutput": "False",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "[[1, 2, 4, 4], 8]",
+        "expectedOutput": "True",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "[[1, 2, 3, 5], 5]",
+        "expectedOutput": "True",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": "[[], 5]",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "[[1], 2]",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "[[1, 2], 3]",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "[[1, 2], 4]",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "[[1, 2, 3, 4, 5], 9]",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "[[1, 2, 3, 4, 5], 10]",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "[[-10, -5, 0, 5, 10], 0]",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "[[-10, -5, 0, 5, 10], 15]",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "[[-10, -5, 0, 5, 10], -15]",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "[[-10, -5, 0, 5, 10], 25]",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  },
+  {
+    "id": "9",
+    "title": "Emergency Patch: Matchmaker Binary Search",
+    "description": "The MMR lookup system has a deployment regression: 1. Midpoint index calculation overflows for large MMR limits on integer divisions. 2. Pointers are not advanced cleanly on updates, causing an infinite hang. Patch the bugs.",
+    "difficulty": 4,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "SPEED",
+      "COMPLETION",
+      "ALGORITHMIC"
+    ],
+    "speedRating": 7,
+    "pressureRating": 6,
+    "estimatedSolveTimeSec": 180,
+    "tags": [
+      "sorting",
+      "binary_search",
+      "debugging"
+    ],
+    "questionType": "DEBUGGING",
+    "questionFamilyId": "FAM_BINARY_SEARCH",
+    "realWorldDomain": "gaming",
+    "initialCode": "import sys\nimport json\n\ndef search(arr: list, target: int) -> int:\n    low, high = 0, len(arr) - 1\n    while low <= high:\n        # Bug 1: potential overflow or division logic\n        mid = low + (high - low)\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            # Bug 2: loop hangs because low does not shift past mid\n            low = mid\n        else:\n            # Bug 3: loop hangs because high does not shift past mid\n            high = mid\n    return -1\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        arr, target = json.loads(input_data)\n        print(search(arr, target))",
+    "solutionCode": "import sys\nimport json\n\ndef search(arr: list, target: int) -> int:\n    low, high = 0, len(arr) - 1\n    while low <= high:\n        mid = low + (high - low) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            low = mid + 1\n        else:\n            high = mid - 1\n    return -1\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        arr, target = json.loads(input_data)\n        print(search(arr, target))",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "[[1, 3, 5, 7, 9], 5]",
+        "expectedOutput": "2",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "[[1, 3, 5, 7, 9], 4]",
+        "expectedOutput": "-1",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "[[1, 3, 5, 7, 9], 1]",
+        "expectedOutput": "0",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": "[[1, 3, 5, 7, 9], 9]",
+        "expectedOutput": "4",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "[[], 5]",
+        "expectedOutput": "-1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "[[5], 5]",
+        "expectedOutput": "0",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "[[5], 3]",
+        "expectedOutput": "-1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 8]",
+        "expectedOutput": "7",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 11]",
+        "expectedOutput": "-1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 0]",
+        "expectedOutput": "-1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "[[-10, -5, 0, 5, 10], 0]",
+        "expectedOutput": "2",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "[[-10, -5, 0, 5, 10], -5]",
+        "expectedOutput": "1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "[[-10, -5, 0, 5, 10], 10]",
+        "expectedOutput": "4",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  },
+  {
+    "id": "10",
+    "title": "Code Collapse: Bracket Balance Validator",
+    "description": "Code Collapse! Reconstruct the entire character stack scanning loop to validate brackets (), [], {} inside the collapse block.",
+    "difficulty": 4,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "SPEED",
+      "COMPLETION",
+      "ALGORITHMIC"
+    ],
+    "speedRating": 7,
+    "pressureRating": 5,
+    "estimatedSolveTimeSec": 180,
+    "tags": [
+      "stacks",
+      "strings",
+      "basics"
+    ],
+    "questionType": "CODE_COMPLETION",
+    "questionFamilyId": "FAM_BRACKET_MATCH",
+    "realWorldDomain": "security",
+    "initialCode": "import sys\n\ndef isValid(s: str) -> bool:\n    stack = []\n    mapping = {\")\": \"(\", \"}\": \"{\", \"]\": \"[\"}\n    # --- COLLAPSE START ---\n    _____\n    # --- COLLAPSE END ---\n    return len(stack) == 0\n\nif __name__ == '__main__':\n    s = sys.stdin.read().strip()\n    print(isValid(s))",
+    "solutionCode": "import sys\n\ndef isValid(s: str) -> bool:\n    stack = []\n    mapping = {\")\": \"(\", \"}\": \"{\", \"]\": \"[\"}\n    # --- COLLAPSE START ---\n    for char in s:\n        if char in mapping.values():\n            stack.append(char)\n        elif char in mapping.keys():\n            if not stack or stack[-1] != mapping[char]:\n                return False\n            stack.pop()\n    # --- COLLAPSE END ---\n    return len(stack) == 0\n\nif __name__ == '__main__':\n    s = sys.stdin.read().strip()\n    print(isValid(s))",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "()",
+        "expectedOutput": "True",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "()[]{}",
+        "expectedOutput": "True",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "(]",
+        "expectedOutput": "False",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": "([)]",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "{[]}",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "[",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "]",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "{[()]}",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "{[()]}()",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "{[()]}(",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "()()()()[][][]{}{}{}",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "(((((((())))))))",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  },
+  {
+    "id": "11",
+    "title": "Chaos Grid: Rotate Map",
+    "description": "Rotate an N x N map grid 90 degrees clockwise. First transpose the matrix, then reverse each row.",
+    "difficulty": 6,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "ALGORITHMIC",
+      "DATA_STRUCTURES"
+    ],
+    "speedRating": 6,
+    "pressureRating": 6,
+    "estimatedSolveTimeSec": 300,
+    "tags": [
+      "matrices",
+      "arrays",
+      "basics"
+    ],
+    "questionType": "SIGNATURE_FUNCTION",
+    "questionFamilyId": "FAM_MATRIX_ROTATION",
+    "realWorldDomain": "gaming",
+    "initialCode": "import sys\nimport json\n\ndef rotate(matrix: list) -> list:\n    # Write your code here\n    pass\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        matrix = json.loads(input_data)\n        res = rotate(matrix)\n        print(json.dumps(res))",
+    "solutionCode": "import sys\nimport json\n\ndef rotate(matrix: list) -> list:\n    n = len(matrix)\n    # Transpose\n    for i in range(n):\n        for j in range(i, n):\n            matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]\n    # Reverse rows\n    for i in range(n):\n        matrix[i].reverse()\n    return matrix\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        matrix = json.loads(input_data)\n        res = rotate(matrix)\n        print(json.dumps(res))",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "[[1, 2], [3, 4]]",
+        "expectedOutput": "[[3, 1], [4, 2]]",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "[[1, 2, 3], [4, 5, 6], [7, 8, 9]]",
+        "expectedOutput": "[[7, 4, 1], [8, 5, 2], [9, 6, 3]]",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "[[5]]",
+        "expectedOutput": "[[5]]",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": "[]",
+        "expectedOutput": "[]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "[[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]]",
+        "expectedOutput": "[[13, 9, 5, 1], [14, 10, 6, 2], [15, 11, 7, 3], [16, 12, 8, 4]]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "[[1, 1], [2, 2]]",
+        "expectedOutput": "[[2, 1], [2, 1]]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "[[1, 0], [0, 1]]",
+        "expectedOutput": "[[0, 1], [1, 0]]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "[[-1, -2], [-3, -4]]",
+        "expectedOutput": "[[-3, -1], [-4, -2]]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "[[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15], [16, 17, 18, 19, 20], [21, 22, 23, 24, 25]]",
+        "expectedOutput": "[[21, 16, 11, 6, 1], [22, 17, 12, 7, 2], [23, 18, 13, 8, 3], [24, 19, 14, 9, 4], [25, 20, 15, 10, 5]]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "[[10, 20], [30, 40]]",
+        "expectedOutput": "[[30, 10], [40, 20]]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "[[0, 0], [0, 0]]",
+        "expectedOutput": "[[0, 0], [0, 0]]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "[[1, 2, 3], [1, 2, 3], [1, 2, 3]]",
+        "expectedOutput": "[[1, 1, 1], [2, 2, 2], [3, 3, 3]]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "[[1, 5], [5, 9]]",
+        "expectedOutput": "[[5, 1], [9, 5]]",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  },
+  {
+    "id": "12",
+    "title": "Chaos Grouping: Product Anagrams",
+    "description": "Group similar product tag names together if they are anagrams of each other. Return the grouped lists, with each sub-list and the final list sorted lexicographically.",
+    "difficulty": 6,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "ALGORITHMIC",
+      "DATA_STRUCTURES"
+    ],
+    "speedRating": 6,
+    "pressureRating": 6,
+    "estimatedSolveTimeSec": 300,
+    "tags": [
+      "strings",
+      "hashing",
+      "arrays"
+    ],
+    "questionType": "SIGNATURE_FUNCTION",
+    "questionFamilyId": "FAM_GROUP_ANAGRAMS",
+    "realWorldDomain": "ecommerce",
+    "initialCode": "import sys\nimport json\n\ndef groupAnagrams(strs: list) -> list:\n    # Write your code here\n    pass\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        strs = json.loads(input_data)\n        res = groupAnagrams(strs)\n        print(json.dumps(res))",
+    "solutionCode": "import sys\nimport json\nfrom collections import defaultdict\n\ndef groupAnagrams(strs: list) -> list:\n    groups = defaultdict(list)\n    for s in strs:\n        groups[tuple(sorted(s))].append(s)\n    return sorted([sorted(g) for g in groups.values()])\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        strs = json.loads(input_data)\n        res = groupAnagrams(strs)\n        print(json.dumps(res))",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "[\"eat\", \"tea\", \"tan\", \"ate\", \"nat\", \"bat\"]",
+        "expectedOutput": "[[\"ate\", \"eat\", \"tea\"], [\"bat\"], [\"nat\", \"tan\"]]",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "[\"\"]",
+        "expectedOutput": "[[\"\"]]",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "[\"a\"]",
+        "expectedOutput": "[[\"a\"]]",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": "[]",
+        "expectedOutput": "[]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "[\"abc\", \"bca\", \"cab\", \"xyz\", \"zyx\"]",
+        "expectedOutput": "[[\"abc\", \"bca\", \"cab\"], [\"xyz\", \"zyx\"]]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "[\"a\", \"b\", \"c\"]",
+        "expectedOutput": "[[\"a\"], [\"b\"], [\"c\"]]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "[\"cat\", \"dog\", \"tac\", \"god\", \"act\"]",
+        "expectedOutput": "[[\"act\", \"cat\", \"tac\"], [\"dog\", \"god\"]]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "[\"aaaa\", \"aaa\", \"aa\"]",
+        "expectedOutput": "[[\"aa\"], [\"aaa\"], [\"aaaa\"]]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "[\"ab\", \"ba\", \"ab\", \"ba\"]",
+        "expectedOutput": "[[\"ab\", \"ab\", \"ba\", \"ba\"]]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "[\"hello\", \"olleh\", \"world\", \"dlrow\"]",
+        "expectedOutput": "[[\"dlrow\", \"world\"], [\"hello\", \"olleh\"]]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "[\"same\", \"same\", \"same\"]",
+        "expectedOutput": "[[\"same\", \"same\", \"same\"]]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "[\"test\", \"sett\", \"tset\"]",
+        "expectedOutput": "[[\"sett\", \"test\", \"tset\"]]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "[\"a\", \"a\", \"b\", \"b\"]",
+        "expectedOutput": "[[\"a\", \"a\"], [\"b\", \"b\"]]",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  },
+  {
+    "id": "13",
+    "title": "Chaos Window: Longest Unique Substring",
+    "description": "Given a string, find the length of the longest substring without repeating characters using the sliding window algorithm.",
+    "difficulty": 6,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "ALGORITHMIC",
+      "DATA_STRUCTURES"
+    ],
+    "speedRating": 6,
+    "pressureRating": 6,
+    "estimatedSolveTimeSec": 240,
+    "tags": [
+      "strings",
+      "sliding_window",
+      "basics"
+    ],
+    "questionType": "SIGNATURE_FUNCTION",
+    "questionFamilyId": "FAM_SLIDING_WINDOW_UNIQUE",
+    "realWorldDomain": "gaming",
+    "initialCode": "import sys\n\ndef longestUniqueSubstring(s: str) -> int:\n    # Write your code here\n    pass\n\nif __name__ == '__main__':\n    s = sys.stdin.read().strip()\n    print(longestUniqueSubstring(s))",
+    "solutionCode": "import sys\n\ndef longestUniqueSubstring(s: str) -> int:\n    seen = {}\n    left = 0\n    max_len = 0\n    for right, char in enumerate(s):\n        if char in seen and seen[char] >= left:\n            left = seen[char] + 1\n        seen[char] = right\n        max_len = max(max_len, right - left + 1)\n    return max_len\n\nif __name__ == '__main__':\n    s = sys.stdin.read().strip()\n    print(longestUniqueSubstring(s))",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "abcabcbb",
+        "expectedOutput": "3",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "bbbbb",
+        "expectedOutput": "1",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "pwwkew",
+        "expectedOutput": "3",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": "",
+        "expectedOutput": "0",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "a",
+        "expectedOutput": "1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "au",
+        "expectedOutput": "2",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "dvdf",
+        "expectedOutput": "3",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "tmmzuxt",
+        "expectedOutput": "5",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "abcdefghijklmnopqrstuvwxyz",
+        "expectedOutput": "26",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "aab",
+        "expectedOutput": "2",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "c",
+        "expectedOutput": "1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "slidingwindow",
+        "expectedOutput": "8",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "abcdeafghijka",
+        "expectedOutput": "11",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  },
+  {
+    "id": "14",
+    "title": "Emergency Patch: Fibonacci Memoization",
+    "description": "The recursive memoized Fibonacci service is experiencing a Performance Crisis. Exactly two bugs are present: 1. Recursion base cases return 1 instead of N. 2. Memoization values are computed but never queried, reverting execution to exponential O(2^N). Fix it.",
+    "difficulty": 6,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "ALGORITHMIC",
+      "DATA_STRUCTURES"
+    ],
+    "speedRating": 6,
+    "pressureRating": 6,
+    "estimatedSolveTimeSec": 240,
+    "tags": [
+      "recursion",
+      "memoization",
+      "debugging"
+    ],
+    "questionType": "DEBUGGING",
+    "questionFamilyId": "FAM_FIB_MEMO",
+    "realWorldDomain": "fintech",
+    "initialCode": "import sys\n\nmemo = {}\ndef fib(n: int) -> int:\n    # Bug 1: incorrect base case (returns 1 for 0)\n    if n <= 1:\n        return 1\n    \n    # Bug 2: Memo check is missing completely, causing exponential calls\n    \n    memo[n] = fib(n - 1) + fib(n - 2)\n    return memo[n]\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        n = int(input_data)\n        print(fib(n))",
+    "solutionCode": "import sys\n\nmemo = {}\ndef fib(n: int) -> int:\n    if n <= 1:\n        return n\n    if n in memo:\n        return memo[n]\n    memo[n] = fib(n - 1) + fib(n - 2)\n    return memo[n]\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        n = int(input_data)\n        print(fib(n))",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "5",
+        "expectedOutput": "5",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "10",
+        "expectedOutput": "55",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "30",
+        "expectedOutput": "832040",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": "0",
+        "expectedOutput": "0",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "1",
+        "expectedOutput": "1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "2",
+        "expectedOutput": "1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "3",
+        "expectedOutput": "2",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "4",
+        "expectedOutput": "3",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "20",
+        "expectedOutput": "6765",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "35",
+        "expectedOutput": "9227465",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "40",
+        "expectedOutput": "102334155",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "45",
+        "expectedOutput": "1134903170",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "50",
+        "expectedOutput": "12586269025",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  },
+  {
+    "id": "15",
+    "title": "Code Collapse: Delivery Overlaps",
+    "description": "Code Collapse! Complete the entire sorting and overlap comparison logic inside the collapse block to identify if any time slots overlap.",
+    "difficulty": 6,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "ALGORITHMIC",
+      "DATA_STRUCTURES"
+    ],
+    "speedRating": 6,
+    "pressureRating": 6,
+    "estimatedSolveTimeSec": 300,
+    "tags": [
+      "intervals",
+      "sorting",
+      "arrays"
+    ],
+    "questionType": "CODE_COMPLETION",
+    "questionFamilyId": "FAM_INTERVAL_OVERLAP",
+    "realWorldDomain": "logistics",
+    "initialCode": "import sys\nimport json\n\ndef overlap(slots: list) -> bool:\n    if not slots:\n        return False\n    # --- COLLAPSE START ---\n    _____\n    # --- COLLAPSE END ---\n    return False\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        slots = json.loads(input_data)\n        print(overlap(slots))",
+    "solutionCode": "import sys\nimport json\n\ndef overlap(slots: list) -> bool:\n    if not slots:\n        return False\n    # --- COLLAPSE START ---\n    slots.sort()\n    for i in range(1, len(slots)):\n        if slots[i][0] < slots[i - 1][1]:\n            return True\n    # --- COLLAPSE END ---\n    return False\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        slots = json.loads(input_data)\n        print(overlap(slots))",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "[[1, 3], [5, 6], [3, 4]]",
+        "expectedOutput": "False",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "[[1, 3], [2, 4], [5, 6]]",
+        "expectedOutput": "True",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "[]",
+        "expectedOutput": "False",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": "[[1, 2]]",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "[[1, 5], [5, 10]]",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "[[1, 5], [4, 10]]",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "[[10, 20], [20, 30], [15, 25]]",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "[[1, 10], [2, 3], [4, 5]]",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "[[2, 3], [4, 5], [1, 10]]",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "[[100, 200], [300, 400], [500, 600]]",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "[[1, 2], [2, 3], [3, 4], [4, 5], [5, 6]]",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "[[1, 2], [2, 3], [3, 4], [4, 5], [1, 6]]",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "[[-5, 5], [6, 10], [-10, -6]]",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  },
+  {
+    "id": "16",
+    "title": "Chaos Tree: Parent Array Height",
+    "description": "Given a tree represented as a parent array where parent[i] is the parent of node i, return the height of the tree. The root node has parent -1.",
+    "difficulty": 8,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "ALGORITHMIC",
+      "DATA_STRUCTURES",
+      "HARD_LOGIC"
+    ],
+    "speedRating": 5,
+    "pressureRating": 7,
+    "estimatedSolveTimeSec": 420,
+    "tags": [
+      "trees",
+      "recursion",
+      "arrays"
+    ],
+    "questionType": "SIGNATURE_FUNCTION",
+    "questionFamilyId": "FAM_TREE_HEIGHT",
+    "realWorldDomain": "gaming",
+    "initialCode": "import sys\nimport json\n\ndef findHeight(parent: list) -> int:\n    # Write your code here\n    pass\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        parent = json.loads(input_data)\n        print(findHeight(parent))",
+    "solutionCode": "import sys\nimport json\n\ndef findHeight(parent: list) -> int:\n    n = len(parent)\n    depths = [0] * n\n    def getDepth(i):\n        if parent[i] == -1:\n            return 1\n        if depths[i] != 0:\n            return depths[i]\n        depths[i] = 1 + getDepth(parent[i])\n        return depths[i]\n    return max(getDepth(i) for i in range(n)) if n > 0 else 0\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        parent = json.loads(input_data)\n        print(findHeight(parent))",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "[-1, 0, 0, 1, 1, 2]",
+        "expectedOutput": "3",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "[-1]",
+        "expectedOutput": "1",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "[-1, 0, 1, 2, 3]",
+        "expectedOutput": "5",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": "[]",
+        "expectedOutput": "0",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "[-1, 0, 0, 0, 0]",
+        "expectedOutput": "2",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "[-1, 0, 1, 1, 2, 2]",
+        "expectedOutput": "4",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "[-1, 0, 0, 1, 2, 3]",
+        "expectedOutput": "5",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "[0, -1, 1, 2, 3]",
+        "expectedOutput": "5",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "[1, 2, -1, 2, 3, 4]",
+        "expectedOutput": "5",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "[-1, 0, 0, 2, 2, 4, 4]",
+        "expectedOutput": "4",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "[-1, 0, 1, 2, 3, 4, 5, 6, 7, 8]",
+        "expectedOutput": "10",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "[9, 9, 9, 9, 9, 9, 9, 9, 9, -1]",
+        "expectedOutput": "2",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "[-1, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4]",
+        "expectedOutput": "6",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  },
+  {
+    "id": "17",
+    "title": "Chaos Streams: Merge K Pricing Feeds",
+    "description": "Merge K sorted lists of vendor prices into one sorted list. Use min-heap/priority queues to keep it efficient.",
+    "difficulty": 8,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "ALGORITHMIC",
+      "DATA_STRUCTURES",
+      "HARD_LOGIC"
+    ],
+    "speedRating": 5,
+    "pressureRating": 7,
+    "estimatedSolveTimeSec": 420,
+    "tags": [
+      "priority_queues",
+      "sorting",
+      "arrays"
+    ],
+    "questionType": "SIGNATURE_FUNCTION",
+    "questionFamilyId": "FAM_MERGE_K_LISTS",
+    "realWorldDomain": "ecommerce",
+    "initialCode": "import sys\nimport json\n\ndef mergeKLists(lists: list) -> list:\n    # Write your code here\n    pass\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        lists = json.loads(input_data)\n        res = mergeKLists(lists)\n        print(json.dumps(res))",
+    "solutionCode": "import sys\nimport json\nimport heapq\n\ndef mergeKLists(lists: list) -> list:\n    heap = []\n    for i, lst in enumerate(lists):\n        if lst:\n            heapq.heappush(heap, (lst[0], i, 0))\n    result = []\n    while heap:\n        val, list_idx, element_idx = heapq.heappop(heap)\n        result.append(val)\n        if element_idx + 1 < len(lists[list_idx]):\n            heapq.heappush(heap, (lists[list_idx][element_idx + 1], list_idx, element_idx + 1))\n    return result\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        lists = json.loads(input_data)\n        res = mergeKLists(lists)\n        print(json.dumps(res))",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "[[1, 5, 7], [2, 3, 8], [4, 6]]",
+        "expectedOutput": "[1, 2, 3, 4, 5, 6, 7, 8]",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "[[], [1], [2]]",
+        "expectedOutput": "[1, 2]",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "[]",
+        "expectedOutput": "[]",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": "[[1]]",
+        "expectedOutput": "[1]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "[[1, 2, 3]]",
+        "expectedOutput": "[1, 2, 3]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "[[10, 20], [5, 15], [3, 30]]",
+        "expectedOutput": "[3, 5, 10, 15, 20, 30]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "[[], [], []]",
+        "expectedOutput": "[]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "[[-10, -5], [-20, 0], [5, 10]]",
+        "expectedOutput": "[-20, -10, -5, 0, 5, 10]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "[[1, 1, 1], [1, 1]]",
+        "expectedOutput": "[1, 1, 1, 1, 1]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "[[5, 10, 15], [2, 4, 6, 8], [1, 3, 7, 9]]",
+        "expectedOutput": "[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "[[1, 3], [2, 4], [3, 5], [4, 6]]",
+        "expectedOutput": "[1, 2, 3, 3, 4, 4, 5, 6]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "[[100], [200], [50], [300]]",
+        "expectedOutput": "[50, 100, 200, 300]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "[[1, 2, 3, 4, 5], [6, 7, 8, 9, 10]]",
+        "expectedOutput": "[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  },
+  {
+    "id": "18",
+    "title": "Emergency Patch: DFS Robot Pathfinder",
+    "description": "The pathfinder has two complex bugs: 1. It fails to mark cells as visited, causing recursion crashes. 2. The boundary check checks index value bounds with '<= len(grid)' instead of '< len(grid)'. Apply the patch.",
+    "difficulty": 8,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "ALGORITHMIC",
+      "DATA_STRUCTURES",
+      "HARD_LOGIC"
+    ],
+    "speedRating": 5,
+    "pressureRating": 7,
+    "estimatedSolveTimeSec": 480,
+    "tags": [
+      "graphs",
+      "dfs",
+      "debugging"
+    ],
+    "questionType": "DEBUGGING",
+    "questionFamilyId": "FAM_DFS_PATH",
+    "realWorldDomain": "robotics",
+    "initialCode": "import sys\nimport json\n\ndef hasPath(grid, start, end, visited=None) -> bool:\n    if visited is None:\n        visited = set()\n    r, c = start\n    # Bug 1: checks <= len(grid) instead of < len(grid)\n    if r < 0 or c < 0 or r >= len(grid) or c >= len(grid[0]) or grid[r][c] == 1:\n        return False\n    if start == end:\n        return True\n    \n    # Bug 2: Missing visited.add(start) to track path traversal\n    \n    for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:\n        neighbor = (r + dr, c + dc)\n        if neighbor not in visited:\n            if hasPath(grid, neighbor, end, visited):\n                return True\n    return False\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        grid, start, end = json.loads(input_data)\n        start = tuple(start)\n        end = tuple(end)\n        print(hasPath(grid, start, end))",
+    "solutionCode": "import sys\nimport json\n\ndef hasPath(grid, start, end, visited=None) -> bool:\n    if visited is None:\n        visited = set()\n    r, c = start\n    if r < 0 or c < 0 or r >= len(grid) or c >= len(grid[0]) or grid[r][c] == 1:\n        return False\n    if start == end:\n        return True\n    \n    visited.add(start)\n    \n    for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:\n        neighbor = (r + dr, c + dc)\n        if neighbor not in visited:\n            if hasPath(grid, neighbor, end, visited):\n                return True\n    return False\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        grid, start, end = json.loads(input_data)\n        start = tuple(start)\n        end = tuple(end)\n        print(hasPath(grid, start, end))",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "[[[0, 0, 0], [1, 1, 0], [0, 0, 0]], [0, 0], [2, 2]]",
+        "expectedOutput": "True",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "[[[0, 0, 0], [1, 1, 1], [0, 0, 0]], [0, 0], [2, 2]]",
+        "expectedOutput": "False",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "[[[0, 1], [1, 0]], [0, 0], [1, 1]]",
+        "expectedOutput": "False",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": "[[[0]], [0, 0], [0, 0]]",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "[[[0, 0], [0, 0]], [0, 0], [1, 1]]",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "[[[0, 0, 0, 0], [0, 1, 1, 0], [0, 0, 0, 0]], [0, 0], [2, 3]]",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "[[[0, 0, 0, 0], [1, 1, 1, 0], [0, 0, 0, 0]], [0, 0], [2, 0]]",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "[[[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0]], [0, 0], [2, 0]]",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "[[[0, 0, 1], [0, 1, 0], [0, 0, 0]], [0, 0], [2, 2]]",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "[[[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]], [0, 0], [4, 4]]",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "[[[0, 0, 0, 0, 0], [1, 1, 1, 1, 0], [0, 0, 0, 0, 0], [0, 1, 1, 1, 1], [0, 0, 0, 0, 0]], [0, 0], [4, 4]]",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "[[[0, 0, 0, 0, 0], [1, 1, 1, 1, 1], [0, 0, 0, 0, 0], [0, 1, 1, 1, 1], [0, 0, 0, 0, 0]], [0, 0], [4, 4]]",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "[[[0, 0, 0], [0, 1, 0], [1, 0, 0]], [0, 0], [2, 1]]",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  },
+  {
+    "id": "19",
+    "title": "Code Collapse: 0-1 Knapsack Capacity",
+    "description": "Code Collapse! Reconstruct the entire dynamic programming transition logic for 0-1 Knapsack.",
+    "difficulty": 8,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "ALGORITHMIC",
+      "DATA_STRUCTURES",
+      "HARD_LOGIC"
+    ],
+    "speedRating": 5,
+    "pressureRating": 7,
+    "estimatedSolveTimeSec": 480,
+    "tags": [
+      "dynamic_programming",
+      "arrays",
+      "basics"
+    ],
+    "questionType": "CODE_COMPLETION",
+    "questionFamilyId": "FAM_KNAPSACK_DP",
+    "realWorldDomain": "logistics",
+    "initialCode": "import sys\nimport json\n\ndef knapsack(weights: list, values: list, capacity: int) -> int:\n    n = len(weights)\n    dp = [[0] * (capacity + 1) for _ in range(n + 1)]\n    # --- COLLAPSE START ---\n    _____\n    # --- COLLAPSE END ---\n    return dp[n][capacity]\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        weights, values, capacity = json.loads(input_data)\n        print(knapsack(weights, values, capacity))",
+    "solutionCode": "import sys\nimport json\n\ndef knapsack(weights: list, values: list, capacity: int) -> int:\n    n = len(weights)\n    dp = [[0] * (capacity + 1) for _ in range(n + 1)]\n    # --- COLLAPSE START ---\n    for i in range(1, n + 1):\n        for w in range(1, capacity + 1):\n            if weights[i-1] <= w:\n                dp[i][w] = max(dp[i-1][w], dp[i-1][w - weights[i-1]] + values[i-1])\n            else:\n                dp[i][w] = dp[i-1][w]\n    # --- COLLAPSE END ---\n    return dp[n][capacity]\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        weights, values, capacity = json.loads(input_data)\n        print(knapsack(weights, values, capacity))",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "[[1, 2, 3], [60, 100, 120], 5]",
+        "expectedOutput": "220",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "[[2, 3, 4, 5], [3, 4, 5, 6], 5]",
+        "expectedOutput": "7",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "[[], [], 10]",
+        "expectedOutput": "0",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": "[[1], [10], 1]",
+        "expectedOutput": "10",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "[[2], [10], 1]",
+        "expectedOutput": "0",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "[[10, 20, 30], [60, 100, 120], 50]",
+        "expectedOutput": "280",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "[[1, 1, 1], [10, 20, 30], 2]",
+        "expectedOutput": "50",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "[[5, 4, 6, 3], [10, 40, 30, 50], 10]",
+        "expectedOutput": "90",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "[[10, 20, 30, 40], [1, 2, 3, 4], 10]",
+        "expectedOutput": "1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "[[1, 2, 5, 6, 7], [1, 6, 18, 22, 28], 11]",
+        "expectedOutput": "46",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "[[3, 4, 5], [30, 40, 50], 2]",
+        "expectedOutput": "0",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "[[1, 2, 3], [10, 15, 40], 6]",
+        "expectedOutput": "65",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "[[1, 3, 4, 5], [1, 4, 5, 7], 7]",
+        "expectedOutput": "11",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  },
+  {
+    "id": "20",
+    "title": "Performance Crisis: Longest Increasing Subsequence",
+    "description": "A financial app has a Performance Crisis! The stock LIS lookup runs in O(N^2) time, causing TLE. Optimize the algorithm to run in O(N log N) time.",
+    "difficulty": 8,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "ALGORITHMIC",
+      "DATA_STRUCTURES",
+      "HARD_LOGIC"
+    ],
+    "speedRating": 5,
+    "pressureRating": 7,
+    "estimatedSolveTimeSec": 540,
+    "tags": [
+      "dynamic_programming",
+      "binary_search",
+      "optimization"
+    ],
+    "questionType": "OPTIMIZATION",
+    "questionFamilyId": "FAM_LIS_OPT",
+    "realWorldDomain": "fintech",
+    "initialCode": "import sys\nimport json\n\ndef lengthOfLIS(nums: list) -> int:\n    if not nums:\n        return 0\n    dp = [1] * len(nums)\n    for i in range(len(nums)):\n        for j in range(i):\n            if nums[i] > nums[j]:\n                dp[i] = max(dp[i], dp[j] + 1)\n    return max(dp)\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        nums = json.loads(input_data)\n        print(lengthOfLIS(nums))",
+    "solutionCode": "import sys\nimport json\nimport bisect\n\ndef lengthOfLIS(nums: list) -> int:\n    sub = []\n    for x in nums:\n        idx = bisect.bisect_left(sub, x)\n        if idx == len(sub):\n            sub.append(x)\n        else:\n            sub[idx] = x\n    return len(sub)\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        nums = json.loads(input_data)\n        print(lengthOfLIS(nums))",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "[10, 9, 2, 5, 3, 7, 101, 18]",
+        "expectedOutput": "4",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "[0, 1, 0, 3, 2, 3]",
+        "expectedOutput": "4",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "[7, 7, 7, 7, 7, 7]",
+        "expectedOutput": "1",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": "[]",
+        "expectedOutput": "0",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "[1]",
+        "expectedOutput": "1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "[1, 2, 3, 4, 5]",
+        "expectedOutput": "5",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "[5, 4, 3, 2, 1]",
+        "expectedOutput": "1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "[10, 20, 10, 30, 20, 40]",
+        "expectedOutput": "4",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "[-1, -2, -3, -4, 0]",
+        "expectedOutput": "2",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "[2, 5, 3, 7, 101, 18, 2, 5, 3, 7, 101, 18]",
+        "expectedOutput": "4",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "[1, 3, 6, 7, 9, 4, 10, 5, 6]",
+        "expectedOutput": "6",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "[3, 4, -1, 5, 8, 2, 3, 12, 7, 9, 10]",
+        "expectedOutput": "6",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "[10, 22, 9, 33, 21, 50, 41, 60, 80]",
+        "expectedOutput": "6",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  },
+  {
+    "id": "21",
+    "title": "Chaos DevOps: Build Dependency Order",
+    "description": "Find a valid build order for tasks given dependencies. Use Khan's algorithm for topological sorting. If a cycle exists, return an empty list.",
+    "difficulty": 10,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "ALGORITHMIC",
+      "HARD_LOGIC"
+    ],
+    "speedRating": 4,
+    "pressureRating": 8,
+    "estimatedSolveTimeSec": 600,
+    "tags": [
+      "graphs",
+      "topological_sort",
+      "devops"
+    ],
+    "questionType": "SIGNATURE_FUNCTION",
+    "questionFamilyId": "FAM_TOPO_SORT",
+    "realWorldDomain": "devops",
+    "initialCode": "import sys\nimport json\n\ndef findOrder(numTasks: int, prerequisites: list) -> list:\n    # Write your code here\n    pass\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        numTasks, prerequisites = json.loads(input_data)\n        res = findOrder(numTasks, prerequisites)\n        print(json.dumps(res))",
+    "solutionCode": "import sys\nimport json\nfrom collections import defaultdict, deque\n\ndef findOrder(numTasks: int, prerequisites: list) -> list:\n    adj = defaultdict(list)\n    indegree = [0] * numTasks\n    for dest, src in prerequisites:\n        adj[src].append(dest)\n        indegree[dest] += 1\n    \n    queue = deque([i for i in range(numTasks) if indegree[i] == 0])\n    order = []\n    \n    while queue:\n        node = queue.popleft()\n        order.append(node)\n        for neighbor in adj[node]:\n            indegree[neighbor] -= 1\n            if indegree[neighbor] == 0:\n                queue.append(neighbor)\n                \n    return order if len(order) == numTasks else []\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        numTasks, prerequisites = json.loads(input_data)\n        res = findOrder(numTasks, prerequisites)\n        print(json.dumps(res))",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "[4, [[1, 0], [2, 0], [3, 1], [3, 2]]]",
+        "expectedOutput": "[0, 1, 2, 3]",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "[2, [[1, 0], [0, 1]]]",
+        "expectedOutput": "[]",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "[1, []]",
+        "expectedOutput": "[0]",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": "[2, [[1, 0]]]",
+        "expectedOutput": "[0, 1]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "[3, [[1, 0], [2, 1]]]",
+        "expectedOutput": "[0, 1, 2]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "[3, [[0, 1], [1, 2], [2, 0]]]",
+        "expectedOutput": "[]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "[5, [[1, 0], [2, 0], [3, 1], [4, 2], [4, 3]]]",
+        "expectedOutput": "[0, 1, 2, 3, 4]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "[4, [[2, 0], [3, 1], [3, 2]]]",
+        "expectedOutput": "[0, 1, 2, 3]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "[4, [[1, 0], [2, 0], [3, 1], [3, 2], [0, 3]]]",
+        "expectedOutput": "[]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "[6, [[1, 0], [2, 0], [3, 1], [4, 1], [5, 2], [5, 3], [5, 4]]]",
+        "expectedOutput": "[0, 1, 2, 3, 4, 5]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "[2, []]",
+        "expectedOutput": "[0, 1]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "[3, [[1, 0], [2, 0]]]",
+        "expectedOutput": "[0, 1, 2]",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "[5, [[1, 2], [2, 3], [3, 4], [4, 1]]]",
+        "expectedOutput": "[]",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  },
+  {
+    "id": "22",
+    "title": "Emergency Patch: Dijkstra Shortest Path",
+    "description": "Emergency Patch! The Dijkstra shortest pathfinder is broken: 1. Pushing (node, new_dist) into priority queue instead of (new_dist, node). 2. Distances table check logic is missing boundaries. Fix the bugs.",
+    "difficulty": 10,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "ALGORITHMIC",
+      "HARD_LOGIC"
+    ],
+    "speedRating": 4,
+    "pressureRating": 8,
+    "estimatedSolveTimeSec": 720,
+    "tags": [
+      "graphs",
+      "shortest_paths",
+      "debugging"
+    ],
+    "questionType": "DEBUGGING",
+    "questionFamilyId": "FAM_DIJKSTRA_PQ",
+    "realWorldDomain": "logistics",
+    "initialCode": "import sys\nimport json\nimport heapq\n\ndef dijkstra(graph: dict, start: str, end: str) -> int:\n    pq = [(0, start)]\n    distances = {start: 0}\n    while pq:\n        dist, node = heapq.heappop(pq)\n        if node == end:\n            return dist\n        # Bug 1: missing comparison condition checker\n        \n        for neighbor, weight in graph.get(node, []):\n            new_dist = dist + weight\n            if new_dist < distances.get(neighbor, float('inf')):\n                distances[neighbor] = new_dist\n                # Bug 2: pushes (neighbor, new_dist) instead of (new_dist, neighbor)\n                heapq.heappush(pq, (neighbor, new_dist))\n    return distances.get(end, -1)\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        graph, start, end = json.loads(input_data)\n        print(dijkstra(graph, start, end))",
+    "solutionCode": "import sys\nimport json\nimport heapq\n\ndef dijkstra(graph: dict, start: str, end: str) -> int:\n    pq = [(0, start)]\n    distances = {start: 0}\n    while pq:\n        dist, node = heapq.heappop(pq)\n        if node == end:\n            return dist\n        if dist > distances.get(node, float('inf')):\n            continue\n        for neighbor, weight in graph.get(node, []):\n            new_dist = dist + weight\n            if new_dist < distances.get(neighbor, float('inf')):\n                distances[neighbor] = new_dist\n                heapq.heappush(pq, (new_dist, neighbor))\n    return distances.get(end, -1)\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        graph, start, end = json.loads(input_data)\n        print(dijkstra(graph, start, end))",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "[{\"A\": [[\"B\", 1], [\"C\", 4]], \"B\": [[\"C\", 2], [\"D\", 5]], \"C\": [[\"D\", 1]], \"D\": []}, \"A\", \"D\"]",
+        "expectedOutput": "4",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "[{\"A\": [[\"B\", 2]], \"B\": []}, \"A\", \"C\"]",
+        "expectedOutput": "-1",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "[{\"A\": []}, \"A\", \"A\"]",
+        "expectedOutput": "0",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": "[{\"A\": [[\"B\", 5], [\"C\", 1]], \"C\": [[\"B\", 2]], \"B\": []}, \"A\", \"B\"]",
+        "expectedOutput": "3",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "[{\"A\": [[\"B\", 10]], \"B\": [[\"C\", 20]], \"C\": [[\"D\", 30]], \"D\": []}, \"A\", \"D\"]",
+        "expectedOutput": "60",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "[{\"A\": [[\"B\", 1], [\"C\", 5]], \"B\": [[\"D\", 3]], \"C\": [[\"D\", 1]], \"D\": []}, \"A\", \"D\"]",
+        "expectedOutput": "4",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "[{\"A\": [[\"B\", 1]], \"B\": [[\"A\", 1]]}, \"A\", \"B\"]",
+        "expectedOutput": "1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "[{\"A\": [[\"B\", 10], [\"C\", 100]], \"B\": [[\"C\", 10]], \"C\": []}, \"A\", \"C\"]",
+        "expectedOutput": "20",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "[{\"A\": [[\"B\", 1], [\"C\", 1]], \"B\": [[\"D\", 10]], \"C\": [[\"D\", 2]], \"D\": []}, \"A\", \"D\"]",
+        "expectedOutput": "3",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "[{\"X\": [[\"Y\", 100]], \"Y\": [[\"Z\", 100]], \"Z\": []}, \"X\", \"Z\"]",
+        "expectedOutput": "200",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "[{\"X\": [[\"Y\", 1]], \"Y\": [[\"X\", 1]]}, \"X\", \"Y\"]",
+        "expectedOutput": "1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "[{\"A\": [[\"B\", 3], [\"C\", 9]], \"B\": [[\"C\", 4], [\"D\", 2]], \"C\": [[\"D\", 5]], \"D\": [[\"E\", 1]], \"E\": []}, \"A\", \"E\"]",
+        "expectedOutput": "6",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "[{\"A\": [[\"B\", 2], [\"C\", 5]], \"B\": [[\"D\", 4], [\"E\", 7]], \"C\": [[\"E\", 1]], \"D\": [[\"F\", 1]], \"E\": [[\"F\", 3]], \"F\": []}, \"A\", \"F\"]",
+        "expectedOutput": "7",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  },
+  {
+    "id": "23",
+    "title": "Code Collapse: Union Find Cycles",
+    "description": "Code Collapse! Reconstruct the entire Union Find with path compression and rank union algorithm block.",
+    "difficulty": 10,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "ALGORITHMIC",
+      "HARD_LOGIC"
+    ],
+    "speedRating": 4,
+    "pressureRating": 8,
+    "estimatedSolveTimeSec": 720,
+    "tags": [
+      "union_find",
+      "graphs",
+      "basics"
+    ],
+    "questionType": "CODE_COMPLETION",
+    "questionFamilyId": "FAM_UNION_FIND",
+    "realWorldDomain": "networking",
+    "initialCode": "import sys\nimport json\n\n# --- COLLAPSE START ---\ndef find(parent: list, x: int) -> int:\n    _____\n\ndef union(parent: list, rank: list, x: int, y: int) -> bool:\n    _____\n# --- COLLAPSE END ---\n\ndef hasCycle(n: int, edges: list) -> bool:\n    parent = list(range(n))\n    rank = [0] * n\n    for u, v in edges:\n        if not union(parent, rank, u, v):\n            return True\n    return False\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        n, edges = json.loads(input_data)\n        print(hasCycle(n, edges))",
+    "solutionCode": "import sys\nimport json\n\n# --- COLLAPSE START ---\ndef find(parent: list, x: int) -> int:\n    if parent[x] == x:\n        return x\n    parent[x] = find(parent, parent[x])\n    return parent[x]\n\ndef union(parent: list, rank: list, x: int, y: int) -> bool:\n    rootX = find(parent, x)\n    rootY = find(parent, y)\n    if rootX == rootY:\n        return False\n    if rank[rootX] < rank[rootY]:\n        parent[rootX] = rootY\n    elif rank[rootX] > rank[rootY]:\n        parent[rootY] = rootX\n    else:\n        parent[rootY] = rootX\n        rank[rootX] += 1\n    return True\n# --- COLLAPSE END ---\n\ndef hasCycle(n: int, edges: list) -> bool:\n    parent = list(range(n))\n    rank = [0] * n\n    for u, v in edges:\n        if not union(parent, rank, u, v):\n            return True\n    return False\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        n, edges = json.loads(input_data)\n        print(hasCycle(n, edges))",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "[3, [[0, 1], [1, 2], [0, 2]]]",
+        "expectedOutput": "True",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "[4, [[0, 1], [1, 2], [2, 3]]]",
+        "expectedOutput": "False",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "[1, []]",
+        "expectedOutput": "False",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": "[2, [[0, 1]]]",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "[4, [[0, 1], [2, 3], [1, 2], [0, 3]]]",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "[5, [[0, 1], [1, 2], [3, 4], [0, 2]]]",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "[5, [[0, 1], [1, 2], [3, 4]]]",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "[3, []]",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "[5, [[0, 1], [2, 3], [0, 4], [4, 1]]]",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "[6, [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5]]]",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "[6, [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [0, 5]]]",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "[5, [[0, 1], [0, 2], [0, 3], [0, 4]]]",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "[5, [[0, 1], [0, 2], [0, 3], [0, 4], [1, 2]]]",
+        "expectedOutput": "True",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  },
+  {
+    "id": "24",
+    "title": "Performance Crisis: DNA Palindrome",
+    "description": "Performance Crisis! The genomic algorithm search runs in O(N^3) time, exceeding the resource allocation. Optimize the algorithm to run in O(N^2) time.",
+    "difficulty": 10,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "ALGORITHMIC",
+      "HARD_LOGIC"
+    ],
+    "speedRating": 4,
+    "pressureRating": 8,
+    "estimatedSolveTimeSec": 720,
+    "tags": [
+      "strings",
+      "dynamic_programming",
+      "optimization"
+    ],
+    "questionType": "OPTIMIZATION",
+    "questionFamilyId": "FAM_LONGEST_PALINDROME_OPT",
+    "realWorldDomain": "healthcare",
+    "initialCode": "import sys\n\ndef longestPalindrome(s: str) -> int:\n    n = len(s)\n    max_len = 0\n    for i in range(n):\n        for j in range(i, n):\n            sub = s[i:j+1]\n            if sub == sub[::-1]:\n                max_len = max(max_len, len(sub))\n    return max_len\n\nif __name__ == '__main__':\n    s = sys.stdin.read().strip()\n    print(longestPalindrome(s))",
+    "solutionCode": "import sys\n\ndef longestPalindrome(s: str) -> int:\n    if not s:\n        return 0\n    max_len = 1\n    for i in range(len(s)):\n        # odd length\n        l, r = i, i\n        while l >= 0 and r < len(s) and s[l] == s[r]:\n            if r - l + 1 > max_len:\n                max_len = r - l + 1\n            l -= 1\n            r += 1\n        # even length\n        l, r = i, i + 1\n        while l >= 0 and r < len(s) and s[l] == s[r]:\n            if r - l + 1 > max_len:\n                max_len = r - l + 1\n            l -= 1\n            r += 1\n    return max_len\n\nif __name__ == '__main__':\n    s = sys.stdin.read().strip()\n    print(longestPalindrome(s))",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "babad",
+        "expectedOutput": "3",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "cbbd",
+        "expectedOutput": "2",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "a",
+        "expectedOutput": "1",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": "",
+        "expectedOutput": "0",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "ac",
+        "expectedOutput": "1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "bb",
+        "expectedOutput": "2",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "racecar",
+        "expectedOutput": "7",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "forgeeksskeegfor",
+        "expectedOutput": "10",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "abcdefgfedcba",
+        "expectedOutput": "13",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "abcdefg",
+        "expectedOutput": "1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "abbcccbbbda",
+        "expectedOutput": "5",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "aacabdkacaa",
+        "expectedOutput": "9",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "bananas",
+        "expectedOutput": "5",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  },
+  {
+    "id": "25",
+    "title": "Performance Crisis: Max Subarray Sum",
+    "description": "Performance Crisis! The maximum contiguous subarray algorithm runs in O(N^2) nested loops. Optimize the logic to execute in O(N) linear time using Kadane's algorithm.",
+    "difficulty": 10,
+    "timeLimit": 2000,
+    "memoryLimit": 128,
+    "compatibleModes": [
+      "MULTI_ROUND",
+      "QUICKODE",
+      "CHAOS_ARENA"
+    ],
+    "compatibleRounds": [
+      "ALGORITHMIC",
+      "HARD_LOGIC"
+    ],
+    "speedRating": 4,
+    "pressureRating": 8,
+    "estimatedSolveTimeSec": 600,
+    "tags": [
+      "dynamic_programming",
+      "optimization",
+      "arrays"
+    ],
+    "questionType": "OPTIMIZATION",
+    "questionFamilyId": "FAM_MAX_SUBARRAY_OPT",
+    "realWorldDomain": "fintech",
+    "initialCode": "import sys\nimport json\n\ndef maxSubArray(nums: list) -> int:\n    n = len(nums)\n    max_sum = -float('inf')\n    for i in range(n):\n        curr_sum = 0\n        for j in range(i, n):\n            curr_sum += nums[j]\n            max_sum = max(max_sum, curr_sum)\n    return max_sum\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        nums = json.loads(input_data)\n        print(maxSubArray(nums))",
+    "solutionCode": "import sys\nimport json\n\ndef maxSubArray(nums: list) -> int:\n    max_so_far = nums[0]\n    curr_max = nums[0]\n    for i in range(1, len(nums)):\n        curr_max = max(nums[i], curr_max + nums[i])\n        max_so_far = max(max_so_far, curr_max)\n    return max_so_far\n\nif __name__ == '__main__':\n    input_data = sys.stdin.read().strip()\n    if input_data:\n        nums = json.loads(input_data)\n        print(maxSubArray(nums))",
+    "testCases": [
+      {
+        "id": "t1",
+        "input": "[-2, 1, -3, 4, -1, 2, 1, -5, 4]",
+        "expectedOutput": "6",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t2",
+        "input": "[1]",
+        "expectedOutput": "1",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "t3",
+        "input": "[5, 4, -1, 7, 8]",
+        "expectedOutput": "23",
+        "isHidden": false,
+        "weight": 10
+      },
+      {
+        "id": "h1",
+        "input": "[-1]",
+        "expectedOutput": "-1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h2",
+        "input": "[0]",
+        "expectedOutput": "0",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h3",
+        "input": "[-5, -4, -3, -2, -1]",
+        "expectedOutput": "-1",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h4",
+        "input": "[1, 2, 3, 4, 5]",
+        "expectedOutput": "15",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h5",
+        "input": "[10, -2, 3, -1, 5]",
+        "expectedOutput": "15",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h6",
+        "input": "[100, -50, 200, -150, 300]",
+        "expectedOutput": "400",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h7",
+        "input": "[-2, -3, 4, -1, -2, 1, 5, -3]",
+        "expectedOutput": "7",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h8",
+        "input": "[0, -1, 2, -1, 3, -1, 0]",
+        "expectedOutput": "4",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h9",
+        "input": "[10, -20, 30, -40, 50]",
+        "expectedOutput": "50",
+        "isHidden": true,
+        "weight": 10
+      },
+      {
+        "id": "h10",
+        "input": "[-100, -200, 300, -100, 200]",
+        "expectedOutput": "400",
+        "isHidden": true,
+        "weight": 10
+      }
+    ]
+  }
+]

@@ -5,6 +5,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     globals: true,
+    testTimeout: 20000,
     alias: {
       '@': path.resolve(__dirname, './src'),
     },

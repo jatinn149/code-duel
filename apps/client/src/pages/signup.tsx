@@ -50,13 +50,15 @@ export const SignupPage = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-slate-950 relative overflow-hidden selection:bg-emerald-500/30">
-      {/* Cinematic Background */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-emerald-600/10 rounded-full blur-[140px] animate-pulse" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-indigo-600/5 rounded-full blur-[140px]" />
-        {/* Scanning Grid Effect */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
+    <div className="min-h-screen w-full flex items-center justify-center bg-zinc-950 relative overflow-hidden selection:bg-emerald-500/30 font-sans">
+      {/* Premium Ambient Background */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        {/* Subtle grid pattern with center fade */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_80%,transparent_100%)]" />
+        
+        {/* Soft elegant glowing orbs */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-emerald-500/10 rounded-full blur-[120px] opacity-70 animate-[pulse_8s_ease-in-out_infinite]" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[250px] bg-teal-600/5 rounded-full blur-[90px] opacity-40" />
       </div>
 
       <AnimatePresence mode="wait">
@@ -66,130 +68,141 @@ export const SignupPage = () => {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            exit={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
-            className="w-full max-w-[480px] px-6 relative z-10"
+            exit={{ opacity: 0, scale: 0.98, filter: 'blur(8px)', transition: { duration: 0.2 } }}
+            className="w-full max-w-[440px] px-6 relative z-10"
           >
-            <div className="esports-card p-10 shadow-2xl border-t-4 border-t-emerald-600 backdrop-blur-2xl bg-slate-900/40">
-              <motion.div variants={itemVariants} className="flex flex-col items-center mb-10">
-                <div className="w-20 h-20 bg-emerald-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-emerald-500/40 mb-6 group cursor-default relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent" />
-                  <UserPlus className="w-10 h-10 text-white group-hover:scale-110 transition-transform duration-500 relative z-10" />
+            {/* Elegant glassmorphic card */}
+            <div className="relative bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/80 rounded-2xl p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden transition-colors duration-300 hover:border-zinc-700/80 group/card">
+              {/* Subtle top edge glowing line */}
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
+              
+              <motion.div variants={itemVariants} className="flex flex-col items-center mb-8">
+                {/* Brand mark/Logo */}
+                <div className="w-12 h-12 bg-gradient-to-b from-emerald-500/10 to-emerald-600/5 border border-emerald-500/20 rounded-xl flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.12)] mb-5 relative group/logo transition-all duration-300 hover:border-emerald-500/40">
+                  <div className="absolute inset-0 rounded-xl bg-emerald-500/5 opacity-0 group-hover/logo:opacity-100 transition-opacity" />
+                  <UserPlus className="w-5 h-5 text-emerald-400 group-hover/logo:scale-110 transition-transform duration-300 relative z-10" />
                 </div>
-                <h1 className="text-3xl font-black text-white tracking-tighter uppercase italic text-center leading-none">
-                  Recruit <br />
-                  <span className="text-emerald-500">Onboarding</span>
+                
+                {/* Clean, high-end SaaS title */}
+                <h1 className="text-2xl font-bold tracking-tight text-white text-center leading-tight">
+                  Recruit <span className="bg-gradient-to-r from-emerald-400 via-emerald-300 to-emerald-400 bg-clip-text text-transparent">Onboarding</span>
                 </h1>
-                <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] mt-4">
+                <p className="text-zinc-500 text-xs font-medium tracking-wide mt-2 text-center">
                   Initialize League Credentials
                 </p>
               </motion.div>
 
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 {error && (
                   <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    className="p-4 text-xs font-bold bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-xl flex items-center overflow-hidden"
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-3.5 bg-rose-500/10 border border-rose-500/20 text-xs font-medium text-rose-400 rounded-lg flex items-center gap-3 overflow-hidden shadow-sm shadow-rose-950/10"
                   >
-                    <AlertCircle className="w-4 h-4 mr-3 flex-shrink-0" />
-                    {error}
+                    <AlertCircle className="w-4 h-4 text-rose-500 flex-shrink-0" />
+                    <span>{error}</span>
                   </motion.div>
                 )}
 
                 <motion.div variants={itemVariants} className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">
-                    Callsign (Username)
+                  <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider ml-0.5">
+                    Username (Coding Handle)
                   </label>
                   <div className="relative group">
                     <input
                       type="text"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      className="w-full px-5 py-3.5 bg-slate-950/50 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-white font-medium placeholder:text-slate-800"
+                      className="w-full pl-4 pr-10 py-2.5 bg-zinc-950/40 hover:bg-zinc-950/70 border border-zinc-800/80 rounded-lg text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 hover:border-zinc-700/80 transition-all duration-200 shadow-inner"
                       placeholder="CODEWARRIOR_01"
                       required
                     />
-                    <Target className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-700 group-focus-within:text-emerald-500 transition-colors" />
+                    <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">
+                      <Target className="w-4 h-4 text-zinc-600 group-focus-within:text-emerald-400 transition-colors duration-200" />
+                    </div>
                   </div>
                 </motion.div>
 
                 <motion.div variants={itemVariants} className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">
-                    Comm Link (Email)
+                  <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider ml-0.5">
+                    Email Address
                   </label>
                   <div className="relative group">
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-5 py-3.5 bg-slate-950/50 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-white font-medium placeholder:text-slate-800"
+                      className="w-full pl-4 pr-10 py-2.5 bg-zinc-950/40 hover:bg-zinc-950/70 border border-zinc-800/80 rounded-lg text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 hover:border-zinc-700/80 transition-all duration-200 shadow-inner"
                       placeholder="recruit@league.com"
                       required
                     />
-                    <Zap className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-700 group-focus-within:text-emerald-500 transition-colors" />
+                    <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">
+                      <Zap className="w-4 h-4 text-zinc-600 group-focus-within:text-emerald-400 transition-colors duration-200" />
+                    </div>
                   </div>
                 </motion.div>
 
                 <motion.div variants={itemVariants} className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">
-                    Access Protocol (Password)
+                  <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider ml-0.5">
+                    Password
                   </label>
                   <div className="relative group">
                     <input
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-5 py-3.5 bg-slate-950/50 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-white font-medium placeholder:text-slate-800"
+                      className="w-full pl-4 pr-10 py-2.5 bg-zinc-950/40 hover:bg-zinc-950/70 border border-zinc-800/80 rounded-lg text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 hover:border-zinc-700/80 transition-all duration-200 shadow-inner"
                       placeholder="••••••••"
                       required
                     />
-                    <Shield className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-700 group-focus-within:text-emerald-500 transition-colors" />
+                    <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">
+                      <Shield className="w-4 h-4 text-zinc-600 group-focus-within:text-emerald-400 transition-colors duration-200" />
+                    </div>
                   </div>
                 </motion.div>
 
                 <motion.button
                   variants={itemVariants}
-                  whileHover={{ scale: 1.02, boxShadow: '0 0 30px -5px rgba(16, 185, 129, 0.5)' }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ y: -1 }}
+                  whileTap={{ y: 0 }}
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-4 mt-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black uppercase tracking-[0.2em] text-xs rounded-xl transition-all flex items-center justify-center space-x-3 shadow-lg shadow-emerald-500/20 relative overflow-hidden"
+                  className="w-full py-3 mt-4 bg-gradient-to-b from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium text-sm rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 shadow-[0_1px_2px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.15)] border border-emerald-700 relative overflow-hidden"
                 >
                   {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
                   ) : (
                     <>
-                      <span>Create Credentials</span>
-                      <Sword className="w-4 h-4 fill-current" />
+                      <span>Sign Up & Register</span>
+                      <Sword className="w-4 h-4 fill-current text-emerald-200" />
                     </>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
                 </motion.button>
               </form>
 
               <motion.div
                 variants={itemVariants}
-                className="mt-10 pt-8 border-t border-slate-800/50 flex flex-col items-center"
+                className="mt-8 pt-6 border-t border-zinc-800/60 flex flex-col items-center"
               >
-                <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest mb-4">
-                  Already Enlisted?
+                <p className="text-[11px] font-medium text-zinc-500 tracking-wider mb-2">
+                  Already have an account?
                 </p>
                 <Link
                   to="/login"
-                  className="text-xs font-black text-white hover:text-emerald-400 uppercase tracking-[0.2em] transition-colors flex items-center group"
+                  className="text-xs font-semibold text-zinc-300 hover:text-emerald-400 transition-colors flex items-center group/link"
                   onClick={() => setError(null)}
                 >
-                  <ChevronLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />
-                  Return to Access Node
+                  <ChevronLeft className="w-4 h-4 mr-0.5 group-hover/link:-translate-x-0.5 transition-transform" />
+                  Log In
                 </Link>
               </motion.div>
             </div>
 
-            <motion.div variants={itemVariants} className="mt-8 flex justify-between px-2">
-              <p className="text-[8px] font-bold text-slate-700 uppercase tracking-widest">
+            <motion.div variants={itemVariants} className="mt-8 flex justify-between px-1">
+              <p className="text-[10px] font-medium text-zinc-600 tracking-wide">
                 Protocol v1.0.4-BETA
               </p>
-              <p className="text-[8px] font-bold text-slate-700 uppercase tracking-widest">
+              <p className="text-[10px] font-medium text-zinc-600 tracking-wide">
                 © 2026 CODE DUEL LEAGUE
               </p>
             </motion.div>
@@ -197,24 +210,29 @@ export const SignupPage = () => {
         ) : (
           <motion.div
             key="success-screen"
-            initial={{ opacity: 0, scale: 1.1 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="flex flex-col items-center text-center z-10"
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ type: 'spring', damping: 15 }}
+            className="flex flex-col items-center text-center z-10 max-w-[420px] px-6"
           >
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', damping: 12 }}
-              className="w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center mb-8 shadow-[0_0_50px_rgba(16,185,129,0.4)]"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.15, type: 'spring', stiffness: 100 }}
+              className="w-16 h-16 bg-gradient-to-b from-emerald-500/20 to-emerald-600/10 border border-emerald-500/30 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-emerald-500/10"
             >
-              <UserPlus className="w-12 h-12 text-white" />
+              <UserPlus className="w-8 h-8 text-emerald-400" />
             </motion.div>
-            <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter mb-4">
-              Enlistment <span className="text-emerald-500">Confirmed</span>
+            <h2 className="text-3xl font-bold tracking-tight text-white mb-2">
+              Enlistment <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">Confirmed</span>
             </h2>
-            <p className="text-slate-500 font-bold uppercase tracking-[0.3em] text-sm animate-pulse">
-              Initializing Command Profile...
+            <p className="text-zinc-400 text-sm tracking-wide mb-6">
+              Welcome to the League. Your profile is ready.
             </p>
+            <div className="flex items-center gap-2 text-zinc-500 text-xs uppercase tracking-wider font-semibold">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              <span>Initializing Command Profile...</span>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

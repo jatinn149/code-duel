@@ -2,6 +2,21 @@ import fs from 'fs/promises';
 import path from 'path';
 import { logger } from '@/utils/logger';
 
+async function renameWithRetry(src: string, dest: string, retries = 5, delay = 50): Promise<void> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await fs.rename(src, dest);
+      return;
+    } catch (error: any) {
+      if ((error.code === 'EPERM' || error.code === 'EBUSY') && i < retries - 1) {
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        continue;
+      }
+      throw error;
+    }
+  }
+}
+
 export class JsonStorageAdapter {
   private lock: Promise<void> = Promise.resolve();
   private baseDir: string;
@@ -50,7 +65,7 @@ export class JsonStorageAdapter {
         try {
           const json = JSON.stringify(data, null, 2);
           await fs.writeFile(tempPath, json, 'utf-8');
-          await fs.rename(tempPath, filePath);
+          await renameWithRetry(tempPath, filePath);
         } catch (error) {
           logger.error({ error, collection }, 'Failed to write to JSON storage');
           // Attempt to clean up temp file
@@ -64,6 +79,46 @@ export class JsonStorageAdapter {
       });
 
     return this.lock;
+  }
+  async updateCollection<T>(collection: string, mutator: (data: T[]) => void | Promise<void>): Promise<T[]> {
+    let resolveOuter: (value: T[] | PromiseLike<T[]>) => void;
+    let rejectOuter: (reason?: any) => void;
+    const resultPromise = new Promise<T[]>((res, rej) => {
+      resolveOuter = res;
+      rejectOuter = rej;
+    });
+
+    this.lock = this.lock
+      .catch(() => {})
+      .then(async () => {
+        try {
+          const filePath = this.getFilePath(collection);
+          let data: T[] = [];
+          try {
+            const raw = await fs.readFile(filePath, 'utf-8');
+            data = JSON.parse(raw);
+          } catch (e) {
+            if ((e as Record<string, unknown>).code !== 'ENOENT') throw e;
+          }
+
+          await mutator(data);
+
+          const tempPath = `${filePath}.${Date.now()}.tmp`;
+          const json = JSON.stringify(data, null, 2);
+          try {
+            await fs.writeFile(tempPath, json, 'utf-8');
+            await renameWithRetry(tempPath, filePath);
+          } catch (error) {
+             try { await fs.unlink(tempPath); } catch { /* ignore */ }
+             throw error;
+          }
+          
+          resolveOuter(data);
+        } catch (error) {
+          rejectOuter(error);
+        }
+      });
+    return resultPromise;
   }
 }
 

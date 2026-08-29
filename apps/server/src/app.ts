@@ -14,7 +14,30 @@ const app = express();
 app.use(helmet());
 app.use(
   cors({
-    origin: env.NODE_ENV === 'development' ? true : ['your-production-domain.com'],
+    origin: (origin, callback) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      if (origin.endsWith('.trycloudflare.com') || origin.endsWith('.trycloudflared.com')) {
+        callback(null, true);
+        return;
+      }
+      const frontendUrl = process.env.FRONTEND_URL;
+      if (frontendUrl && (origin === frontendUrl || origin === frontendUrl.replace(/\/$/, ''))) {
+        callback(null, true);
+        return;
+      }
+      if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
+        callback(null, true);
+        return;
+      }
+      if (env.NODE_ENV === 'development') {
+        callback(null, true);
+        return;
+      }
+      callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
   }),
 );

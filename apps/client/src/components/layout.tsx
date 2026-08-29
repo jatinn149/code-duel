@@ -1,39 +1,66 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth-store';
-import { LogOut, Sword, Shield, Bell, Settings } from 'lucide-react';
+import { LogOut, Sword, Bell, User, Trophy } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useMemo } from 'react';
 
 export const Layout = () => {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
     navigate('/login');
   };
 
+  const userLevel = useMemo(() => {
+    if (!user) return 1;
+    const rating = user.rating;
+    if (rating < 800) return 1;
+    if (rating < 950) return 2;
+    if (rating < 1100) return 3;
+    if (rating < 1250) return 4;
+    if (rating < 1400) return 5;
+    if (rating < 1550) return 6;
+    if (rating < 1700) return 7;
+    if (rating < 1850) return 8;
+    if (rating < 2000) return 9;
+    return 10;
+  }, [user]);
+
+  const levelColorClass = useMemo(() => {
+    if (userLevel === 10) return 'bg-orange-500 text-white font-black';
+    if (userLevel >= 8) return 'bg-rose-500 text-white';
+    if (userLevel >= 5) return 'bg-amber-500 text-black font-bold';
+    if (userLevel >= 2) return 'bg-emerald-500 text-white';
+    return 'bg-neutral-600 text-white';
+  }, [userLevel]);
+
+  const isLobbyOrBattle = location.pathname.includes('/lobby/') || location.pathname.includes('/battle/');
+
   return (
-    <div className="flex flex-col min-h-screen w-full bg-slate-950 text-slate-200 selection:bg-indigo-500/30">
-      <header className="sticky top-0 z-40 w-full bg-slate-950/80 backdrop-blur-xl border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <motion.div
-            whileHover={{ scale: 1.02 }}
+    <div className="flex flex-col min-h-screen w-full bg-black text-neutral-200 selection:bg-neutral-800">
+      {!isLobbyOrBattle && (
+        <header className="sticky top-0 z-40 w-full bg-black/80 backdrop-blur-md border-b border-neutral-900">
+        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+          <div
             className="flex items-center space-x-3 cursor-pointer group"
             onClick={() => navigate('/')}
           >
-            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:bg-indigo-500 transition-colors">
-              <Sword className="w-6 h-6 text-white transform -rotate-12" />
+            <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center border border-neutral-800 transition-colors group-hover:bg-neutral-200">
+              <Sword className="w-4 h-4 text-black transform -rotate-12" />
             </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-black tracking-tighter text-white uppercase italic leading-none">
-                Code <span className="text-indigo-500">Duel</span>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-extrabold tracking-[0.2em] text-white">
+                CODE<span className="text-neutral-500">_</span>DUEL
               </span>
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] leading-none mt-1">
-                League System
+              <span className="text-[9px] font-mono text-neutral-600 tracking-widest uppercase border-l border-neutral-800 pl-2 mt-0.5">
+                LEAGUE
               </span>
             </div>
-          </motion.div>
+          </div>
 
           {user && (
             <div className="flex items-center space-x-8">
@@ -41,56 +68,100 @@ export const Layout = () => {
                 {['Dashboard', 'Leaderboard', 'Arena', 'Training'].map((item) => (
                   <button
                     key={item}
-                    className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-white transition-colors"
+                    onClick={() => {
+                      if (item === 'Leaderboard') {
+                        navigate('/leaderboard');
+                      } else if (item === 'Dashboard' || item === 'Arena') {
+                        navigate('/');
+                      }
+                    }}
+                    className={`text-xs font-semibold uppercase tracking-wider transition-colors ${
+                      (item === 'Dashboard' && location.pathname === '/') || 
+                      (item === 'Arena' && location.pathname === '/') ||
+                      (item === 'Leaderboard' && location.pathname === '/leaderboard')
+                        ? 'text-white'
+                        : 'text-neutral-400 hover:text-white'
+                    }`}
                   >
-                    {item}
+                    {item === 'Dashboard' ? 'Dashboard' : item === 'Leaderboard' ? 'Leaderboard' : item === 'Arena' ? 'Battle Arena' : 'Code Practice'}
                   </button>
                 ))}
               </nav>
 
-              <div className="h-6 w-px bg-white/5 hidden md:block" />
+              <div className="h-4 w-px bg-neutral-800 hidden md:block" />
 
               <div className="flex items-center space-x-4">
-                <button className="p-2 text-slate-500 hover:text-indigo-400 transition-colors relative">
-                  <Bell className="w-5 h-5" />
-                  <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-rose-500 rounded-full border border-slate-950" />
+                <button className="p-2 text-neutral-500 hover:text-white transition-colors relative rounded-lg hover:bg-neutral-900">
+                  <Bell className="w-4.5 h-4.5" />
+                  <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-neutral-400 rounded-full border border-black" />
                 </button>
 
-                <div className="flex items-center space-x-4 pl-4 border-l border-white/5">
-                  <div className="flex flex-col items-end mr-3">
-                    <span className="text-xs font-black text-white uppercase tracking-tight">
+                <div className="flex items-center space-x-3 pl-4 border-l border-neutral-800 relative">
+                  <div className="flex flex-col items-end mr-1.5">
+                    <span className="text-xs font-semibold text-white tracking-tight leading-none">
                       {user.username}
                     </span>
-                    <div className="flex items-center space-x-1 mt-0.5">
-                      <Shield className="w-3 h-3 text-indigo-500" />
-                      <span className="text-[10px] font-mono text-slate-400 font-bold tracking-tighter italic">
-                        RANK: SILVER IV
+                    <div className="flex items-center space-x-1.5 mt-1 leading-none">
+                      <div className={`w-3.5 h-3.5 rounded text-[8px] flex items-center justify-center font-extrabold ${levelColorClass}`}>
+                        {userLevel}
+                      </div>
+                      <span className="text-[9px] font-mono text-neutral-550 tracking-wider uppercase font-bold">
+                        {user.rating} CP
                       </span>
                     </div>
                   </div>
 
-                  <div className="relative group">
-                    <div className="w-10 h-10 rounded-xl bg-slate-800 border border-white/5 flex items-center justify-center overflow-hidden cursor-pointer">
-                      <div className="w-full h-full bg-gradient-to-br from-indigo-500/20 to-transparent flex items-center justify-center">
-                        <span className="text-sm font-black text-indigo-400">
-                          {user.username.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
+                  <div 
+                    className="relative"
+                    onMouseEnter={() => setDropdownOpen(true)}
+                    onMouseLeave={() => setDropdownOpen(false)}
+                  >
+                    <div className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center overflow-hidden cursor-pointer hover:border-neutral-700 transition-colors">
+                      <span className="text-xs font-bold text-neutral-400 uppercase">
+                        {user.username.charAt(0)}
+                      </span>
                     </div>
 
-                    <div className="absolute right-0 top-full mt-2 w-48 py-2 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform translate-y-2 group-hover:translate-y-0">
-                      <button className="w-full px-4 py-2 text-left text-xs font-bold text-slate-400 hover:bg-slate-800 hover:text-white transition-colors flex items-center justify-between">
-                        <span>Profile Settings</span>
-                        <Settings className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full px-4 py-2 text-left text-xs font-bold text-rose-500 hover:bg-rose-500/10 transition-colors flex items-center justify-between"
-                      >
-                        <span>Terminate Session</span>
-                        <LogOut className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                    <AnimatePresence>
+                      {dropdownOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 5 }}
+                          transition={{ duration: 0.15 }}
+                          className="absolute right-0 top-full mt-1 w-44 py-1.5 bg-black border border-neutral-800 rounded-lg shadow-xl z-50 overflow-hidden"
+                        >
+                          <button
+                            onClick={() => {
+                              navigate('/profile');
+                              setDropdownOpen(false);
+                            }}
+                            className="w-full px-3 py-2 text-left text-xs font-semibold text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors flex items-center justify-between"
+                          >
+                            <span>Profile & Coding Stats</span>
+                            <User className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              navigate('/leaderboard');
+                              setDropdownOpen(false);
+                            }}
+                            className="w-full px-3 py-2 text-left text-xs font-semibold text-neutral-300 hover:bg-neutral-900 hover:text-white transition-colors flex items-center justify-between"
+                          >
+                            <span>Leaderboard</span>
+                            <Trophy className="w-3.5 h-3.5" />
+                          </button>
+                          <div className="h-px bg-neutral-800 my-1" />
+                          <button
+                            onClick={handleLogout}
+                            className="w-full px-3 py-2 text-left text-xs font-semibold text-red-500 hover:bg-red-500/10 transition-colors flex items-center justify-between"
+                          >
+                            <span>Log Out</span>
+                            <LogOut className="w-3.5 h-3.5" />
+                          </button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
               </div>
@@ -98,25 +169,25 @@ export const Layout = () => {
           )}
         </div>
       </header>
+      )}
 
       <main className="flex-1 flex flex-col overflow-hidden relative">
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15, ease: 'easeInOut' }}
             className="flex-1 flex flex-col overflow-auto scrollbar-hide"
           >
             <Outlet />
           </motion.div>
         </AnimatePresence>
 
-        {/* Background Decorative Elements */}
-        <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
-          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/5 rounded-full blur-[120px]" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-rose-600/5 rounded-full blur-[120px]" />
+        <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden bg-black">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#0c0c0c_1px,transparent_1px),linear-gradient(to_bottom,#0c0c0c_1px,transparent_1px)] bg-[size:3rem_3rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[60%] h-[40%] bg-neutral-500/5 rounded-full blur-[100px]" />
         </div>
       </main>
     </div>

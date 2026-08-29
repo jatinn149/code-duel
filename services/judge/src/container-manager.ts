@@ -35,13 +35,14 @@ export class ContainerManager {
       OpenStdin: true,
       StdinOnce: true,
       Tty: false,
+      Labels: { 'com.code-duel.judge': 'true' },
       HostConfig: {
         Memory: options.memoryLimitMb * 1024 * 1024,
         MemorySwap: options.memoryLimitMb * 1024 * 1024, // Disable swap
         CpuQuota: 50000, // 50% CPU limit
         NetworkMode: 'none',
         ReadonlyRootfs: true,
-        AutoRemove: true, // Auto cleanup
+        AutoRemove: false, // Prevent premature deletion before log collection
         PidsLimit: 32, // Prevent fork bombs
         Tmpfs: {
           '/tmp': 'size=16M,mode=1777',
@@ -65,8 +66,9 @@ export class ContainerManager {
       stream.end();
 
       // Handle timeout
+      let timeoutId: NodeJS.Timeout;
       const timeoutPromise = new Promise<void>((_, reject) => {
-        setTimeout(() => {
+        timeoutId = setTimeout(() => {
           timeoutReached = true;
           reject(new Error('TIMEOUT'));
         }, options.timeLimitMs);
@@ -87,6 +89,8 @@ export class ContainerManager {
         } else {
           throw error;
         }
+      } finally {
+        clearTimeout(timeoutId!);
       }
 
       // Capture logs

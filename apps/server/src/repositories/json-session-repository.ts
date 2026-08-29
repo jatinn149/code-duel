@@ -18,32 +18,39 @@ export class JsonSessionRepository implements ISessionRepository {
   }
 
   async create(session: Session): Promise<Session> {
-    const sessions = await this.storage.read<Session>(this.collection);
-    sessions.push(session);
-    await this.storage.write(this.collection, sessions);
+    await this.storage.updateCollection<Session>(this.collection, (sessions) => {
+      sessions.push(session);
+    });
     return session;
   }
 
   async update(id: string, data: Partial<Session>): Promise<Session> {
-    const sessions = await this.storage.read<Session>(this.collection);
-    const index = sessions.findIndex((s) => s.id === id);
-    if (index === -1) {
-      throw new Error(`Session with id ${id} not found`);
-    }
-    sessions[index] = { ...sessions[index], ...data };
-    await this.storage.write(this.collection, sessions);
-    return sessions[index];
+    let updatedSession: Session | undefined;
+    await this.storage.updateCollection<Session>(this.collection, (sessions) => {
+      const index = sessions.findIndex((s) => s.id === id);
+      if (index === -1) {
+        throw new Error(`Session with id ${id} not found`);
+      }
+      sessions[index] = { ...sessions[index], ...data };
+      updatedSession = sessions[index];
+    });
+    return updatedSession!;
   }
 
   async delete(id: string): Promise<void> {
-    let sessions = await this.storage.read<Session>(this.collection);
-    sessions = sessions.filter((s) => s.id !== id);
-    await this.storage.write(this.collection, sessions);
+    await this.storage.updateCollection<Session>(this.collection, (sessions) => {
+      const index = sessions.findIndex((s) => s.id === id);
+      if (index !== -1) sessions.splice(index, 1);
+    });
   }
 
   async deleteByUserId(userId: string): Promise<void> {
-    let sessions = await this.storage.read<Session>(this.collection);
-    sessions = sessions.filter((s) => s.userId !== userId);
-    await this.storage.write(this.collection, sessions);
+    await this.storage.updateCollection<Session>(this.collection, (sessions) => {
+      for (let i = sessions.length - 1; i >= 0; i--) {
+        if (sessions[i].userId === userId) {
+          sessions.splice(i, 1);
+        }
+      }
+    });
   }
 }

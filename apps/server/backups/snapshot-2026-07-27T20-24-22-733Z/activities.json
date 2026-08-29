@@ -1,0 +1,18 @@
+[
+  {
+    "id": "ea3c0e73-5ecc-492b-b9e2-fde0d3d05ab6",
+    "userId": "a2eff6b0-a79a-4b97-8361-4b20712c63bb",
+    "username": "jatin",
+    "type": "DUEL_VICTORY",
+    "message": "won a duel against diksha!",
+    "createdAt": "2026-05-12T06:43:21.577Z"
+  },
+  {
+    "id": "ee7ff7bf-2c31-4dae-9ab7-a7265b73cc24",
+    "userId": "a2eff6b0-a79a-4b97-8361-4b20712c63bb",
+    "username": "jatin",
+    "type": "DUEL_VICTORY",
+    "message": "won a duel against diksha!",
+    "createdAt": "2026-05-12T06:22:02.406Z"
+  }
+]

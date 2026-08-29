@@ -28,10 +28,12 @@ export class AntiCheatService {
     // Rule 2: Impossible typing speed
     // Calculate CPS (Characters per second) in bursts
     if (keystrokeEvents.length > 20) {
-      const duration =
+      const duration = Math.max(
+        0.1,
         (new Date(keystrokeEvents[keystrokeEvents.length - 1].timestamp).getTime() -
           new Date(keystrokeEvents[0].timestamp).getTime()) /
-        1000;
+        1000
+      );
       const cps = keystrokeEvents.length / duration;
       if (cps > 15) {
         // More than 15 chars per second consistently
@@ -57,11 +59,20 @@ export class AntiCheatService {
     };
   }
 
-  validateSubmission(userId: string, code: string, keystrokes: number): boolean {
+  validateSubmission(userId: string, code: string, keystrokes: number, initialCode?: string): boolean {
     const codeLength = code.length;
-    // If code is long but keystrokes are very low (excluding massive legitimate pastes)
-    if (codeLength > 200 && keystrokes < codeLength * 0.1) {
-      logger.warn({ userId, codeLength, keystrokes }, 'Submission anomaly: Low keystroke ratio');
+
+    // Rule A: Submitting unchanged initial starter code or boilerplate is always valid
+    if (initialCode && (code === initialCode || code.trim() === initialCode.trim())) {
+      return true;
+    }
+
+    // Rule B: Compute net code length added beyond starter code
+    const netLength = initialCode ? Math.max(0, codeLength - initialCode.length) : codeLength;
+
+    // Rule C: Flag anomaly if code is long (>200) AND keystrokes are low (<10% of net length)
+    if (netLength > 200 && keystrokes < netLength * 0.1) {
+      logger.warn({ userId, codeLength, keystrokes, netLength }, 'Submission anomaly: Low keystroke ratio');
       return false;
     }
     return true;

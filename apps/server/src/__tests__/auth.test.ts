@@ -147,11 +147,15 @@ describe('Authentication System', () => {
 
     expect(thirdRefreshResponse.status).toBe(401);
   });
-
   it('should protect routes with requireAuth middleware', async () => {
-    const signupResponse = await request(app).post('/api/v1/auth/signup').send(signupData);
+    const uniqueSignupData = {
+      username: 'protectuser',
+      email: 'protect@example.com',
+      password: 'password123',
+    };
+    const signupResponse = await request(app).post('/api/v1/auth/signup').send(uniqueSignupData);
 
-    const token = signupResponse.body.data.accessToken;
+    const token = signupResponse.body.data?.accessToken;
 
     const authResponse = await request(app)
       .get('/api/v1/auth/me')

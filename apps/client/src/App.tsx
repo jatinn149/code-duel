@@ -7,6 +7,11 @@ import { LoginPage } from '@/pages/login';
 import { SignupPage } from '@/pages/signup';
 import { DashboardPage } from '@/pages/dashboard';
 import { BattlePage } from '@/pages/battle';
+import { ProfilePage } from '@/pages/profile';
+import { LeaderboardPage } from '@/pages/leaderboard';
+import { LobbyPage } from '@/pages/lobby';
+import { ResultsPage } from '@/pages/results';
+import { ErrorBoundary } from '@/components/error-boundary';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,26 +46,35 @@ export const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
+      <ErrorBoundary>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
 
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Layout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<DashboardPage />} />
-            <Route path="battle/:roomId" element={<BattlePage />} />
-          </Route>
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Layout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<DashboardPage />} />
+              <Route path="profile" element={<ProfilePage />} />
+              <Route path="leaderboard" element={<LeaderboardPage />} />
+              <Route path="lobby/:roomId" element={<LobbyPage />} />
+              <Route path="battle/:roomId" element={<BattlePage />} />
+              <Route path="battle/multi-round/:roomId" element={<BattlePage />} />
+              <Route path="battle/quickode/:roomId" element={<BattlePage />} />
+              <Route path="battle/chaos-arena/:roomId" element={<BattlePage />} />
+              <Route path="results/:roomId" element={<ResultsPage />} />
+            </Route>
 
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </BrowserRouter>
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </BrowserRouter>
+      </ErrorBoundary>
     </QueryClientProvider>
   );
 };

@@ -2,65 +2,326 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   CODE DUEL ARENA — Design System v3.0
+   Premium Dark Mode Esports Platform
+   ============================================ */
+
 @layer base {
   :root {
     --brand-primary: 79 70 229; /* indigo-600 */
     --brand-secondary: 244 63 94; /* rose-500 */
   }
 
+  *,
+  *::before,
+  *::after {
+    scrollbar-color: rgba(63, 63, 70, 0.4) transparent;
+    scrollbar-width: thin;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
   body {
-    @apply bg-slate-950 text-slate-200 antialiased overflow-x-hidden;
+    @apply bg-black text-neutral-200 antialiased overflow-x-hidden font-sans;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
-  /* Custom Scrollbar */
+  ::selection {
+    @apply bg-neutral-800 text-white;
+  }
+
+  /* Custom Scrollbar - WebKit */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-transparent;
+    background: transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-slate-800 rounded-full hover:bg-indigo-500/50 transition-colors;
+    @apply bg-neutral-900 rounded-full hover:bg-neutral-800 transition-colors;
+  }
+
+  /* Focus ring */
+  :focus-visible {
+    @apply outline-none ring-1 ring-neutral-700 ring-offset-1 ring-offset-black;
   }
 }
 
 @layer components {
+  /* ----------------------------------------
+     CARD SYSTEM (Vercel / Linear inspired)
+     ---------------------------------------- */
+  .card {
+    @apply bg-neutral-900/30 border border-neutral-900 rounded-xl transition-all duration-300;
+  }
+
+  .card-elevated {
+    @apply bg-neutral-900/40 border border-neutral-900 rounded-xl backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)];
+  }
+
+  .card-interactive {
+    @apply card cursor-pointer;
+  }
+  .card-interactive:hover {
+    @apply bg-neutral-900/60 border-neutral-800 -translate-y-0.5 shadow-lg;
+  }
+
+  .card-glow {
+    @apply card border-neutral-800/80 shadow-[0_0_15px_-5px_rgba(255,255,255,0.02)];
+  }
+  .card-glow:hover {
+    @apply border-neutral-700/80 shadow-[0_0_20px_-5px_rgba(255,255,255,0.05)];
+  }
+
+  /* esports compat classes */
   .esports-card {
-    @apply bg-slate-900/50 border border-slate-800/50 backdrop-blur-xl rounded-2xl;
+    @apply card;
+  }
+
+  /* ----------------------------------------
+     BUTTON SYSTEM
+     ---------------------------------------- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 font-semibold text-xs rounded-lg
+           transition-all duration-200 ease-out
+           active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+
+  .btn-primary {
+    @apply btn px-5 py-2.5
+           bg-white hover:bg-neutral-200 text-black
+           shadow-[0_1px_2px_rgba(0,0,0,0.05)];
+  }
+
+  .btn-secondary {
+    @apply btn px-5 py-2.5
+           bg-neutral-900 hover:bg-neutral-800 text-white
+           border border-neutral-800 hover:border-neutral-700;
+  }
+
+  .btn-ghost {
+    @apply btn px-4 py-2
+           bg-transparent hover:bg-neutral-900 text-neutral-400 hover:text-white;
+  }
+
+  .btn-danger {
+    @apply btn px-5 py-2.5
+           bg-red-950/20 hover:bg-red-950/40 text-red-400
+           border border-red-900/30 hover:border-red-900/50;
+  }
+
+  .btn-success {
+    @apply btn px-5 py-2.5
+           bg-emerald-950/20 hover:bg-emerald-950/40 text-emerald-400
+           border border-emerald-900/30 hover:border-emerald-900/50;
+  }
+
+  .btn-icon {
+    @apply btn p-2 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-neutral-800;
   }
 
   .esports-button-primary {
-    @apply relative overflow-hidden px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20 active:scale-95 disabled:opacity-50;
+    @apply btn-primary;
   }
 
   .esports-button-secondary {
-    @apply px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl transition-all border border-slate-700 active:scale-95;
+    @apply btn-secondary;
+  }
+
+  /* ----------------------------------------
+     INPUT SYSTEM
+     ---------------------------------------- */
+  .input {
+    @apply w-full px-4 py-2.5 bg-neutral-950 border border-neutral-900 rounded-lg
+           text-white text-sm font-medium
+           placeholder:text-neutral-700
+           focus:outline-none focus:border-neutral-700 focus:ring-0
+           transition-all duration-200;
+  }
+
+  .input-lg {
+    @apply input px-5 py-3.5 text-base;
+  }
+
+  /* ----------------------------------------
+     BADGE SYSTEM
+     ---------------------------------------- */
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-md border;
+  }
+
+  .badge-brand {
+    @apply badge bg-indigo-500/10 text-indigo-400 border-indigo-500/20;
+  }
+
+  .badge-success {
+    @apply badge bg-emerald-500/10 text-emerald-400 border-emerald-500/20;
+  }
+
+  .badge-warning {
+    @apply badge bg-amber-500/10 text-amber-400 border-amber-500/20;
+  }
+
+  .badge-danger {
+    @apply badge bg-rose-500/10 text-rose-400 border-rose-500/20;
+  }
+
+  .badge-neutral {
+    @apply badge bg-neutral-900 text-neutral-400 border-neutral-800;
+  }
+
+  /* ----------------------------------------
+     LABEL / OVERLINE
+     ---------------------------------------- */
+  .label {
+    @apply text-[10px] font-bold uppercase tracking-wider text-neutral-500;
+  }
+
+  /* ----------------------------------------
+     DIVIDERS
+     ---------------------------------------- */
+  .divider {
+    @apply h-px w-full bg-neutral-900;
+  }
+
+  .divider-v {
+    @apply w-px h-full bg-neutral-900;
+  }
+
+  /* ----------------------------------------
+     STAT DISPLAY
+     ---------------------------------------- */
+  .stat-value {
+    @apply text-xl font-bold text-white tracking-tight font-mono leading-none;
+  }
+
+  .stat-label {
+    @apply text-[10px] font-semibold uppercase tracking-wider text-neutral-500 mt-1;
+  }
+
+  /* ----------------------------------------
+     GLASS PANEL
+     ---------------------------------------- */
+  .glass {
+    @apply bg-neutral-950/80 backdrop-blur-md border border-neutral-900;
   }
 
   .glass-panel {
-    @apply bg-white/[0.02] border border-white/[0.05] backdrop-blur-md;
+    @apply glass;
   }
+
+  /* ----------------------------------------
+     SCROLLBAR HIDE
+     ---------------------------------------- */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ----------------------------------------
+     STATUS DOT
+     ---------------------------------------- */
+  .status-dot {
+    @apply w-2 h-2 rounded-full;
+  }
+
+  .status-online {
+    @apply status-dot bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)];
+  }
+
+  .status-offline {
+    @apply status-dot bg-neutral-700;
+  }
+
+  .status-ingame {
+    @apply status-dot bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.3)];
+  }
+
+  /* Legacy compat classes */
+  .premium-card {
+    @apply card;
+  }
+
+  .premium-button-primary {
+    @apply btn-primary;
+  }
+
+  .premium-button-secondary {
+    @apply btn-secondary;
+  }
+
+  .premium-button-brand {
+    @apply btn-primary;
+  }
+
+  .premium-input {
+    @apply input;
+  }
+}
+
+/* ============================================
+   UTILITY CLASSES (outside @layer)
+   ============================================ */
+
+/* Gradient text */
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-neutral-500;
+}
+
+.text-gradient-brand {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-violet-400;
+}
+
+/* Glow effects */
+.glow-brand {
+  box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.15);
+}
+
+.glow-success {
+  box-shadow: 0 0 25px -5px rgba(52, 211, 153, 0.15);
+}
+
+.glow-danger {
+  box-shadow: 0 0 20px -5px rgba(239, 68, 68, 0.15);
 }
 
 .glow-indigo {
-  box-shadow: 0 0 20px -5px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 0 20px -5px rgba(255, 255, 255, 0.05);
 }
 
-.text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-slate-500;
+/* Noise texture overlay */
+.bg-noise::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.015'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Shimmer animation */
+.animate-shimmer {
+  animation: shimmer 2.5s ease-in-out infinite;
 }
 
 @keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
-
+/* Progress bar pulse */
+@keyframes progressPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}

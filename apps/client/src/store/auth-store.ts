@@ -22,6 +22,7 @@ interface AuthState {
   login: (data: LoginInput) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
+  setUser: (user: Omit<User, 'passwordHash'> | null) => void;
   setError: (error: string | null) => void;
   setInitialized: (value: boolean) => void;
 }
@@ -97,6 +98,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      setUser: (user) => set({ user }),
       setError: (error) => set({ error }),
       setInitialized: (isInitialized) => set({ isInitialized }),
     }),
