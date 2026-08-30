@@ -19,7 +19,7 @@ app.use(
         callback(null, true);
         return;
       }
-      if (origin.endsWith('.trycloudflare.com') || origin.endsWith('.trycloudflared.com')) {
+      if (origin.endsWith('.trycloudflare.com') || origin.endsWith('.trycloudflared.com') || origin.endsWith('.netlify.app')) {
         callback(null, true);
         return;
       }
