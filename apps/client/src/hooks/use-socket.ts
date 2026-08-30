@@ -4,7 +4,7 @@ import { SocketEvents } from '@code-duel/shared';
 import { useEffect, useState } from 'react';
 
 const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const SOCKET_URL = isLocal ? (import.meta.env.VITE_API_URL || 'http://localhost:3001') : window.location.origin;
+const SOCKET_URL = import.meta.env.VITE_API_URL || (isLocal ? 'http://localhost:3001' : window.location.origin);
 
 let socketInstance: Socket | null = null;
 
