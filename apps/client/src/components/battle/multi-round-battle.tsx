@@ -134,9 +134,9 @@ export const MultiRoundBattle: React.FC<BattleComponentProps> = ({
   const { lastJudgeResult, dryRunResult, isRunningCode } = useRoomStore();
   const [activeTab, setActiveTab] = useState<'output' | 'testcase'>('output');
 
-  const currentRoundIndex = currentRoom.currentRound ?? 1;
-  const currentRoundObj = currentRoom.rounds?.find(r => r.roundIndex === currentRoundIndex);
-  const problem = currentRoundObj?.problem;
+  const currentRoundIndex = currentRoom.currentRound || 1;
+  const currentRoundObj = currentRoom.rounds?.find(r => r.roundIndex === currentRoundIndex) || (currentRoom.rounds && currentRoom.rounds.length > 0 ? currentRoom.rounds[currentRoom.rounds.length - 1] : undefined);
+  const problem = currentRoundObj?.problem || (currentRoom as any).problem;
 
   const problemTitle = problem?.title || 'Loading Problem...';
   const problemDescription = problem?.description || '';

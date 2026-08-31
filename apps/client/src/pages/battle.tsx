@@ -29,7 +29,7 @@ export const BattlePage = () => {
   const [cheatWarning, setCheatWarning] = useState<string | null>(null);
   const runCodeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const currentRoundIndex = currentRoom?.currentRound ?? 1;
+  const currentRoundIndex = currentRoom?.currentRound || 1;
 
   useEffect(() => {
     setDryRunResult(null);
@@ -64,8 +64,8 @@ export const BattlePage = () => {
   useEffect(() => {
     if (!currentRoom || !user) return;
 
-    const roundIndex = currentRoom.currentRound ?? 1;
-    const currentRound = currentRoom.rounds?.find((r) => r.roundIndex === roundIndex);
+    const roundIndex = currentRoom.currentRound || 1;
+    const currentRound = currentRoom.rounds?.find((r) => r.roundIndex === roundIndex) || (currentRoom.rounds && currentRoom.rounds.length > 0 ? currentRoom.rounds[currentRoom.rounds.length - 1] : undefined);
     const hasSubmitted = !!currentRound?.submissions?.[user.id]?.submittedAt;
 
     const isMultiRound = currentRoom.gameMode === GameMode.MULTI_ROUND;
@@ -76,15 +76,14 @@ export const BattlePage = () => {
 
   useEffect(() => {
     if (!currentRoom) return;
-    const roundIndex = currentRoom.currentRound ?? 1;
-    const currentRound = currentRoom.rounds?.find((r) => r.roundIndex === roundIndex);
-    const problem = currentRound?.problem;
+    const currentRound = currentRoom.rounds?.find((r) => r.roundIndex === currentRoundIndex) || (currentRoom.rounds && currentRoom.rounds.length > 0 ? currentRoom.rounds[currentRoom.rounds.length - 1] : undefined);
+    const problem = currentRound?.problem || (currentRoom as any).problem;
     
     if (problem) {
       setCode(problem.initialCode || 'def solution():\n    # Write your code here\n    pass');
       useRoomStore.getState().setJudgeResult(null);
     }
-  }, [currentRoom?.currentRound, currentRoom?.rounds?.find((r) => r.roundIndex === (currentRoom?.currentRound ?? 1))?.problemId]);
+  }, [currentRoundIndex, currentRoom?.rounds]);
 
   useLatency(socket);
   useCountdown(currentRoom?.countdownStartAt);
@@ -315,7 +314,7 @@ export const BattlePage = () => {
     );
   }
 
-  const currentRound = currentRoom?.rounds?.find(r => r.roundIndex === currentRoundIndex);
+  const currentRound = currentRoom?.rounds?.find(r => r.roundIndex === currentRoundIndex) || (currentRoom?.rounds && currentRoom.rounds.length > 0 ? currentRoom.rounds[currentRoom.rounds.length - 1] : undefined);
   
   const isMatchMode = currentRoom?.gameMode === GameMode.MULTI_ROUND || 
                       currentRoom?.gameMode === GameMode.CHAOS_ARENA || 
@@ -324,7 +323,7 @@ export const BattlePage = () => {
   const isRoundDataReady = !isMatchMode || 
                            currentRoom.state === MatchState.WAITING || 
                            currentRoom.state === MatchState.COUNTDOWN || 
-                           (currentRound && currentRound.problem && user);
+                           (currentRound && (currentRound.problem || (currentRoom as any).problem || currentRound.problemId) && user);
 
   if (!currentRoom || !isRoundDataReady) {
     return (

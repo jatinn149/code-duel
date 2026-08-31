@@ -32,12 +32,21 @@ export class QuickodeService {
 
     if (!problem) throw new Error('Failed to allocate problem for Quickode');
 
+    const clientProblem = {
+      id: problem.id,
+      title: problem.title,
+      description: problem.description,
+      difficulty: problem.difficulty,
+      initialCode: problem.initialCode || undefined,
+    };
+
     const newRound: Round = {
       roundIndex: nextRoundIndex,
       roundType,
       problemId: problem.id,
       duration,
       submissions: {},
+      problem: clientProblem,
     };
 
     room.rounds = room.rounds || [];

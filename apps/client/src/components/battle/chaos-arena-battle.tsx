@@ -138,7 +138,8 @@ export const ChaosArenaBattle: React.FC<BattleComponentProps> = (props) => {
   const [timeLeftStr, setTimeLeftStr] = useState('05:00');
 
   const activeRound = useMemo(() => {
-    return currentRoom.rounds?.find(r => r.roundIndex === currentRoom.currentRound);
+    const roundIdx = currentRoom.currentRound || 1;
+    return currentRoom.rounds?.find(r => r.roundIndex === roundIdx) || (currentRoom.rounds && currentRoom.rounds.length > 0 ? currentRoom.rounds[currentRoom.rounds.length - 1] : undefined);
   }, [currentRoom.rounds, currentRoom.currentRound]);
 
   const roundStartedTime = useMemo(() => {
