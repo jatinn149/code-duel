@@ -12,8 +12,8 @@ export const WaitingResults = () => {
 
   const currentRound = useMemo(() => {
     if (!currentRoom) return null;
-    const currentRoundIndex = currentRoom.currentRound ?? 0;
-    return currentRoom.rounds?.find((r) => r.roundIndex === currentRoundIndex) || null;
+    const currentRoundIndex = currentRoom.currentRound || (currentRoom.rounds && currentRoom.rounds.length > 0 ? currentRoom.rounds.length : 1);
+    return currentRoom.rounds?.find((r) => r.roundIndex === currentRoundIndex) || (currentRoom.rounds && currentRoom.rounds.length > 0 ? currentRoom.rounds[currentRoom.rounds.length - 1] : null);
   }, [currentRoom]);
 
   // Sync remaining time
@@ -89,7 +89,16 @@ export const WaitingResults = () => {
   }, [logSteps]);
 
   if (!currentRoom || !currentRound) {
-    return null;
+    return (
+      <div className="flex-1 flex items-center justify-center bg-[#0a0a0a] text-white min-h-screen">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-10 h-10 border-2 border-zinc-800 border-t-white rounded-full animate-spin" />
+          <span className="text-zinc-400 font-semibold uppercase tracking-wider text-xs block">
+            Awaiting Round Data...
+          </span>
+        </div>
+      </div>
+    );
   }
 
   return (
