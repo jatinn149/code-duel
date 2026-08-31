@@ -9,6 +9,7 @@ import { env } from '@/config/env';
 import { createAuthRouter } from '@/routes/auth-routes';
 
 const app = express();
+app.set('trust proxy', 1);
 
 // Security Middlewares
 app.use(helmet());

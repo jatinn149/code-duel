@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN "placementMatchesPlayed" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN "seasonalTier" TEXT NOT NULL DEFAULT 'UNRANKED';
