@@ -142,35 +142,39 @@ export const ChaosArenaBattle: React.FC<BattleComponentProps> = (props) => {
     return currentRoom.rounds?.find(r => r.roundIndex === roundIdx) || (currentRoom.rounds && currentRoom.rounds.length > 0 ? currentRoom.rounds[currentRoom.rounds.length - 1] : undefined);
   }, [currentRoom.rounds, currentRoom.currentRound]);
 
+  const activeProblem = activeRound?.problem || currentRoom.rounds?.[0]?.problem;
+
   const roundStartedTime = useMemo(() => {
     return activeRound?.startedAt ? new Date(activeRound.startedAt).getTime() : null;
   }, [activeRound]);
 
   useEffect(() => {
-    if (currentRoom.state !== MatchState.PLAYING) {
-      setTimeLeftStr('00:00');
+    if (currentRoom.state !== MatchState.PLAYING && currentRoom.state !== MatchState.SUBMITTED_WAITING) {
+      if (currentRoom.state === MatchState.RESULTS) {
+        setTimeLeftStr('00:00');
+      }
       return;
     }
 
-    const startedAt = activeRound?.startedAt;
-    const duration = activeRound?.duration;
-
-    if (!startedAt || !duration) {
-      const d = duration || currentRoom.roundTimer?.duration || 300;
-      const m = Math.floor(d / 60);
-      const s = d % 60;
-      setTimeLeftStr(`${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`);
-      return;
-    }
+    const duration = activeRound?.duration || currentRoom.roundTimer?.duration || 300;
+    const startedAt = activeRound?.startedAt || activeRound?.roundStartedAt || currentRoom.matchStartAt || currentRoom.createdAt;
 
     const updateTimer = () => {
       const now = Date.now();
-      const start = new Date(startedAt).getTime();
-      const end = start + duration * 1000;
-      const left = Math.max(0, end - now);
+      let endMs = 0;
 
-      const m = Math.floor(left / 60000);
-      const s = Math.floor((left % 60000) / 1000);
+      if (activeRound?.roundEndsAt) {
+        endMs = new Date(activeRound.roundEndsAt).getTime();
+      } else if (startedAt) {
+        endMs = new Date(startedAt).getTime() + duration * 1000;
+      } else {
+        endMs = now + duration * 1000;
+      }
+
+      const leftMs = Math.max(0, endMs - now);
+      const totalSecs = Math.floor(leftMs / 1000);
+      const m = Math.floor(totalSecs / 60);
+      const s = totalSecs % 60;
       setTimeLeftStr(`${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`);
     };
 
@@ -178,7 +182,7 @@ export const ChaosArenaBattle: React.FC<BattleComponentProps> = (props) => {
     const interval = setInterval(updateTimer, 1000);
 
     return () => clearInterval(interval);
-  }, [activeRound, currentRoom.state, currentRoom.roundTimer]);
+  }, [activeRound, currentRoom.state, currentRoom.matchStartAt, currentRoom.roundTimer]);
 
   // Derived user statistics to avoid static placeholders
   const totalChaosMatches = useMemo(() => {
@@ -354,24 +358,13 @@ export const ChaosArenaBattle: React.FC<BattleComponentProps> = (props) => {
               
               <div className="flex-1 overflow-y-auto mt-4 space-y-3.5 text-neutral-400 leading-relaxed font-medium text-[11.5px] pr-1 scrollbar-hide">
                 <h2 className="text-base font-extrabold text-white tracking-tight leading-none mb-1">
-                  {currentRoom.rounds?.[0]?.problem?.title || 'Two Sum'}
+                  {activeProblem?.title || 'Chaos Arena Challenge'}
                 </h2>
                 
                 <div 
-                  className="space-y-3.5"
+                  className="space-y-3.5 prose prose-invert max-w-none text-xs leading-relaxed"
                   dangerouslySetInnerHTML={{
-                    __html: currentRoom.rounds?.[0]?.problem?.description || `
-                      <p>Implement an efficient solution to find two index coordinates in the array <code>nums</code> that sum up to <code>target</code>.</p>
-                      <p>You may assume that each input would have exactly one solution, and you may not use the same element twice.</p>
-                      <p>You can return the answer in any order.</p>
-                      
-                      <div class="mt-4 p-3 bg-neutral-950 border border-neutral-900 rounded-lg">
-                        <strong class="text-[9px] font-bold text-red-500 uppercase tracking-wider block mb-1">Example:</strong>
-                        <p class="font-mono text-[10px]">Input: nums = [2,7,11,15], target = 9</p>
-                        <p class="font-mono text-[10px]">Output: [0,1]</p>
-                        <p class="font-mono text-[10px] text-neutral-550 mt-1">Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].</p>
-                      </div>
-                    `
+                    __html: activeProblem?.description || `<p>Implement an efficient solution to solve the algorithmic objective before chaos anomalies strike.</p>`
                   }}
                 />
 
@@ -379,11 +372,9 @@ export const ChaosArenaBattle: React.FC<BattleComponentProps> = (props) => {
                   <span className="text-[8.5px] font-bold text-red-500/70 block uppercase tracking-wider">
                     Execution Constraints
                   </span>
-                  <p>• 2 &lt;= nums.length &lt;= 10⁴</p>
-                  <p>• -10⁹ &lt;= nums[i] &lt;= 10⁹</p>
-                  <p>• Only one valid answer exists.</p>
-                  <p>• Time Limit: 1000ms</p>
-                  <p>• Memory Limit: 256MB</p>
+                  <p>• Time Limit: {activeProblem?.timeLimit || 2000}ms</p>
+                  <p>• Memory Limit: {activeProblem?.memoryLimit || 256}MB</p>
+                  <p>• Faster submissions deal catastrophic damage to opponents.</p>
                 </div>
               </div>
             </div>

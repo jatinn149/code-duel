@@ -73,6 +73,8 @@ export interface ClientProblem {
   description: string;
   difficulty: number;
   initialCode?: string;
+  timeLimit?: number;
+  memoryLimit?: number;
 }
 
 export interface Round {

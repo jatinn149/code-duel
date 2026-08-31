@@ -8,14 +8,12 @@ import {
   Terminal,
   Loader2,
   AlertCircle,
-  Wifi,
   Trophy,
   LogOut,
   Zap,
   Sword,
   Code2,
   Target,
-  Clock,
   Activity,
 } from 'lucide-react';
 import { useRoomStore } from '@/store/room-store';
@@ -51,7 +49,7 @@ export const QuickodeBattle: React.FC<BattleComponentProps> = ({
   code,
   setCode,
   isSubmitting,
-  latency,
+  latency: _latency,
   countdown,
   sortedPlayers,
   allReady,
@@ -68,6 +66,67 @@ export const QuickodeBattle: React.FC<BattleComponentProps> = ({
   const activeOpponents = opponents && opponents.length > 0 ? opponents : opponent ? [opponent] : [];
   const isPlaying = currentRoom.state === MatchState.PLAYING;
   const isJudging = currentRoom.state === MatchState.JUDGING || isSubmitting;
+
+  const currentRoundIndex = currentRoom.currentRound || 1;
+  const activeRound = React.useMemo(() => {
+    return currentRoom.rounds?.find((r) => r.roundIndex === currentRoundIndex) || (currentRoom.rounds && currentRoom.rounds.length > 0 ? currentRoom.rounds[currentRoom.rounds.length - 1] : null);
+  }, [currentRoom, currentRoundIndex]);
+
+  const activeProblem = activeRound?.problem || currentRoom.rounds?.[0]?.problem;
+
+  const [timeLeftStr, setTimeLeftStr] = React.useState('00:00');
+  const [timeLeftSecs, setTimeLeftSecs] = React.useState<number>(0);
+
+  React.useEffect(() => {
+    if (currentRoom.state !== MatchState.PLAYING && currentRoom.state !== MatchState.SUBMITTED_WAITING) {
+      if (currentRoom.state === MatchState.RESULTS) {
+        setTimeLeftStr('00:00');
+        setTimeLeftSecs(0);
+      }
+      return;
+    }
+
+    const duration = activeRound?.duration || currentRoom.roundTimer?.duration || 120;
+    const startedAt = activeRound?.startedAt || activeRound?.roundStartedAt || currentRoom.matchStartAt || currentRoom.createdAt;
+
+    const updateTimer = () => {
+      const now = Date.now();
+      let endMs = 0;
+
+      if (activeRound?.roundEndsAt) {
+        endMs = new Date(activeRound.roundEndsAt).getTime();
+      } else if (startedAt) {
+        endMs = new Date(startedAt).getTime() + duration * 1000;
+      } else {
+        endMs = now + duration * 1000;
+      }
+
+      const leftMs = Math.max(0, endMs - now);
+      const totalSecs = Math.floor(leftMs / 1000);
+      setTimeLeftSecs(totalSecs);
+
+      const m = Math.floor(totalSecs / 60);
+      const s = totalSecs % 60;
+      setTimeLeftStr(`${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [activeRound, currentRoom.state, currentRoom.matchStartAt, currentRoom.roundTimer]);
+
+  const timerColorClass = React.useMemo(() => {
+    if (currentRoom.state !== MatchState.PLAYING && currentRoom.state !== MatchState.SUBMITTED_WAITING) {
+      return 'text-white border-neutral-900 bg-neutral-950';
+    }
+    if (timeLeftSecs <= 20) {
+      return 'text-rose-500 border-rose-900/40 bg-rose-950/20 animate-pulse';
+    }
+    if (timeLeftSecs <= 60) {
+      return 'text-amber-400 border-amber-900/40 bg-amber-950/20';
+    }
+    return 'text-white border-neutral-900 bg-neutral-950';
+  }, [timeLeftSecs, currentRoom.state]);
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-[#0a0a0a] text-neutral-200 relative select-none font-sans">
@@ -108,55 +167,49 @@ export const QuickodeBattle: React.FC<BattleComponentProps> = ({
           </div>
           <div className="h-6 w-px bg-neutral-900" />
           <div className="flex items-center space-x-2 bg-neutral-900/40 px-2 py-1 rounded border border-neutral-900">
-            <Wifi className="w-3 h-3 text-neutral-405" />
-            <span className="text-[10px] font-mono text-neutral-450">{Math.round(latency)}ms</span>
+            <Sword className="w-3.5 h-3.5 text-neutral-400" />
+            <span className="text-[10px] font-mono font-bold text-neutral-400 uppercase tracking-widest">
+              QUICKODE
+            </span>
           </div>
         </div>
 
-        {/* Center HUD: Battle Mode VS Status */}
-        <div className="flex items-center justify-center w-1/3 space-x-4">
-          <div className="px-3 py-1 bg-neutral-900 border border-neutral-850 rounded text-[10px] font-semibold text-neutral-400 tracking-wider font-bold">
-            QUICK DUEL
+        {/* Center: Live Round Timer */}
+        <div className="flex flex-col items-center">
+          <div className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest font-black mb-1">
+            SPEED DUEL
           </div>
-          <div className="h-4 w-px bg-neutral-900" />
-          <div className="flex items-center space-x-1.5 text-neutral-400 font-mono text-xs font-semibold">
-            <Clock className="w-3.5 h-3.5" />
-            <span>REALTIME</span>
+          <div className={`text-2xl font-black font-mono tracking-wider px-4 py-1 rounded-lg border transition-colors ${timerColorClass}`}>
+            {timeLeftStr}
           </div>
         </div>
 
-        {/* Right HUD: Target Opponents & Leave Actions */}
+        {/* Right HUD: Opponents */}
         <div className="flex items-center justify-end space-x-4 w-1/3">
-          <div className="flex items-center space-x-4">
-            {activeOpponents.map((opp) => (
-              <div key={opp.id} className="flex items-center space-x-2">
-                <div className="flex flex-col items-end hidden sm:flex">
-                  <span className="text-xs font-semibold text-white tracking-tight leading-none font-bold">
-                    {opp.username}
-                  </span>
-                  <span className="text-[9px] text-neutral-555 font-mono font-medium mt-0.5">
-                    {opp.rating} CP
-                  </span>
-                </div>
-                <div className="w-7 h-7 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center relative" title={`${opp.username} (${opp.rating} CP)`}>
-                  <span className="text-[10px] font-semibold text-neutral-450 font-mono">
-                    {opp.username.charAt(0).toUpperCase()}
-                  </span>
-                  <div
-                    className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-[#000000] ${
-                      opp.connected ? 'bg-emerald-500' : 'bg-neutral-800'
-                    }`}
-                  />
-                </div>
+          {activeOpponents.map((opp) => (
+            <div key={opp.id} className="flex items-center space-x-3 text-right">
+              <div className="flex flex-col">
+                <span className="text-xs font-semibold text-white tracking-tight leading-none font-bold">
+                  {opp.username}
+                </span>
+                <span className="text-[10px] text-neutral-555 font-mono font-medium mt-1">
+                  {opp.rating} CP
+                </span>
               </div>
-            ))}
-          </div>
-
+              <div className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center relative">
+                <span className="text-xs font-semibold text-neutral-450 font-mono">
+                  {opp.username.charAt(0).toUpperCase()}
+                </span>
+                <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border border-[#000000] ${
+                  opp.connected ? 'bg-emerald-500' : 'bg-rose-500'
+                }`} />
+              </div>
+            </div>
+          ))}
           <div className="h-6 w-px bg-neutral-900" />
-
           <button
             onClick={handleLeaveRoom}
-            className="p-2 hover:bg-neutral-900 text-neutral-400 hover:text-white rounded-lg transition-colors border border-transparent hover:border-neutral-800 active:scale-95"
+            className="p-2 hover:bg-neutral-900 rounded-lg text-neutral-500 hover:text-white transition-colors"
             title="Leave Sector"
           >
             <LogOut className="w-4 h-4" />
@@ -174,21 +227,30 @@ export const QuickodeBattle: React.FC<BattleComponentProps> = ({
                 <Target className="w-3.5 h-3.5" />
                 <span>TASK DETAILS</span>
               </div>
-              <h2 className="text-lg font-bold text-white tracking-tight">Two Sum</h2>
+              <h2 className="text-lg font-bold text-white tracking-tight">
+                {activeProblem?.title || 'Algorithmic Challenge'}
+              </h2>
               <div className="text-neutral-400 leading-relaxed space-y-3 font-medium font-sans">
-                <p>
-                  Extract array indices of two elements summing to{' '}
-                  <code className="bg-neutral-900 border border-neutral-850 px-1 py-0.5 rounded text-neutral-350 font-mono">
-                    target
-                  </code>
-                  .
-                </p>
-                <div className="p-3 bg-neutral-950 border border-neutral-900 rounded-lg space-y-1.5">
-                  <span className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block">
+                {activeProblem?.description ? (
+                  <div 
+                    className="space-y-3 prose prose-invert max-w-none text-xs leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: activeProblem.description }}
+                  />
+                ) : (
+                  <p>Implement the optimal solution for the problem specification.</p>
+                )}
+                <div className="p-3 bg-neutral-950 border border-neutral-900 rounded-lg space-y-1.5 font-mono text-[10px]">
+                  <span className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block font-sans">
                     CONSTRAINTS
                   </span>
-                  <p className="text-[11px] text-neutral-455 italic">
-                    Runtime complexity optimal target: O(N) required.
+                  <p className="text-neutral-400">
+                    • Time Limit: {activeProblem?.timeLimit || 2000}ms
+                  </p>
+                  <p className="text-neutral-400">
+                    • Memory Limit: {activeProblem?.memoryLimit || 256}MB
+                  </p>
+                  <p className="text-neutral-500 italic">
+                    • Optimal complexity required for full score.
                   </p>
                 </div>
               </div>

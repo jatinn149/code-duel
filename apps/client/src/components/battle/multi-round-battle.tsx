@@ -173,26 +173,18 @@ export const MultiRoundBattle: React.FC<BattleComponentProps> = ({
       return;
     }
 
-    const startedTime = currentRoundObj?.roundStartedAt || currentRoundObj?.startedAt;
-    const duration = currentRoundObj?.duration;
-
-    if (!startedTime || !duration) {
-      const d = duration || currentRoom.roundTimer?.duration || 300;
-      const m = Math.floor(d / 60);
-      const s = d % 60;
-      setTimeLeftStr(`${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`);
-      setTimeLeftSecs(d);
-      return;
-    }
+    const duration = currentRoundObj?.duration || currentRoom.roundTimer?.duration || 300;
+    const startedTime = currentRoundObj?.roundStartedAt || currentRoundObj?.startedAt || currentRoom.matchStartAt || currentRoom.createdAt;
 
     const updateTimer = () => {
       const now = Date.now();
       let end = 0;
       if (currentRoundObj?.roundEndsAt) {
         end = new Date(currentRoundObj.roundEndsAt).getTime();
+      } else if (startedTime) {
+        end = new Date(startedTime).getTime() + duration * 1000;
       } else {
-        const start = new Date(startedTime).getTime();
-        end = start + duration * 1000;
+        end = now + duration * 1000;
       }
       
       const left = Math.max(0, end - now);
@@ -208,7 +200,7 @@ export const MultiRoundBattle: React.FC<BattleComponentProps> = ({
     const interval = setInterval(updateTimer, 1000);
 
     return () => clearInterval(interval);
-  }, [currentRoundObj, currentRoom.state, currentRoom.roundTimer]);
+  }, [currentRoundObj, currentRoom.state, currentRoom.matchStartAt, currentRoom.roundTimer]);
 
   const timerColorClass = useMemo(() => {
     if (currentRoom.state !== MatchState.PLAYING && currentRoom.state !== MatchState.SUBMITTED_WAITING) {
