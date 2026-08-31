@@ -31,16 +31,19 @@ export class PlayerContainerManager {
     this.docker = new Docker({
       socketPath: process.platform === 'win32' ? '//./pipe/docker_engine' : '/var/run/docker.sock',
     });
-    // Run startup pruning of orphan containers in fire-and-forget fashion
-    this.pruneOrphanContainers().catch((err) => {
-      logger.error({ err }, 'Failed to prune orphan player containers in constructor');
-    });
+    // Run startup pruning of orphan containers only when not using external evaluator
+    if (!env.USE_EVALUATOR_SERVICE) {
+      this.pruneOrphanContainers().catch((err) => {
+        logger.error({ err }, 'Failed to prune orphan player containers in constructor');
+      });
+    }
   }
 
   /**
    * Startup safety cleanup of any orphan execution containers from previous server runs/crashes.
    */
   async pruneOrphanContainers(): Promise<void> {
+    if (env.USE_EVALUATOR_SERVICE) return;
     try {
       const containers = await this.docker.listContainers({
         all: true,
@@ -62,6 +65,16 @@ export class PlayerContainerManager {
    * Initializes a persistent container for a player.
    */
   async createContainerForPlayer(matchId: string, playerId: string): Promise<void> {
+    if (env.USE_EVALUATOR_SERVICE) {
+      this.remainingRuns.set(playerId, this.maxRunsPerMatch);
+      if (!this.matchPlayerMap.has(matchId)) {
+        this.matchPlayerMap.set(matchId, new Set());
+      }
+      this.matchPlayerMap.get(matchId)!.add(playerId);
+      logger.info({ playerId, matchId }, 'Microservice evaluation mode: virtual player container allocated');
+      return;
+    }
+
     if (this.containers.has(playerId)) {
       logger.warn({ playerId, matchId }, 'Container already exists for player. Destroying old one first.');
       await this.destroyContainerForPlayer(playerId);
@@ -111,7 +124,17 @@ export class PlayerContainerManager {
       this.matchPlayerMap.get(matchId)!.add(playerId);
 
       logger.info({ playerId, matchId, containerId: container.id }, 'Persistent player container started successfully');
-    } catch (err) {
+    } catch (err: any) {
+      if (err?.code === 'ENOENT' || err?.message?.includes('connect ENOENT') || err?.message?.includes('docker.sock')) {
+        logger.warn({ playerId, matchId }, 'Docker daemon unavailable. Falling back to virtual container evaluation.');
+        this.remainingRuns.set(playerId, this.maxRunsPerMatch);
+        if (!this.matchPlayerMap.has(matchId)) {
+          this.matchPlayerMap.set(matchId, new Set());
+        }
+        this.matchPlayerMap.get(matchId)!.add(playerId);
+        return;
+      }
+
       logger.error({ err, playerId, matchId }, 'Failed to start persistent container for player');
       // Clean up mapping if partial creation
       this.containers.delete(playerId);

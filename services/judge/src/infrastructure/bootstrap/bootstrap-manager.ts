@@ -23,14 +23,22 @@ export class BootstrapManager {
       healthService.updateComponent('Redis', JudgeInfrastructureStatus.HEALTHY, 'Connected');
     }
 
-    // 2. Ensure Docker Images are ready
-    const dockerImageReady = await imageManager.ensureImageExists('python:3.11-slim');
-    if (!dockerImageReady) {
-      logger.error('Required Docker image is missing. Judge will start in DEGRADED mode.');
-      healthService.updateComponent('Docker', JudgeInfrastructureStatus.OFFLINE, 'Image missing');
-      this.isDegradedMode = true;
+    const useEvaluator = process.env.USE_EVALUATOR_SERVICE === 'true';
+
+    // 2. Ensure Docker Images are ready (skip in microservice evaluator mode)
+    if (useEvaluator) {
+      logger.info('USE_EVALUATOR_SERVICE enabled: bypassing local Docker daemon and worker pool.');
+      healthService.updateComponent('Docker', JudgeInfrastructureStatus.HEALTHY, 'Evaluator Microservice');
+      healthService.updateComponent('WorkerPool', JudgeInfrastructureStatus.HEALTHY, 'Evaluator Microservice');
     } else {
-      healthService.updateComponent('Docker', JudgeInfrastructureStatus.HEALTHY, 'Available');
+      const dockerImageReady = await imageManager.ensureImageExists('python:3.11-slim');
+      if (!dockerImageReady) {
+        logger.error('Required Docker image is missing. Judge will start in DEGRADED mode.');
+        healthService.updateComponent('Docker', JudgeInfrastructureStatus.OFFLINE, 'Image missing');
+        this.isDegradedMode = true;
+      } else {
+        healthService.updateComponent('Docker', JudgeInfrastructureStatus.HEALTHY, 'Available');
+      }
     }
 
     // 3. Start Judge components safely
@@ -39,21 +47,23 @@ export class BootstrapManager {
       logger.warn('Submissions may not be processed until infrastructure recovers.');
       // Initialize what we can, but don't crash
     } else {
-       await this.startCoreComponents();
+       await this.startCoreComponents(useEvaluator);
     }
     
     this.startHealthMonitor();
   }
 
-  private async startCoreComponents() {
+  private async startCoreComponents(useEvaluator: boolean = false) {
       try {
           const orchestrator = new JudgeOrchestrator();
           
-          // Worker Pool requires Docker
-          healthService.updateComponent('WorkerPool', JudgeInfrastructureStatus.DEGRADED, 'Initializing');
-          const { workerPool } = await import('../../workers/worker-pool');
-          await workerPool.initialize();
-          healthService.updateComponent('WorkerPool', JudgeInfrastructureStatus.HEALTHY, 'Initialized');
+          if (!useEvaluator) {
+            // Worker Pool requires Docker
+            healthService.updateComponent('WorkerPool', JudgeInfrastructureStatus.DEGRADED, 'Initializing');
+            const { workerPool } = await import('../../workers/worker-pool');
+            await workerPool.initialize();
+            healthService.updateComponent('WorkerPool', JudgeInfrastructureStatus.HEALTHY, 'Initialized');
+          }
 
           // Queue requires Redis
           healthService.updateComponent('Queue', JudgeInfrastructureStatus.DEGRADED, 'Initializing');
