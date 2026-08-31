@@ -743,9 +743,21 @@ export const initSocket = (
       const sub = round?.submissions?.[userId];
       if (!sub) return;
 
-      const testCases = round?.metadata?.testCaseWeights 
+      let testCases = round?.metadata?.testCaseWeights 
         ? Object.keys(round.metadata.testCaseWeights).map(id => ({ id }))
         : undefined;
+
+      // Fetch real problem test cases from repository if available
+      if (round?.problemId && _repositories?.problemRepository) {
+        try {
+          const problem = await _repositories.problemRepository.findById(round.problemId);
+          if (problem && problem.testCases && Array.isArray(problem.testCases) && problem.testCases.length > 0) {
+            testCases = problem.testCases;
+          }
+        } catch (e) {
+          logger.warn({ error: e, problemId: round.problemId }, 'Could not load problem test cases from repository');
+        }
+      }
 
       // 1. Run the Judge Layer (extracts execution facts only)
       const facts = await judgeService.execute(sub.code, sub.language || 'python', testCases);

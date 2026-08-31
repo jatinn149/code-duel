@@ -3,6 +3,7 @@ import { roomManager } from '../socket/room-manager';
 import { Server } from 'socket.io';
 import { SocketEvents } from '@code-duel/shared';
 import { logger } from '../utils/logger';
+import { env } from '../config/env';
 
 // ------------------------------------------------------------
 // 1. JUDGE FACT INTERFACES & SERVICE
@@ -110,8 +111,100 @@ export class MockJudgeService implements IJudgeService {
   }
 }
 
-// Backward-compatible alias
-export class JudgeService extends MockJudgeService {}
+export class EvaluatorJudgeService implements IJudgeService {
+  async execute(code: string, language: string = 'python', testCases?: any[]): Promise<JudgeFacts> {
+    const evaluatorUrl = env.CODE_EVALUATOR_URL || 'http://127.0.0.1:5000';
+    
+    // If testcases with inputs exist, run them through microservice
+    const validTestCases = (testCases && testCases.length > 0 && testCases.some(tc => tc.input !== undefined))
+      ? testCases.map((tc, idx) => ({
+          input: tc.input || '',
+          expectedOutput: tc.expectedOutput || tc.output || '',
+          id: tc.id || tc.testCaseId || String(idx + 1),
+          isHidden: !!tc.isHidden,
+        }))
+      : [];
+
+    if (validTestCases.length > 0) {
+      try {
+        const response = await fetch(`${evaluatorUrl}/api/evaluate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            code,
+            language,
+            testCases: validTestCases.map(tc => ({ input: tc.input, expectedOutput: tc.expectedOutput })),
+            timeoutMs: 3000,
+          }),
+        });
+
+        if (response.ok) {
+          const data: any = await response.json();
+          if (data.success && data.results) {
+            let hasTimeout = false;
+            let hasRuntimeError = false;
+            let totalExecutionTimeMs = 0;
+            const testResults: TestCaseResult[] = [];
+
+            data.results.forEach((res: any, idx: number) => {
+              const tc = validTestCases[idx];
+              totalExecutionTimeMs += res.timeMs || 0;
+
+              let status: TestCaseResult['status'] = 'passed';
+              if (res.status === 'TIMEOUT') {
+                status = 'timeout';
+                hasTimeout = true;
+              } else if (res.status === 'RUNTIME_ERROR' || res.status === 'COMPILATION_ERROR') {
+                status = 'error';
+                hasRuntimeError = true;
+              } else if (res.status !== 'PASSED') {
+                status = 'failed';
+              }
+
+              testResults.push({
+                testCaseId: tc.id,
+                status,
+                executionTimeMs: res.timeMs || 0,
+                memoryUsageMb: 10,
+                actualOutput: res.actualOutput,
+                error: res.stderr,
+              });
+            });
+
+            let verdict: Verdict = Verdict.ACCEPTED;
+            if (data.passedCount === data.totalCount && data.totalCount > 0) {
+              verdict = Verdict.ACCEPTED;
+            } else if (hasTimeout) {
+              verdict = Verdict.TIME_LIMIT_EXCEEDED;
+            } else if (hasRuntimeError) {
+              verdict = Verdict.RUNTIME_ERROR;
+            } else {
+              verdict = Verdict.WRONG_ANSWER;
+            }
+
+            return {
+              verdict,
+              passedCount: data.passedCount || 0,
+              totalCount: data.totalCount || validTestCases.length,
+              executionTimeMs: totalExecutionTimeMs,
+              memoryBytes: 10 * 1024 * 1024,
+              language,
+              code,
+              testResults,
+            };
+          }
+        }
+      } catch (err) {
+        logger.error({ err }, 'Error evaluating code via Evaluator Microservice in JudgeService');
+      }
+    }
+
+    // Fallback to MockJudgeService if evaluator microservice is unreachable or testCases format is minimal
+    return new MockJudgeService().execute(code, language, testCases);
+  }
+}
+
+export class JudgeService extends EvaluatorJudgeService {}
 
 // ------------------------------------------------------------
 // 2. SCORE CALCULATOR & STRATEGIES

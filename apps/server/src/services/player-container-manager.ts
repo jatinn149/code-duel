@@ -191,8 +191,12 @@ export class PlayerContainerManager {
    * Runs the code inside the player's persistent container.
    */
   async runCodeForPlayer(playerId: string, code: string, input: string, isFree?: boolean): Promise<RunCodeResult> {
-    if (env.USE_EVALUATOR_SERVICE) {
-      const runsLeft = this.remainingRuns.get(playerId) ?? 0;
+    const evaluatorUrl = env.CODE_EVALUATOR_URL || 'http://127.0.0.1:5000';
+    let container = this.containers.get(playerId);
+
+    // If evaluator service mode is active OR if Docker is absent, execute via Evaluator Microservice
+    if (env.USE_EVALUATOR_SERVICE || !container) {
+      const runsLeft = this.remainingRuns.get(playerId) ?? this.maxRunsPerMatch;
       if (!isFree && runsLeft <= 0) {
         return { success: false, error: `Execution limit reached (${this.maxRunsPerMatch} runs max per match).`, remainingRuns: 0 };
       }
@@ -203,13 +207,13 @@ export class PlayerContainerManager {
       }
 
       try {
-        const response = await fetch(`${env.CODE_EVALUATOR_URL}/api/evaluate`, {
+        const response = await fetch(`${evaluatorUrl}/api/evaluate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             code,
             language: 'python',
-            testCases: [{ input, expectedOutput: '' }],
+            testCases: [{ input: input || '', expectedOutput: '' }],
             timeoutMs: 5000,
           }),
         });
@@ -220,7 +224,7 @@ export class PlayerContainerManager {
 
         const data: any = await response.json();
         if (!data.success || !data.results || data.results.length === 0) {
-          throw new Error('Evaluator returned unsuccessful status');
+          throw new Error(data.error || 'Evaluator returned unsuccessful status');
         }
 
         const res = data.results[0];
@@ -229,22 +233,20 @@ export class PlayerContainerManager {
         return {
           success: true,
           remainingRuns: nextRuns,
-          stdout: res.actualOutput,
-          stderr: isTimeout ? 'Time Limit Exceeded (5000ms)' : res.stderr,
-          executionTimeMs: res.timeMs,
-          exitCode: isTimeout ? 137 : res.exitCode,
+          stdout: res.actualOutput || '',
+          stderr: isTimeout ? 'Time Limit Exceeded (5000ms)' : (res.stderr || ''),
+          executionTimeMs: res.timeMs || 0,
+          exitCode: isTimeout ? 137 : (res.exitCode ?? 0),
         };
       } catch (err: any) {
-        logger.error({ err, playerId }, 'Error calling code evaluator service for dry run');
+        logger.error({ err, playerId, evaluatorUrl }, 'Error calling code evaluator service for dry run');
         return {
           success: false,
-          error: 'Execution failed due to sandbox environment error.',
+          error: `Sandbox execution error: ${err.message || 'Could not reach evaluator service'}.`,
           remainingRuns: nextRuns,
         };
       }
     }
-
-    let container = this.containers.get(playerId);
     
     // 1. Container Health Verification & Automatic Recovery
     let isHealthy = false;

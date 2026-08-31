@@ -16,13 +16,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Zod validation schemas
 const evaluateSchema = z.object({
   code: z.string(),
-  language: z.enum(['python', 'javascript']),
+  language: z.enum(['python', 'javascript']).default('python'),
   testCases: z.array(
     z.object({
-      input: z.string(),
-      expectedOutput: z.string(),
+      input: z.string().optional().default(''),
+      expectedOutput: z.string().optional().default(''),
     })
-  ),
+  ).default([{ input: '', expectedOutput: '' }]),
   timeoutMs: z.number().min(500).max(10000).default(3000),
 });
 
@@ -39,6 +39,8 @@ const getPythonCommand = () => {
 
 const PYTHON_CMD = getPythonCommand();
 
+const MAX_OUTPUT_BYTES = 512 * 1024; // 512 KB limit to prevent memory exhaustion
+
 // Execute a single test case
 const runTestCase = (code, language, input, timeoutMs) => {
   return new Promise((resolve) => {
@@ -47,13 +49,35 @@ const runTestCase = (code, language, input, timeoutMs) => {
     const filename = `eval_${Date.now()}_${Math.random().toString(36).substring(7)}${fileExt}`;
     const filePath = path.join(tempDir, filename);
 
-    fs.writeFileSync(filePath, code);
+    try {
+      fs.writeFileSync(filePath, code, 'utf8');
+    } catch (writeErr) {
+      return resolve({
+        status: 'RUNTIME_ERROR',
+        stdout: '',
+        stderr: 'Failed to write code to execution environment.',
+        exitCode: -1,
+        timeMs: 0,
+      });
+    }
 
     const cmd = language === 'python' ? PYTHON_CMD : 'node';
     const args = [filePath];
 
     const startTime = Date.now();
-    const child = spawn(cmd, args);
+    let child;
+    try {
+      child = spawn(cmd, args);
+    } catch (spawnErr) {
+      try { if (fs.existsSync(filePath)) fs.unlinkSync(filePath); } catch (e) {}
+      return resolve({
+        status: 'COMPILATION_ERROR',
+        stdout: '',
+        stderr: spawnErr.message,
+        exitCode: -1,
+        timeMs: 0,
+      });
+    }
 
     let stdout = '';
     let stderr = '';
@@ -62,20 +86,33 @@ const runTestCase = (code, language, input, timeoutMs) => {
     // Set timeout to kill process
     const timeout = setTimeout(() => {
       killed = true;
-      child.kill('SIGKILL');
+      try {
+        child.kill('SIGKILL');
+      } catch (e) {}
     }, timeoutMs);
 
+    // Protect against EPIPE crashes if child process terminates before reading stdin
     if (child.stdin) {
-      child.stdin.write(input);
-      child.stdin.end();
+      child.stdin.on('error', () => {});
+      try {
+        child.stdin.write(input || '');
+        child.stdin.end();
+      } catch (e) {}
     }
 
     child.stdout.on('data', (data) => {
-      stdout += data.toString();
+      if (stdout.length < MAX_OUTPUT_BYTES) {
+        stdout += data.toString();
+      } else if (!killed) {
+        killed = true;
+        try { child.kill('SIGKILL'); } catch (e) {}
+      }
     });
 
     child.stderr.on('data', (data) => {
-      stderr += data.toString();
+      if (stderr.length < MAX_OUTPUT_BYTES) {
+        stderr += data.toString();
+      }
     });
 
     child.on('close', (exitCode) => {
@@ -105,7 +142,7 @@ const runTestCase = (code, language, input, timeoutMs) => {
           status: exitCode === 0 ? 'SUCCESS' : 'RUNTIME_ERROR',
           stdout,
           stderr,
-          exitCode,
+          exitCode: exitCode ?? 0,
           timeMs: durationMs,
         });
       }
@@ -129,6 +166,16 @@ const runTestCase = (code, language, input, timeoutMs) => {
     });
   });
 };
+
+// Health Check Endpoints
+app.get(['/health', '/api/health'], (_req, res) => {
+  res.json({
+    status: 'ok',
+    uptimeSec: Math.floor(process.uptime()),
+    pythonCommand: PYTHON_CMD,
+    timestamp: new Date().toISOString(),
+  });
+});
 
 // Evaluate endpoint
 app.post('/api/evaluate', async (req, res) => {

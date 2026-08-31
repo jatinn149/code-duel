@@ -346,7 +346,7 @@ export const QuickodeBattle: React.FC<BattleComponentProps> = ({
                   <div className="flex items-center space-x-2 text-neutral-450">
                     <Loader2 className="w-3.5 h-3.5 animate-spin text-neutral-500" />
                     <span className="text-[10px] font-semibold animate-pulse uppercase tracking-wide">
-                      Running program inside Docker sandbox...
+                      Running program in evaluation sandbox...
                     </span>
                   </div>
                 </div>
