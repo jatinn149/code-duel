@@ -26,7 +26,11 @@ export class ExecutionPipeline {
       });
 
       try {
-        const evaluatorUrl = process.env.CODE_EVALUATOR_URL || 'http://127.0.0.1:5000';
+        let evaluatorUrl = (process.env.CODE_EVALUATOR_URL || 'http://127.0.0.1:5000').trim();
+        if (!evaluatorUrl.startsWith('http://') && !evaluatorUrl.startsWith('https://')) {
+          evaluatorUrl = evaluatorUrl.includes('localhost') || evaluatorUrl.includes('127.0.0.1') ? `http://${evaluatorUrl}` : `https://${evaluatorUrl}`;
+        }
+        evaluatorUrl = evaluatorUrl.replace(/\/+$/, '');
         
         for (let i = 0; i < payload.testCases.length; i++) {
           const testCase = payload.testCases[i];

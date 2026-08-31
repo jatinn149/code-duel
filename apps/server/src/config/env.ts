@@ -15,7 +15,16 @@ const envSchema = z.object({
   REDIS_PORT: z.string().transform(Number).default('6379'),
   REDIS_PASSWORD: z.string().optional(),
   USE_EVALUATOR_SERVICE: z.preprocess((val) => val === 'true' || val === true, z.boolean()).default(false),
-  CODE_EVALUATOR_URL: z.string().default('http://127.0.0.1:5000'),
+  CODE_EVALUATOR_URL: z
+    .string()
+    .default('http://127.0.0.1:5000')
+    .transform((val) => {
+      let url = val.trim();
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = url.includes('localhost') || url.includes('127.0.0.1') ? `http://${url}` : `https://${url}`;
+      }
+      return url.replace(/\/+$/, '');
+    }),
 });
 
 const parsed = envSchema.safeParse(process.env);
