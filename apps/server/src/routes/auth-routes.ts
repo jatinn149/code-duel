@@ -120,7 +120,7 @@ export const createAuthRouter = () => {
       const retentionService = new RetentionService(userRepository, dailyMissionRepository, progressionService);
       const missions = await retentionService.getDailyMissions(userId);
       
-      // 4. Fetch live arena matches (active rooms in Redis)
+      // 4. Fetch live arena matches (active rooms in Redis) and prune ghost/stale rooms
       const keys = await redisCache.keys('room:*');
       const roomKeys = keys.filter(key => {
         const parts = key.split(':');
@@ -128,26 +128,58 @@ export const createAuthRouter = () => {
       });
 
       const liveMatches = [];
-      for (const key of roomKeys.slice(0, 10)) {
+      for (const key of roomKeys) {
         const roomStr = await redisCache.get(key);
-        if (roomStr) {
-          try {
-            const room = JSON.parse(roomStr);
-            if (room && room.players && room.players.length > 0) {
-              liveMatches.push({
-                roomId: room.id,
-                mode: room.gameMode,
-                state: room.state,
-                players: room.players.map((p: any) => ({
-                  username: p.username,
-                  rating: p.rating,
-                  seasonalTier: p.seasonalTier
-                }))
-              });
-            }
-          } catch (e) {
-            // ignore
+        if (!roomStr) continue;
+
+        try {
+          const room = JSON.parse(roomStr);
+          if (!room || !room.id || !room.players || room.players.length === 0) {
+            await redisCache.del(key);
+            continue;
           }
+
+          // Delete finished or cancelled rooms
+          if (room.state === 'RESULTS' || room.state === 'CANCELLED') {
+            await redisCache.del(key);
+            continue;
+          }
+
+          // Check if any player is currently connected
+          const connectedPlayers = room.players.filter((p: any) => p.connected);
+          if (connectedPlayers.length === 0) {
+            const lastUpdated = new Date(room.updatedAt || room.createdAt || 0).getTime();
+            if (Date.now() - lastUpdated > 3 * 60 * 1000) { // 3 mins with 0 connected players
+              await redisCache.del(key);
+              continue;
+            }
+          }
+
+          // Verify the room owner actually exists in the PostgreSQL database
+          const owner = await userRepository.findById(room.ownerId);
+          if (!owner) {
+            // Orphaned room from a deleted/reset account: permanently purge from Redis
+            await redisCache.del(key);
+            continue;
+          }
+
+          // Only list truly active rooms
+          if (room.state === 'PLAYING' || room.state === 'COUNTDOWN' || (room.state === 'WAITING' && connectedPlayers.length > 0)) {
+            liveMatches.push({
+              roomId: room.id,
+              mode: room.gameMode,
+              state: room.state,
+              players: room.players.map((p: any) => ({
+                username: p.username,
+                rating: p.rating,
+                seasonalTier: p.seasonalTier,
+                connected: p.connected
+              }))
+            });
+          }
+        } catch (e) {
+          // Bad JSON or corrupted key: delete
+          await redisCache.del(key).catch(() => {});
         }
       }
 
