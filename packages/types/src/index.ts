@@ -524,12 +524,13 @@ export enum Verdict {
   RUNTIME_ERROR = 'RUNTIME_ERROR',
   COMPILATION_ERROR = 'COMPILATION_ERROR',
   TIMEOUT = 'TIMEOUT',
+  DISQUALIFIED = 'DISQUALIFIED',
 }
 
 export interface PlayerResult {
   userId: string;
   username: string;
-  outcome: 'WINNER' | 'LOSER' | 'DRAW';
+  outcome: 'WINNER' | 'LOSER' | 'DRAW' | 'DISQUALIFIED';
   verdict: Verdict;
   passedCount: number;
   totalCount: number;
@@ -540,6 +541,7 @@ export interface PlayerResult {
   correctnessScore?: number;
   efficiencyScore?: number;
   speedScore?: number;
+  disqualificationReason?: string;
 }
 
 export interface MatchResult {

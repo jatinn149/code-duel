@@ -69,7 +69,16 @@ export const useTelemetry = (socket: Socket | null, roomId: string | undefined) 
     };
   }, [socket, roomId]);
 
+  useEffect(() => {
+    totalKeystrokesRef.current = 0;
+    eventsRef.current = [];
+    lastSyncRef.current = Date.now();
+  }, [roomId]);
+
   return {
     getKeystrokeCount: () => totalKeystrokesRef.current,
+    recordKeystroke: (count: number = 1) => {
+      totalKeystrokesRef.current += count;
+    },
   };
 };

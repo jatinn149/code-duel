@@ -5,7 +5,7 @@ import { useSocket } from '@/hooks/use-socket';
 import { useNavigate } from 'react-router-dom';
 import { SocketEvents } from '@code-duel/shared';
 import { motion } from 'framer-motion';
-import { Trophy, LogOut, RefreshCw, Code2, Award, Zap, Cpu, Terminal } from 'lucide-react';
+import { Trophy, LogOut, RefreshCw, Code2, Award, Zap, Cpu, Terminal, AlertTriangle, ShieldAlert } from 'lucide-react';
 import { clsx } from 'clsx';
 import { GameMode } from '@code-duel/types';
 
@@ -89,46 +89,67 @@ export const FinalResults = () => {
           <h2 className="text-3xl font-black tracking-widest text-white uppercase drop-shadow-md">
             {isMeWinner ? 'VICTORY ACHIEVED' : 'MATCH CONCLUDED'}
           </h2>
-          <p className="text-xs font-mono mt-2 text-indigo-400 tracking-wider">
-            {winner ? `WINNER: ${winner.username}` : 'DRAW'}
+
+          <p className="text-zinc-400 text-sm max-w-md mx-auto font-medium">
+            {matchResult?.isDraw
+              ? 'Both players demonstrated equal proficiency in this challenge.'
+              : isMeWinner
+              ? 'Outstanding performance. Your solution and strategy surpassed your opponent.'
+              : 'A competitive duel. Review performance analytics and refine your approach.'}
           </p>
         </div>
 
-        {/* Players results: limited max-width cards to prevent being zoomed-in */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8 max-w-2xl mx-auto">
-          {currentRoom.players.map((player) => {
-            const playerResult = matchResult.playerResults[player.id];
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 my-auto max-w-4xl mx-auto w-full">
+          {currentRoom?.players.map((player) => {
+            const isPlayerWinner = winner?.id === player.id;
+            const isMe = player.id === user?.id;
+            const playerResult = matchResult?.playerResults[player.id];
+            const isDisqualified = playerResult?.outcome === 'DISQUALIFIED' || playerResult?.verdict === 'DISQUALIFIED';
+
             if (!playerResult) return null;
 
-            const isPlayerWinner = matchResult.winnerId === player.id;
-            const isMe = player.id === user?.id;
-            const outcomeText = matchResult.isDraw ? 'DRAW' : (isPlayerWinner ? 'WINNER' : 'LOSER');
+            const outcomeText = isDisqualified
+              ? 'DISQUALIFIED'
+              : matchResult?.isDraw
+              ? 'DRAW'
+              : isPlayerWinner
+              ? 'WINNER'
+              : 'LOSER';
             const code = currentRound?.submissions?.[player.id]?.code || '';
 
             return (
               <div
                 key={player.id}
                 className={clsx(
-                  "p-5 rounded-xl border transition-all duration-300 relative flex flex-col justify-between min-h-[360px]",
-                  isPlayerWinner
-                    ? "bg-amber-500/5 border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.05)]"
-                    : "bg-zinc-900/30 border-zinc-900"
+                  "relative rounded-2xl border p-5 md:p-6 flex flex-col justify-between backdrop-blur-xl transition-all duration-300",
+                  isDisqualified
+                    ? "bg-rose-950/20 border-rose-500/40 shadow-[0_0_30px_rgba(244,63,94,0.15)]"
+                    : isPlayerWinner
+                    ? "bg-zinc-950/80 border-amber-500/30 shadow-[0_0_30px_rgba(245,158,11,0.1)]"
+                    : "bg-zinc-950/40 border-zinc-800/80"
                 )}
               >
-                {isPlayerWinner && (
-                  <div className="absolute top-3.5 right-3.5 bg-amber-500/10 border border-amber-500/20 text-amber-500 px-2 py-0.5 rounded text-[8px] font-mono uppercase tracking-widest font-black flex items-center gap-1">
-                    <Trophy className="w-2.5 h-2.5" /> Winner
+                {isDisqualified ? (
+                  <div className="absolute -top-3 right-6 bg-rose-600 text-white text-[9px] font-mono font-black tracking-widest uppercase px-2.5 py-0.5 rounded-full border border-rose-400/30 shadow-lg flex items-center gap-1">
+                    <ShieldAlert className="w-3 h-3" />
+                    ANTI-CHEAT FLAGGED
                   </div>
-                )}
+                ) : isPlayerWinner ? (
+                  <div className="absolute -top-3 right-6 bg-amber-500 text-black text-[9px] font-mono font-black tracking-widest uppercase px-2.5 py-0.5 rounded-full border border-amber-300 shadow-lg">
+                    Winner
+                  </div>
+                ) : null}
 
-                <div className="flex items-center space-x-3 mb-6 mt-2">
+                <div className="flex items-center space-x-3 mb-6">
                   <div className={clsx(
                     "w-10 h-10 rounded-lg border flex items-center justify-center font-bold text-sm",
-                    isPlayerWinner 
+                    isDisqualified
+                      ? "bg-rose-500/10 border-rose-500/30 text-rose-400"
+                      : isPlayerWinner 
                       ? "bg-amber-500/10 border-amber-500/20 text-amber-500" 
                       : "bg-zinc-900 border-zinc-800 text-zinc-400"
                   )}>
-                    {player.username.charAt(0).toUpperCase()}
+                    {(player.username?.charAt(0) || 'P').toUpperCase()}
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-white flex items-center gap-2">
@@ -156,6 +177,8 @@ export const FinalResults = () => {
                         ? "bg-amber-500/10 border-amber-500/20 text-amber-500"
                         : outcomeText === 'DRAW'
                         ? "bg-zinc-900 border-zinc-800 text-zinc-400"
+                        : outcomeText === 'DISQUALIFIED'
+                        ? "bg-rose-500/20 border-rose-500/40 text-rose-400"
                         : "bg-rose-500/10 border-rose-500/20 text-rose-550"
                     )}>
                       {outcomeText}
@@ -175,6 +198,18 @@ export const FinalResults = () => {
                       {playerResult.verdict}
                     </span>
                   </div>
+
+                  {playerResult.disqualificationReason && (
+                    <div className="bg-rose-950/40 border border-rose-500/30 rounded-lg p-2.5 my-2 text-rose-300 font-mono text-[10px] space-y-1">
+                      <div className="text-rose-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                        <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
+                        Disqualified for Anomaly
+                      </div>
+                      <div className="text-zinc-400 text-[9px] leading-relaxed">
+                        {playerResult.disqualificationReason}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="flex justify-between items-center py-2 border-b border-zinc-900">
                     <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider font-mono">

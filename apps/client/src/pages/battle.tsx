@@ -74,12 +74,17 @@ export const BattlePage = () => {
     }
   }, [currentRoom, user, roomId, navigate]);
 
+  const lastLoadedProblemIdRef = useRef<string | null>(null);
+  const lastLoadedRoundIndexRef = useRef<number | null>(null);
+
   useEffect(() => {
     if (!currentRoom) return;
     const currentRound = currentRoom.rounds?.find((r) => r.roundIndex === currentRoundIndex) || (currentRoom.rounds && currentRoom.rounds.length > 0 ? currentRoom.rounds[currentRoom.rounds.length - 1] : undefined);
     const problem = currentRound?.problem || (currentRoom as any).problem;
     
-    if (problem) {
+    if (problem && (problem.id !== lastLoadedProblemIdRef.current || currentRoundIndex !== lastLoadedRoundIndexRef.current)) {
+      lastLoadedProblemIdRef.current = problem.id;
+      lastLoadedRoundIndexRef.current = currentRoundIndex;
       setCode(problem.initialCode || 'def solution():\n    # Write your code here\n    pass');
       useRoomStore.getState().setJudgeResult(null);
     }

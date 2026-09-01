@@ -85,7 +85,7 @@ export const FriendSidebar: React.FC = () => {
               
               <div className="relative z-10">
                 <div className="w-12 h-12 rounded-xl bg-surface-900 flex items-center justify-center font-bold text-white border border-surface-700 inner-light shadow-md">
-                  {friend.username?.[0].toUpperCase()}
+                  {(friend.username?.[0] || 'U').toUpperCase()}
                 </div>
                 <Circle 
                   size={14} 

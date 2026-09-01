@@ -233,7 +233,7 @@ export const PlayerHoverCard: React.FC<{
                 <div className="flex items-center space-x-6 relative z-10">
                   <div className="w-24 h-24 rounded-2xl bg-surface-900 border border-brand-500/40 flex items-center justify-center font-black text-brand-300 text-4xl shadow-xl shadow-brand-500/20 inner-light relative group">
                     <div className="absolute inset-0 bg-brand-500/20 blur-md rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <span className="relative z-10">{summary.username.substring(0, 2).toUpperCase()}</span>
+                    <span className="relative z-10">{(summary?.username?.substring(0, 2) || 'PL').toUpperCase()}</span>
                   </div>
                   <div>
                     <div className="flex items-center space-x-3 mb-2">

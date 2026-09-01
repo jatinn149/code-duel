@@ -269,6 +269,7 @@ const VerdictPriority: Record<Verdict, number> = {
   [Verdict.COMPILATION_ERROR]: 4,
   [Verdict.TIME_LIMIT_EXCEEDED]: 5,
   [Verdict.TIMEOUT]: 6,
+  [Verdict.DISQUALIFIED]: 99,
 };
 
 export function comparePlayerResults(a: PlayerResult, b: PlayerResult): number {

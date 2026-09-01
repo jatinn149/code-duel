@@ -318,7 +318,7 @@ export const MultiRoundBattle: React.FC<BattleComponentProps> = ({
                   Sector
                 </span>
                 <span className="text-[10px] font-mono font-bold text-indigo-400 uppercase">
-                  {currentRoom.id.slice(0, 4).toUpperCase()}
+                  {(currentRoom?.id?.slice(0, 4) || '').toUpperCase()}
                 </span>
               </div>
               <div className="bg-[#0a0a0a] border border-neutral-900 rounded-xl p-2.5">
@@ -353,7 +353,7 @@ export const MultiRoundBattle: React.FC<BattleComponentProps> = ({
               <div className="flex items-center space-x-3 w-2/5">
                 <div className="w-10 h-10 rounded-full bg-neutral-900 border-2 border-indigo-900/30 flex items-center justify-center relative shadow-inner">
                   <span className="text-sm font-black text-white font-mono">
-                    {user?.username.charAt(0).toUpperCase()}
+                    {(user?.username?.charAt(0) || 'U').toUpperCase()}
                   </span>
                   <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border border-black" />
                 </div>

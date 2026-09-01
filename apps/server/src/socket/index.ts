@@ -304,24 +304,29 @@ export const initSocket = (
         ? (room.rounds?.reduce((sum, r) => sum + (r.submissions?.[pid]?.score || 0), 0) || 0)
         : (roundResult?.scores[pid] || 0);
 
-      const finalOutcome = isFinalRound
+      const isDisqualified = s?.status === 'DISQUALIFIED' || (s as any)?.disqualificationReason !== undefined;
+
+      const finalOutcome = isDisqualified
+        ? 'DISQUALIFIED'
+        : isFinalRound
         ? (overallWinnerId === 'DRAW' ? 'DRAW' : (overallWinnerId === pid ? 'WINNER' : 'LOSER'))
         : (roundWinnerId === 'DRAW' ? 'DRAW' : (roundWinnerId === pid ? 'WINNER' : 'LOSER'));
 
       playerResults[pid] = {
         userId: pid,
         username: playerObj?.username || '',
-        outcome: finalOutcome,
-        verdict: (s?.status as Verdict) || Verdict.TIMEOUT,
-        passedCount: s?.testResults?.filter(t => t.status === 'passed').length ?? (s?.status === 'ACCEPTED' ? 1 : 0),
+        outcome: finalOutcome as any,
+        verdict: isDisqualified ? Verdict.DISQUALIFIED : ((s?.status as Verdict) || Verdict.TIMEOUT),
+        passedCount: isDisqualified ? 0 : (s?.testResults?.filter(t => t.status === 'passed').length ?? (s?.status === 'ACCEPTED' ? 1 : 0)),
         totalCount: s?.testResults?.length || ((round?.problem as any)?.testCases?.length || 1),
         executionTimeMs: s?.executionTimeMs || 0,
         memoryBytes: s?.memoryBytes || 0,
         language: s?.language || 'python',
-        score: finalScore,
-        correctnessScore: s?.correctnessScore ?? (s?.status === 'ACCEPTED' ? 800 : 0),
-        efficiencyScore: s?.efficiencyScore ?? 0,
-        speedScore: s?.speedScore ?? 0,
+        score: isDisqualified ? 0 : finalScore,
+        correctnessScore: isDisqualified ? 0 : (s?.correctnessScore ?? (s?.status === 'ACCEPTED' ? 800 : 0)),
+        efficiencyScore: isDisqualified ? 0 : (s?.efficiencyScore ?? 0),
+        speedScore: isDisqualified ? 0 : (s?.speedScore ?? 0),
+        disqualificationReason: (s as any)?.disqualificationReason,
       };
     });
 
@@ -1185,7 +1190,7 @@ export const initSocket = (
           }
         }
 
-        // Anti-cheat validation (simplified for now)
+        // Anti-cheat validation
         const isValid = antiCheatService.validateSubmission(
           user.id,
           parsed.code,
@@ -1193,10 +1198,50 @@ export const initSocket = (
           round.problem?.initialCode
         );
         if (!isValid) {
-          return socket.emit(
-            SocketEvents.ROOM_ERROR,
-            'Submission rejected due to anomaly detection.',
-          );
+          logger.warn({ userId: user.id, roomId: room.id }, 'Player disqualified due to anomaly detection');
+
+          const opponent = room.players.find(p => p.id !== user.id);
+          const rIndex = room.currentRound ?? 1;
+
+          const updatedRoom = await roomManager.updateRoom(room.id, (r) => {
+            r.state = MatchState.RESULTS;
+            const rnd = r.rounds?.find(roundItem => roundItem.roundIndex === rIndex);
+            if (rnd) {
+              rnd.submissions = rnd.submissions || {};
+              rnd.submissions[user.id] = {
+                userId: user.id,
+                code: parsed.code,
+                language: 'python',
+                status: 'DISQUALIFIED' as any,
+                submittedAt: new Date().toISOString(),
+                attempts: (rnd.submissions[user.id]?.attempts || 0) + 1,
+                score: 0,
+                disqualificationReason: 'Anomaly Detection: Unnatural typing telemetry / external paste detected',
+              } as any;
+              rnd.winner = opponent?.id;
+            }
+
+            r.roundResults = r.roundResults || [];
+            const scores: Record<string, number> = {
+              [user.id]: 0,
+            };
+            if (opponent) {
+              scores[opponent.id] = 1000;
+            }
+            const existingIndex = r.roundResults.findIndex(res => res.roundIndex === rIndex);
+            if (existingIndex >= 0) {
+              r.roundResults[existingIndex] = { roundIndex: rIndex, winner: opponent?.id, scores };
+            } else {
+              r.roundResults.push({ roundIndex: rIndex, winner: opponent?.id, scores });
+            }
+          });
+
+          clearRoundTimeout(room.id);
+          if (updatedRoom) {
+            matchFlowEngine.emit('roundEnded', { room: updatedRoom, roundIndex: rIndex });
+            emitRoomUpdated(room.id, updatedRoom);
+          }
+          return;
         }
 
         // Update room in Redis with player's submission marked as PENDING

@@ -152,7 +152,7 @@ export const QuickodeBattle: React.FC<BattleComponentProps> = ({
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center relative">
               <span className="text-xs font-semibold text-neutral-450 font-mono">
-                {user?.username.charAt(0).toUpperCase()}
+                {(user?.username?.charAt(0) || 'U').toUpperCase()}
               </span>
               <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border border-[#000000]" />
             </div>
@@ -198,7 +198,7 @@ export const QuickodeBattle: React.FC<BattleComponentProps> = ({
               </div>
               <div className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center relative">
                 <span className="text-xs font-semibold text-neutral-450 font-mono">
-                  {opp.username.charAt(0).toUpperCase()}
+                  {(opp?.username?.charAt(0) || 'O').toUpperCase()}
                 </span>
                 <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border border-[#000000] ${
                   opp.connected ? 'bg-emerald-500' : 'bg-rose-500'
@@ -280,7 +280,7 @@ export const QuickodeBattle: React.FC<BattleComponentProps> = ({
                   >
                     <div className="flex items-center space-x-2.5">
                       <div className="w-6 h-6 rounded bg-neutral-900 border border-neutral-805 flex items-center justify-center font-mono text-[10px] text-neutral-450 font-bold">
-                        {player.username.charAt(0).toUpperCase()}
+                        {(player?.username?.charAt(0) || 'P').toUpperCase()}
                       </div>
                       <div className="flex flex-col">
                         <span className="text-xs font-semibold text-neutral-205">

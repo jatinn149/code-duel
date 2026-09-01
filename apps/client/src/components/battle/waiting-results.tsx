@@ -213,7 +213,7 @@ export const WaitingResults = () => {
                         ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
                         : 'bg-zinc-900 border-zinc-800 text-zinc-400'
                     }`}>
-                      {player.username.charAt(0).toUpperCase()}
+                      {(player?.username?.charAt(0) || 'P').toUpperCase()}
                     </div>
                     <div>
                       <div className="flex items-center space-x-2">
