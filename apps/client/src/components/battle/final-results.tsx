@@ -224,26 +224,63 @@ export const FinalResults = () => {
                     <>
                       <div className="flex justify-between items-center py-2 border-b border-zinc-900">
                         <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider font-mono">
-                          Cumulative Score
+                          Total Tournament Score
                         </span>
-                        <span className="font-bold text-indigo-400 font-mono">
+                        <span className="font-bold text-indigo-400 font-mono text-sm">
                           {getCumulativeScore(player.id)?.toLocaleString() || 0} / {(currentRoom.totalRounds || 3) * 1000} PTS
                         </span>
                       </div>
                       
-                      {currentRoom.roundResults && currentRoom.roundResults.length > 0 && (
-                        <div className="bg-zinc-950/50 rounded-lg p-2.5 my-2 space-y-1.5 border border-zinc-900/60 text-[10px] font-mono">
-                          <div className="text-zinc-500 uppercase tracking-widest text-[8px] font-bold pb-1 border-b border-zinc-900">
-                            Rounds Score Breakdown
-                          </div>
-                          {currentRoom.roundResults.map((rr) => (
-                            <div key={rr.roundIndex} className="flex justify-between items-center text-zinc-400">
-                              <span>Round {rr.roundIndex}</span>
-                              <span className="text-zinc-300 font-bold">{rr.scores[player.id] ?? 0} / 1000</span>
-                            </div>
-                          ))}
+                      <div className="space-y-2 my-2.5">
+                        <div className="text-zinc-500 uppercase tracking-widest text-[8.5px] font-bold font-mono">
+                          Round-by-Round Breakdown
                         </div>
-                      )}
+                        {((currentRoom.rounds && currentRoom.rounds.length > 0) ? currentRoom.rounds : (currentRoom.roundResults || []).map(rr => ({ roundIndex: rr.roundIndex, problem: { title: `Round ${rr.roundIndex}` }, submissions: {} } as any))).map((rnd: any) => {
+                          const sub = rnd.submissions?.[player.id];
+                          const rr = currentRoom.roundResults?.find(res => res.roundIndex === rnd.roundIndex);
+                          const roundWinner = rr?.winner === player.id;
+                          const roundScore = sub?.score ?? rr?.scores?.[player.id] ?? 0;
+                          const testCasesPassed = sub?.testResults?.filter((t: any) => t.status === 'passed').length ?? (sub?.status === 'ACCEPTED' ? (rnd.problem?.testCases?.length || 1) : 0);
+                          const totalTestCases = sub?.testResults?.length || (rnd.problem?.testCases?.length || 1);
+
+                          return (
+                            <div key={rnd.roundIndex} className="bg-zinc-950/80 rounded-xl p-3 border border-zinc-900/80 space-y-2 text-[10px] font-mono">
+                              <div className="flex items-center justify-between pb-1.5 border-b border-zinc-900">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-bold text-white uppercase">Round {rnd.roundIndex}</span>
+                                  {roundWinner && (
+                                    <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-1.5 py-0.2 rounded text-[8px] font-bold">
+                                      WON
+                                    </span>
+                                  )}
+                                </div>
+                                <span className="font-bold text-indigo-400">{roundScore} / 1000 PTS</span>
+                              </div>
+                              <div className="text-[9px] text-zinc-400 font-sans truncate font-medium">
+                                {rnd.problem?.title || `Problem ${rnd.roundIndex}`}
+                              </div>
+                              <div className="grid grid-cols-3 gap-1.5 pt-0.5 text-[9px] text-zinc-400">
+                                <div className="bg-zinc-900/50 p-1.5 rounded border border-zinc-900 flex flex-col items-center">
+                                  <span className="text-zinc-500 text-[8px]">Correct</span>
+                                  <span className="text-zinc-200 font-bold">{sub?.correctnessScore ?? (sub?.status === 'ACCEPTED' ? 800 : 0)}/800</span>
+                                </div>
+                                <div className="bg-zinc-900/50 p-1.5 rounded border border-zinc-900 flex flex-col items-center">
+                                  <span className="text-zinc-500 text-[8px]">Efficiency</span>
+                                  <span className="text-zinc-200 font-bold">{sub?.efficiencyScore ?? 0}/120</span>
+                                </div>
+                                <div className="bg-zinc-900/50 p-1.5 rounded border border-zinc-900 flex flex-col items-center">
+                                  <span className="text-zinc-500 text-[8px]">Speed</span>
+                                  <span className="text-zinc-200 font-bold">{sub?.speedScore ?? 0}/80</span>
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between text-[9px] text-zinc-500 pt-0.5">
+                                <span>Tests: <strong className="text-zinc-300 font-mono">{testCasesPassed}/{totalTestCases}</strong></span>
+                                <span>Runtime: <strong className="text-zinc-300 font-mono">{sub?.executionTimeMs ? `${sub.executionTimeMs}ms` : '--'}</strong></span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </>
                   ) : (
                     <>
