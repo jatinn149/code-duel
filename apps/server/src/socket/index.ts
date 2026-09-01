@@ -313,15 +313,15 @@ export const initSocket = (
         username: playerObj?.username || '',
         outcome: finalOutcome,
         verdict: (s?.status as Verdict) || Verdict.TIMEOUT,
-        passedCount: s?.testResults?.filter(t => t.status === 'passed').length || 0,
-        totalCount: s?.testResults?.length || 5,
+        passedCount: s?.testResults?.filter(t => t.status === 'passed').length ?? (s?.status === 'ACCEPTED' ? 1 : 0),
+        totalCount: s?.testResults?.length || ((round?.problem as any)?.testCases?.length || 1),
         executionTimeMs: s?.executionTimeMs || 0,
         memoryBytes: s?.memoryBytes || 0,
         language: s?.language || 'python',
         score: finalScore,
-        correctnessScore: s?.correctnessScore || 0,
-        efficiencyScore: s?.efficiencyScore || 0,
-        speedScore: s?.speedScore || 0,
+        correctnessScore: s?.correctnessScore ?? (s?.status === 'ACCEPTED' ? 800 : 0),
+        efficiencyScore: s?.efficiencyScore ?? 0,
+        speedScore: s?.speedScore ?? 0,
       };
     });
 
@@ -747,15 +747,32 @@ export const initSocket = (
         ? Object.keys(round.metadata.testCaseWeights).map(id => ({ id }))
         : undefined;
 
-      // Fetch real problem test cases from repository if available
-      if (round?.problemId && _repositories?.problemRepository) {
-        try {
-          const problem = await _repositories.problemRepository.findById(round.problemId);
-          if (problem && problem.testCases && Array.isArray(problem.testCases) && problem.testCases.length > 0) {
-            testCases = problem.testCases;
+      // Fetch real problem test cases from repository or problems.json
+      if (round?.problemId) {
+        if (_repositories?.problemRepository) {
+          try {
+            const problem = await _repositories.problemRepository.findById(round.problemId);
+            if (problem && problem.testCases && Array.isArray(problem.testCases) && problem.testCases.length > 0) {
+              testCases = problem.testCases;
+            }
+          } catch (e) {
+            logger.warn({ error: e, problemId: round.problemId }, 'Could not load problem test cases from repository');
           }
-        } catch (e) {
-          logger.warn({ error: e, problemId: round.problemId }, 'Could not load problem test cases from repository');
+        }
+        if (!testCases || testCases.length === 0 || !testCases.some((tc: any) => tc.input !== undefined)) {
+          try {
+            const fs = require('fs');
+            const path = require('path');
+            const problemsPath = path.resolve(__dirname, '../../data/problems.json');
+            if (fs.existsSync(problemsPath)) {
+              const raw = fs.readFileSync(problemsPath, 'utf8');
+              const json = JSON.parse(raw);
+              const p = json.find((x: any) => String(x.id) === String(round.problemId));
+              if (p && Array.isArray(p.testCases) && p.testCases.length > 0) {
+                testCases = p.testCases;
+              }
+            }
+          } catch (e) {}
         }
       }
 

@@ -129,39 +129,95 @@ export class ChaosService {
     const scores: Record<string, number> = {};
     let winnerId: string | undefined = undefined;
     let highestScore = -1;
+    let bestCorrectness = -1;
+    let lowestRuntime = Infinity;
+    let earliestSubmission = Infinity;
 
     for (const [userId, sub] of Object.entries(round.submissions)) {
-      if (sub.status === 'passed' || sub.status === 'ACCEPTED') {
-        const timeTakenMs = new Date(sub.submittedAt).getTime() - new Date(round.startedAt || 0).getTime();
-        
-        let score = 1000;
-        const maxTimeMs = round.duration * 1000;
-        const timeRatio = Math.max(0, 1 - (timeTakenMs / maxTimeMs));
-        score += Math.floor(timeRatio * 500); 
+      const testResults = sub.testResults || [];
+      const totalCount = testResults.length > 0 ? testResults.length : 1;
+      const passedCount = testResults.filter(t => t.status === 'passed').length;
+      const isFullyCorrect = passedCount === totalCount && (sub.status === 'ACCEPTED' || sub.status === 'passed');
 
-        if ((sub as any).bonus) {
-          score += (sub as any).bonus;
+      // 1. Correctness Score (0 - 800 PTS)
+      let correctnessScore = 0;
+      if (testResults.length > 0) {
+        correctnessScore = Math.round(800 * (passedCount / totalCount));
+      } else if (isFullyCorrect) {
+        correctnessScore = 800;
+      }
+
+      // 2. Efficiency Score (0 - 120 PTS)
+      let efficiencyScore = 0;
+      const runtime = sub.executionTimeMs || 0;
+      if (isFullyCorrect) {
+        if (runtime <= 100) {
+          efficiencyScore = 120;
+        } else if (runtime <= 300) {
+          efficiencyScore = 90;
+        } else if (runtime <= 800) {
+          efficiencyScore = 60;
+        } else if (runtime <= 1500) {
+          efficiencyScore = 30;
+        } else {
+          efficiencyScore = 10;
         }
+      }
 
-        scores[userId] = score;
+      // 3. Solve Speed Score (0 - 80 PTS)
+      let speedScore = 0;
+      if (isFullyCorrect && round.startedAt && sub.submittedAt) {
+        const solveTimeSec = Math.max(0, (new Date(sub.submittedAt).getTime() - new Date(round.startedAt).getTime()) / 1000);
+        const durationSec = round.duration || 300;
+        const timeRatio = Math.max(0, Math.min(1, solveTimeSec / durationSec));
+        speedScore = Math.round(80 * (1 - timeRatio));
+      }
 
-        if (score > highestScore) {
-          highestScore = score;
-          winnerId = userId;
-        }
-      } else {
-        scores[userId] = 0;
+      // Bonus points (Chaos events)
+      const bonus = (sub as any).bonus || 0;
+      const totalScore = Math.max(0, correctnessScore + efficiencyScore + speedScore + bonus);
+
+      sub.correctnessScore = correctnessScore;
+      sub.efficiencyScore = efficiencyScore;
+      sub.speedScore = speedScore;
+      sub.score = totalScore;
+      scores[userId] = totalScore;
+
+      const submitTime = sub.submittedAt ? new Date(sub.submittedAt).getTime() : Infinity;
+      const isBetter = 
+        totalScore > highestScore ||
+        (totalScore === highestScore && correctnessScore > bestCorrectness) ||
+        (totalScore === highestScore && correctnessScore === bestCorrectness && runtime < lowestRuntime) ||
+        (totalScore === highestScore && correctnessScore === bestCorrectness && runtime === lowestRuntime && submitTime < earliestSubmission);
+
+      if (totalScore > 0 && isBetter) {
+        highestScore = totalScore;
+        bestCorrectness = correctnessScore;
+        lowestRuntime = runtime;
+        earliestSubmission = submitTime;
+        winnerId = userId;
+      } else if (totalScore === highestScore && totalScore === 0) {
+        winnerId = undefined;
       }
     }
 
     round.winner = winnerId;
     
     room.roundResults = room.roundResults || [];
-    room.roundResults.push({
-      roundIndex,
-      winner: winnerId,
-      scores,
-    });
+    const existingIndex = room.roundResults.findIndex(r => r.roundIndex === roundIndex);
+    if (existingIndex >= 0) {
+      room.roundResults[existingIndex] = {
+        roundIndex,
+        winner: winnerId,
+        scores,
+      };
+    } else {
+      room.roundResults.push({
+        roundIndex,
+        winner: winnerId,
+        scores,
+      });
+    }
   }
 
   determineOverallWinner(room: Room): string | undefined {
