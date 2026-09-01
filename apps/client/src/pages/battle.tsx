@@ -172,8 +172,15 @@ export const BattlePage = () => {
   };
 
   const handleLeaveRoom = () => {
-    if (!socket) return;
-    socket.emit(SocketEvents.LEAVE_ROOM);
+    if (currentRoom && (currentRoom.state === MatchState.PLAYING || currentRoom.state === MatchState.COUNTDOWN || currentRoom.state === MatchState.SUBMITTED_WAITING)) {
+      const confirmLeave = window.confirm(
+        'Are you sure you want to leave the active match? This will forfeit the duel and grant victory to your opponent.'
+      );
+      if (!confirmLeave) return;
+    }
+    if (socket) {
+      socket.emit(SocketEvents.LEAVE_ROOM);
+    }
     useRoomStore.getState().setRoom(null);
     navigate('/');
   };
@@ -266,8 +273,13 @@ export const BattlePage = () => {
   };
 
   const handleSubmitCode = async () => {
-    if (!socket) return;
+    if (!socket || isSubmitting) return;
     setIsSubmitting(true);
+
+    setTimeout(() => {
+      setIsSubmitting(false);
+    }, 12000); // 12s safety timeout
+
     socket.emit(SocketEvents.SUBMIT_CODE, {
       code,
       keystrokes: getKeystrokeCount(),

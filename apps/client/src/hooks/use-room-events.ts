@@ -23,20 +23,38 @@ export const useRoomEvents = (socket: Socket | null, roomId: string | undefined)
     };
 
     const handleRoomError = (error: string) => {
+      let formatted = error;
+      if (error === 'ALREADY_IN_A_ROOM') {
+        formatted = 'Previous session was active. We cleared it for you—please try again.';
+      } else if (error === 'ROOM_NOT_FOUND') {
+        formatted = 'Battle room not found or has expired. Please verify the code.';
+      } else if (error === 'ROOM_FULL') {
+        formatted = 'This battle room has reached maximum player capacity.';
+      } else if (error === 'MATCH_ALREADY_IN_PROGRESS') {
+        formatted = 'This duel is currently in progress and cannot be joined.';
+      } else if (error === 'ROOM_NOT_JOINABLE') {
+        formatted = 'This battle room is currently not available to join.';
+      } else if (error === 'AUTHENTICATION_REQUIRED' || error === 'SESSION_EXPIRED') {
+        formatted = 'Your session has expired. Please log in again.';
+      } else if (error.includes('Rate limit')) {
+        formatted = 'Action sent too quickly. Please wait a moment.';
+      }
+
       const isTransient = 
         error.includes('anomaly') ||
         error.includes('already accepted') ||
         error.includes('already submitted') ||
         error.includes('still being judged') ||
         error.includes('rate limit') ||
+        error.includes('Rate limit') ||
         error.includes('Invalid') ||
         error.includes('No need to resubmit') ||
         error.includes('rejected');
 
       if (isTransient) {
-        setTransientError(error);
+        setTransientError(formatted);
       } else {
-        setError(error);
+        setError(formatted);
       }
     };
 

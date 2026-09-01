@@ -26,13 +26,9 @@ export class DistributedRoomManager {
     if (existingRoomId) {
       const oldRoom = await this.getRoom(existingRoomId);
       if (oldRoom) {
-        if (oldRoom.state === MatchState.PLAYING) {
-          throw new Error('ALREADY_IN_A_ROOM');
-        }
-        await this.leaveRoom(owner.id);
-      } else {
-        await redisCache.del(`${this.PLAYER_TO_ROOM_PREFIX}${owner.id}`);
+        await this.leaveRoom(owner.id).catch(() => {});
       }
+      await redisCache.del(`${this.PLAYER_TO_ROOM_PREFIX}${owner.id}`);
     }
     const roomId = generateRoomCode();
     const now = new Date().toISOString();
@@ -110,13 +106,9 @@ export class DistributedRoomManager {
     if (existingRoomId) {
       const oldRoom = await this.getRoom(existingRoomId);
       if (oldRoom) {
-        if (oldRoom.state === MatchState.PLAYING) {
-          throw new Error('ALREADY_IN_A_ROOM');
-        }
-        await this.leaveRoom(user.id);
-      } else {
-        await redisCache.del(`${this.PLAYER_TO_ROOM_PREFIX}${user.id}`);
+        await this.leaveRoom(user.id).catch(() => {});
       }
+      await redisCache.del(`${this.PLAYER_TO_ROOM_PREFIX}${user.id}`);
     }
 
     const room = await this.updateRoom(roomId, (r) => {

@@ -136,6 +136,7 @@ export class EvaluatorJudgeService implements IJudgeService {
             testCases: validTestCases.map(tc => ({ input: tc.input, expectedOutput: tc.expectedOutput })),
             timeoutMs: 3000,
           }),
+          signal: AbortSignal.timeout(8000),
         });
 
         if (response.ok) {
