@@ -48,13 +48,25 @@ export class PgProblemRepository implements IProblemRepository {
   }
 
   private mapToDomain(problem: PrismaProblem): Problem {
+    let testCases = problem.testCases as any;
+    if (typeof testCases === 'string') {
+      try {
+        testCases = JSON.parse(testCases);
+      } catch (e) {
+        testCases = undefined;
+      }
+    }
+    if (testCases && !Array.isArray(testCases) && Array.isArray(testCases.testCases)) {
+      testCases = testCases.testCases;
+    }
+
     return {
       ...problem,
       questionFamilyId: problem.questionFamilyId || '',
       realWorldDomain: problem.realWorldDomain || undefined,
       initialCode: problem.initialCode || undefined,
       solutionCode: problem.solutionCode || undefined,
-      testCases: (problem.testCases as any) || undefined,
+      testCases: Array.isArray(testCases) ? testCases : undefined,
       compatibleModes: problem.compatibleModes as GameMode[],
       compatibleRounds: problem.compatibleRounds as RoundType[],
       questionType: problem.questionType as ProblemType,

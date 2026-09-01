@@ -28,13 +28,15 @@ const evaluateSchema = z.object({
 
 // Helper to determine python command
 const getPythonCommand = () => {
-  try {
-    const { execSync } = require('child_process');
-    execSync('python3 --version', { stdio: 'ignore' });
-    return 'python3';
-  } catch (e) {
-    return 'python';
+  const { execSync } = require('child_process');
+  const candidates = ['python3', 'python', '/usr/bin/python3', '/usr/local/bin/python3', 'py'];
+  for (const cmd of candidates) {
+    try {
+      execSync(`${cmd} --version`, { stdio: 'ignore' });
+      return cmd;
+    } catch (e) {}
   }
+  return process.platform === 'win32' ? 'python' : 'python3';
 };
 
 const PYTHON_CMD = getPythonCommand();
@@ -169,10 +171,19 @@ const runTestCase = (code, language, input, timeoutMs) => {
 
 // Health Check Endpoints
 app.get(['/health', '/api/health'], (_req, res) => {
+  let pythonVersion = 'unknown';
+  try {
+    const { execSync } = require('child_process');
+    pythonVersion = execSync(`${PYTHON_CMD} --version`).toString().trim();
+  } catch (e) {
+    pythonVersion = `error: ${e.message}`;
+  }
+
   res.json({
     status: 'ok',
     uptimeSec: Math.floor(process.uptime()),
     pythonCommand: PYTHON_CMD,
+    pythonVersion,
     timestamp: new Date().toISOString(),
   });
 });
