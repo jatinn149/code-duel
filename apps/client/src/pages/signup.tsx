@@ -4,12 +4,13 @@ import { useAuthStore } from '@/store/auth-store';
 import {
   Sword,
   Loader2,
-  Shield,
   Zap,
   Target,
   UserPlus,
   AlertCircle,
   ChevronLeft,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -34,6 +35,7 @@ export const SignupPage = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const { signup, isLoading, error, setError } = useAuthStore();
   const navigate = useNavigate();
@@ -148,16 +150,26 @@ export const SignupPage = () => {
                   </label>
                   <div className="relative group">
                     <input
-                      type="password"
+                      type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-4 pr-10 py-2.5 bg-zinc-950/40 hover:bg-zinc-950/70 border border-zinc-800/80 rounded-lg text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 hover:border-zinc-700/80 transition-all duration-200 shadow-inner"
+                      className="w-full pl-4 pr-11 py-2.5 bg-zinc-950/40 hover:bg-zinc-950/70 border border-zinc-800/80 rounded-lg text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 hover:border-zinc-700/80 transition-all duration-200 shadow-inner"
                       placeholder="••••••••"
                       required
                     />
-                    <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">
-                      <Shield className="w-4 h-4 text-zinc-600 group-focus-within:text-emerald-400 transition-colors duration-200" />
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-zinc-500 hover:text-zinc-300 focus:outline-none transition-colors"
+                      tabIndex={-1}
+                      title={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-4 h-4 text-emerald-400" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
                   </div>
                 </motion.div>
 

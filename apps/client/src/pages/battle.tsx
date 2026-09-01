@@ -32,6 +32,10 @@ export const BattlePage = () => {
   const currentRoundIndex = currentRoom?.currentRound || 1;
 
   useEffect(() => {
+    useRoomStore.getState().setError(null);
+  }, [roomId]);
+
+  useEffect(() => {
     setDryRunResult(null);
     setIsRunningCode(false);
     return () => {
@@ -307,7 +311,7 @@ export const BattlePage = () => {
     return QuickodeBattle;
   }, [location.pathname, currentRoom]);
 
-  if (error) {
+  if (error && !currentRoom) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-[#0a0a0a]">
         <motion.div

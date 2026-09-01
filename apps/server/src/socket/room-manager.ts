@@ -1,5 +1,5 @@
 import { Room, Player, MatchState, User, GameMode, ChaosEventType, MatchRuleSet } from '@code-duel/types';
-import { generateRoomCode } from '@code-duel/shared';
+import { generateRoomCode, normalizeRoomCode } from '@code-duel/shared';
 import { logger } from '@/utils/logger';
 import { redisCache } from '@/utils/redis-cache';
 import { v4 as uuidv4 } from 'uuid';
@@ -20,7 +20,6 @@ export class DistributedRoomManager {
     this.matchFlowEngine = matchFlowEngine;
   }
 
-
   async createRoom(owner: User, maxPlayers: number = 2, gameMode?: GameMode, options?: any): Promise<Room> {
     const existingRoomId = await redisCache.get(`${this.PLAYER_TO_ROOM_PREFIX}${owner.id}`);
     if (existingRoomId) {
@@ -30,7 +29,7 @@ export class DistributedRoomManager {
       }
       await redisCache.del(`${this.PLAYER_TO_ROOM_PREFIX}${owner.id}`);
     }
-    const roomId = generateRoomCode();
+    const roomId = normalizeRoomCode(generateRoomCode());
     const now = new Date().toISOString();
 
     const player: Player = {
@@ -85,8 +84,10 @@ export class DistributedRoomManager {
     return room;
   }
 
-  async joinRoom(roomId: string, user: User): Promise<Room> {
-    const existingRoomId = await redisCache.get(`${this.PLAYER_TO_ROOM_PREFIX}${user.id}`);
+  async joinRoom(rawRoomId: string, user: User): Promise<Room> {
+    const roomId = normalizeRoomCode(rawRoomId);
+    const existingRoomIdRaw = await redisCache.get(`${this.PLAYER_TO_ROOM_PREFIX}${user.id}`);
+    const existingRoomId = existingRoomIdRaw ? normalizeRoomCode(existingRoomIdRaw) : undefined;
     
     // Idempotent join if already in the room
     if (existingRoomId === roomId) {
@@ -383,7 +384,8 @@ export class DistributedRoomManager {
     }
   }
 
-  async getRoom(roomId: string): Promise<Room | undefined> {
+  async getRoom(rawRoomId: string): Promise<Room | undefined> {
+    const roomId = normalizeRoomCode(rawRoomId);
     const data = await redisCache.get(`${this.ROOM_PREFIX}${roomId}`);
     if (!data) return undefined;
     try {
@@ -406,7 +408,7 @@ export class DistributedRoomManager {
 
   async getRoomByPlayerId(userId: string): Promise<Room | undefined> {
     const roomId = await redisCache.get(`${this.PLAYER_TO_ROOM_PREFIX}${userId}`);
-    return roomId ? this.getRoom(roomId) : undefined;
+    return roomId ? this.getRoom(normalizeRoomCode(roomId)) : undefined;
   }
 
   async updatePlayerStatus(userId: string, connected: boolean): Promise<Room | null> {
@@ -497,7 +499,8 @@ export class DistributedRoomManager {
   /**
    * Helper to perform CAS (Compare-And-Swap) updates on a room.
    */
-  async updateRoom(roomId: string, mutator: (room: Room) => void | Promise<void>, fencingToken?: number): Promise<Room> {
+  async updateRoom(rawRoomId: string, mutator: (room: Room) => void | Promise<void>, fencingToken?: number): Promise<Room> {
+    const roomId = normalizeRoomCode(rawRoomId);
     const maxRetries = parseInt(process.env.OCC_MAX_RETRIES || '10', 10);
     let retries = maxRetries;
     while(retries-- > 0) {
