@@ -53,6 +53,7 @@ export interface RoundSubmission {
   correctnessScore?: number;
   efficiencyScore?: number;
   speedScore?: number;
+  bonus?: number;
 }
 
 export interface RoundResult {

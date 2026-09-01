@@ -241,7 +241,7 @@ export const GeneralLobby = () => {
                               : "bg-white/[0.02] border-white/[0.08] text-surface-200"
                             : "bg-white/[0.01] border-white/[0.02] text-surface-500"
                         )}>
-                          {player.username.substring(0, 2).toUpperCase()}
+                          {(player?.username?.substring(0, 2) || 'PL').toUpperCase()}
                         </div>
                         
                         {/* Connection status indicator */}

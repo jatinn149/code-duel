@@ -395,7 +395,7 @@ export const MultiRoundBattle: React.FC<BattleComponentProps> = ({
                 </div>
                 <div className="w-10 h-10 rounded-full bg-neutral-900 border-2 border-indigo-900/30 flex items-center justify-center relative shadow-inner">
                   <span className="text-sm font-black text-white font-mono">
-                    {opponent?.username?.charAt(0).toUpperCase() || '?'}
+                    {(opponent?.username?.charAt(0) || '?').toUpperCase()}
                   </span>
                   <div className={`absolute -bottom-0.5 -left-0.5 w-3 h-3 rounded-full border border-black ${
                     opponent?.connected ? 'bg-emerald-500' : 'bg-neutral-800'
@@ -598,18 +598,18 @@ export const MultiRoundBattle: React.FC<BattleComponentProps> = ({
                         Verdict:{' '}
                         <span
                           className={
-                            lastJudgeResult.overallStatus === 'passed'
+                            lastJudgeResult?.overallStatus === 'passed'
                               ? 'text-emerald-400 font-bold'
                               : 'text-indigo-455 font-bold'
                           }
                         >
-                          {lastJudgeResult.overallStatus.toUpperCase()}
+                          {(lastJudgeResult?.overallStatus || 'PENDING').toUpperCase()}
                         </span>
                       </div>
                     </div>
 
                     <div className="space-y-1.5 max-h-24 overflow-y-auto">
-                      {lastJudgeResult.testResults.map((test: any, index: number) => (
+                      {(lastJudgeResult?.testResults || []).map((test: any, index: number) => (
                         <div
                           key={test.testCaseId}
                           className="flex items-center justify-between bg-[#0a0a0a] px-3 py-1.5 rounded border border-neutral-900 text-[10px]"

@@ -145,6 +145,7 @@ export const ChaosArenaBattle: React.FC<BattleComponentProps> = (props) => {
   // Chaos Event Arrival Alert States
   const [swapAlertActive, setSwapAlertActive] = useState(false);
   const [mathRewardActive, setMathRewardActive] = useState(false);
+  const [mathWinnerData, setMathWinnerData] = useState<{ winnerId: string; winnerUsername: string } | null>(null);
   const lastHandledSwapRef = useRef<string | null>(null);
   const lastMathWinnerRef = useRef<string | null>(null);
 
@@ -182,6 +183,10 @@ export const ChaosArenaBattle: React.FC<BattleComponentProps> = (props) => {
       const winnerId = chaos.data.winnerId;
       if (winnerId && lastMathWinnerRef.current !== `${chaos.activatedAt}-${winnerId}`) {
         lastMathWinnerRef.current = `${chaos.activatedAt}-${winnerId}`;
+        setMathWinnerData({
+          winnerId,
+          winnerUsername: chaos.data.winnerUsername || 'Opponent',
+        });
         setMathRewardActive(true);
         const timer = setTimeout(() => setMathRewardActive(false), 6000);
         return () => clearTimeout(timer);
@@ -191,7 +196,11 @@ export const ChaosArenaBattle: React.FC<BattleComponentProps> = (props) => {
 
   useEffect(() => {
     if (!socket) return;
-    const handleMathSolved = () => {
+    const handleMathSolved = (data: { userId: string; username: string }) => {
+      setMathWinnerData({
+        winnerId: data?.userId || '',
+        winnerUsername: data?.username || 'Opponent',
+      });
       setMathRewardActive(true);
       const timer = setTimeout(() => setMathRewardActive(false), 6000);
       return () => clearTimeout(timer);
@@ -511,7 +520,7 @@ export const ChaosArenaBattle: React.FC<BattleComponentProps> = (props) => {
                 </div>
                 <div className="w-10 h-10 rounded-full bg-neutral-900 border-2 border-red-900/30 flex items-center justify-center relative shadow-inner">
                   <span className="text-sm font-black text-white font-mono">
-                    {opponent?.username?.charAt(0).toUpperCase() || '?'}
+                    {(opponent?.username?.charAt(0) || '?').toUpperCase()}
                   </span>
                   <div className={`absolute -bottom-0.5 -left-0.5 w-3 h-3 rounded-full border border-black ${
                     opponent?.connected ? 'bg-emerald-500' : 'bg-neutral-800'
@@ -629,19 +638,41 @@ export const ChaosArenaBattle: React.FC<BattleComponentProps> = (props) => {
                   initial={{ y: -50, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   exit={{ y: -50, opacity: 0 }}
-                  className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-emerald-950/90 border border-emerald-500/40 rounded-xl px-5 py-3 shadow-[0_0_30px_rgba(16,185,129,0.3)] backdrop-blur-md flex items-center gap-3.5"
+                  className={`absolute top-4 left-1/2 -translate-x-1/2 z-50 rounded-xl px-5 py-3 backdrop-blur-md flex items-center gap-3.5 border ${
+                    mathWinnerData?.winnerId === user?.id
+                      ? 'bg-emerald-950/90 border-emerald-500/40 shadow-[0_0_30px_rgba(16,185,129,0.3)]'
+                      : 'bg-amber-950/90 border-amber-500/40 shadow-[0_0_30px_rgba(245,158,11,0.3)]'
+                  }`}
                 >
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center flex-shrink-0">
-                    <Sparkles className="w-4 h-4 text-emerald-400" />
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 border ${
+                    mathWinnerData?.winnerId === user?.id
+                      ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
+                      : 'bg-amber-500/20 border-amber-500/40 text-amber-400'
+                  }`}>
+                    <Sparkles className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="text-emerald-400 font-mono font-black text-xs uppercase tracking-wider flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                      Lightning Math Solved!
-                    </div>
-                    <div className="text-zinc-300 font-mono text-[10px]">
-                      Reward: <span className="text-white font-bold">+30s Time Added</span> & <span className="text-emerald-300 font-bold">+150 Bonus PTS</span>
-                    </div>
+                    {mathWinnerData?.winnerId === user?.id ? (
+                      <>
+                        <div className="text-emerald-400 font-mono font-black text-xs uppercase tracking-wider flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                          ⚡ Lightning Math Solved! You Won The Bounty!
+                        </div>
+                        <div className="text-zinc-300 font-mono text-[10px]">
+                          Reward: <span className="text-white font-bold">+30s Time Added</span> & <span className="text-emerald-300 font-bold">+150 Bonus PTS</span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-amber-400 font-mono font-black text-xs uppercase tracking-wider flex items-center gap-1.5">
+                          <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
+                          ⚡ Lightning Math Solved by {mathWinnerData?.winnerUsername || 'Opponent'}!
+                        </div>
+                        <div className="text-zinc-300 font-mono text-[10px]">
+                          Reward awarded to <span className="text-amber-300 font-bold">{mathWinnerData?.winnerUsername || 'Opponent'}</span> (+30s & +150 PTS)
+                        </div>
+                      </>
+                    )}
                   </div>
                 </motion.div>
               )}
@@ -732,6 +763,28 @@ export const ChaosArenaBattle: React.FC<BattleComponentProps> = (props) => {
                   </div>
                 </motion.div>
               )}
+
+              {/* Editor Freeze Opponent HUD notification */}
+              {currentRoom.chaosEvent && eventTimeLeftSec !== null && currentRoom.chaosEvent.type === ChaosEventType.EDITOR_FREEZE && currentRoom.chaosEvent.data?.frozenUserId !== user?.id && (
+                <motion.div
+                  initial={{ y: -30, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -30, opacity: 0 }}
+                  className="absolute top-4 left-1/2 -translate-x-1/2 z-40 bg-rose-950/90 border border-rose-500/40 rounded-xl px-5 py-2.5 shadow-[0_0_25px_rgba(244,63,94,0.25)] backdrop-blur-md flex items-center gap-3"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center">
+                    <AlertCircle className="w-4 h-4 text-rose-400" />
+                  </div>
+                  <div>
+                    <div className="text-rose-300 font-mono font-black text-[11px] uppercase tracking-wider">
+                      ⚡ EMP STRIKE DEPLOYED: Opponent Terminal Frozen!
+                    </div>
+                    <div className="text-zinc-400 font-mono text-[9px]">
+                      Opponent's keyboard transmitters locked for <span className="text-rose-300 font-bold">{eventTimeLeftSec}s</span>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
             </AnimatePresence>
 
             {/* Lightning Math Active Challenge Overlay */}
@@ -777,27 +830,34 @@ export const ChaosArenaBattle: React.FC<BattleComponentProps> = (props) => {
                 </div>
               )}
 
-            {/* Editor Freeze Active Overlay */}
-            {currentRoom.chaosEvent &&
-              currentRoom.chaosEvent.type === ChaosEventType.EDITOR_FREEZE &&
-              currentRoom.chaosEvent.data?.frozenUserId === user?.id &&
-              eventTimeLeftSec !== null && (
-                <div className="absolute inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-8 text-center border-l-2 border-red-650">
-                  <div className="w-14 h-14 bg-red-950/40 border border-red-500/20 rounded-full flex items-center justify-center mb-5 animate-pulse">
-                    <AlertCircle className="w-7 h-7 text-red-500" />
-                  </div>
-                  <h3 className="text-red-500 font-mono font-black text-xs tracking-wider uppercase leading-none mb-2">
-                    ⚠️ Writer Terminal Disabled: EMP Pulse
-                  </h3>
-                  <p className="text-neutral-455 text-[11px] max-w-sm mb-6 leading-relaxed font-medium">
-                    Your key transmitters have been disrupted by an electro-magnetic strike.
-                  </p>
-                  
-                  <div className="text-base font-bold font-mono tracking-widest text-red-500 bg-red-950/10 border border-red-950/40 px-6 py-3 rounded-lg mb-4 animate-pulse">
-                    TERMINAL UNLOCKING IN {eventTimeLeftSec}s
-                  </div>
-                </div>
-              )}
+            {/* Editor Freeze Active Overlay for Frozen Player */}
+            <AnimatePresence>
+              {currentRoom.chaosEvent &&
+                currentRoom.chaosEvent.type === ChaosEventType.EDITOR_FREEZE &&
+                currentRoom.chaosEvent.data?.frozenUserId === user?.id &&
+                eventTimeLeftSec !== null && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="absolute inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-8 text-center border-l-4 border-red-600"
+                  >
+                    <div className="w-16 h-16 bg-red-950/60 border-2 border-red-500/40 rounded-2xl flex items-center justify-center mb-5 animate-pulse shadow-[0_0_30px_rgba(239,68,68,0.4)]">
+                      <AlertCircle className="w-8 h-8 text-red-500 animate-spin" style={{ animationDuration: '3s' }} />
+                    </div>
+                    <h3 className="text-red-500 font-mono font-black text-sm tracking-widest uppercase leading-none mb-2 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]">
+                      ⚠️ CRITICAL ALERT: EMP TRANSMITTER FREEZE
+                    </h3>
+                    <p className="text-neutral-400 text-xs max-w-sm mb-6 leading-relaxed font-medium">
+                      Your keyboard transmitters have been disabled by an Electro-Magnetic Pulse strike.
+                    </p>
+                    
+                    <div className="text-lg font-black font-mono tracking-widest text-red-400 bg-red-950/30 border border-red-500/40 px-8 py-3.5 rounded-xl mb-4 animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.2)]">
+                      TERMINAL UNLOCKING IN {eventTimeLeftSec}s
+                    </div>
+                  </motion.div>
+                )}
+            </AnimatePresence>
           </div>
 
           {/* Console / Output Terminal Tabs (Bottom Panel) */}
@@ -923,18 +983,18 @@ export const ChaosArenaBattle: React.FC<BattleComponentProps> = (props) => {
                         Verdict:{' '}
                         <span
                           className={
-                            lastJudgeResult.overallStatus === 'passed'
+                            lastJudgeResult?.overallStatus === 'passed'
                               ? 'text-emerald-400 font-bold'
                               : 'text-red-500 font-bold'
                           }
                         >
-                          {lastJudgeResult.overallStatus.toUpperCase()}
+                          {(lastJudgeResult?.overallStatus || 'PENDING').toUpperCase()}
                         </span>
                       </div>
                     </div>
 
                     <div className="space-y-1.5 max-h-24 overflow-y-auto">
-                      {lastJudgeResult.testResults.map((test: any, index: number) => (
+                      {(lastJudgeResult?.testResults || []).map((test: any, index: number) => (
                         <div
                           key={test.testCaseId}
                           className="flex items-center justify-between bg-[#0a0a0a] px-3 py-1.5 rounded border border-neutral-900 text-[10px]"

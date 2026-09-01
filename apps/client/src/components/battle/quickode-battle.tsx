@@ -498,19 +498,19 @@ export const QuickodeBattle: React.FC<BattleComponentProps> = ({
                       Status:{' '}
                       <span
                         className={
-                          lastJudgeResult.overallStatus === 'passed'
+                          lastJudgeResult?.overallStatus === 'passed'
                             ? 'text-emerald-500 font-bold'
                             : 'text-rose-500 font-bold'
                         }
                       >
-                        {lastJudgeResult.overallStatus.toUpperCase()}
+                        {(lastJudgeResult?.overallStatus || 'PENDING').toUpperCase()}
                       </span>
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
                     <div className="space-y-1">
-                      {lastJudgeResult.testResults.map((test: any, index: number) => (
+                      {(lastJudgeResult?.testResults || []).map((test: any, index: number) => (
                         <div
                           key={test.testCaseId}
                           className="flex items-center justify-between bg-neutral-950/40 px-2 py-1 rounded border border-neutral-900 text-[11px]"

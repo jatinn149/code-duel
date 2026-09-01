@@ -381,11 +381,35 @@ export class ChaosService {
       const currentRound = room.rounds?.find((r) => r.roundIndex === currentRoundIndex);
       if (currentRound) {
         currentRound.duration += 30;
+        if (currentRound.roundEndsAt) {
+          currentRound.roundEndsAt = new Date(new Date(currentRound.roundEndsAt).getTime() + 30000).toISOString();
+        }
+        if (!currentRound.submissions) currentRound.submissions = {};
+        if (!currentRound.submissions[userId]) {
+          currentRound.submissions[userId] = {
+            userId,
+            code: '',
+            language: 'python',
+            status: 'DRAFT',
+            submittedAt: '',
+            attempts: 0,
+            bonus: 150,
+          } as any;
+        } else {
+          currentRound.submissions[userId].bonus = (currentRound.submissions[userId].bonus || 0) + 150;
+        }
       }
+
+      if (room.roundTimer?.duration) {
+        room.roundTimer.duration += 30;
+      }
+
+      const solverPlayer = room.players.find((p) => p.id === userId);
 
       room.chaosEvent.data = {
         ...room.chaosEvent.data,
         winnerId: userId,
+        winnerUsername: solverPlayer?.username || 'Opponent',
         solved: true,
       };
       room.chaosEvent.expiresAt = new Date().toISOString();

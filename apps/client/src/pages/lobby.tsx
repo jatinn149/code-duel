@@ -212,7 +212,7 @@ export const LobbyPage = () => {
             </div>
             
             <div className="w-20 h-20 rounded-full bg-neutral-900 border-2 border-neutral-800 flex items-center justify-center text-2xl font-black font-mono text-white mb-2 mt-4">
-              {player.username.charAt(0).toUpperCase()}
+              {(player?.username?.charAt(0) || 'P').toUpperCase()}
             </div>
 
             <div className="min-w-0 w-full mb-1">
@@ -347,7 +347,7 @@ export const LobbyPage = () => {
                   </div>
                   
                   <div className="w-20 h-20 rounded-full bg-neutral-900 border-2 border-neutral-800 flex items-center justify-center text-2xl font-black font-mono text-white mb-4 mt-2">
-                    {hostPlayer.username.charAt(0).toUpperCase()}
+                    {(hostPlayer?.username?.charAt(0) || 'H').toUpperCase()}
                   </div>
 
                   <h2 className="text-lg font-bold text-white tracking-tight leading-none">
@@ -472,7 +472,7 @@ export const LobbyPage = () => {
                   </div>
                   
                   <div className="w-20 h-20 rounded-full bg-neutral-900 border-2 border-neutral-800 flex items-center justify-center text-2xl font-black font-mono text-white mb-4 mt-2">
-                    {challengerPlayer.username.charAt(0).toUpperCase()}
+                    {(challengerPlayer?.username?.charAt(0) || 'C').toUpperCase()}
                   </div>
 
                   <h2 className="text-lg font-bold text-white tracking-tight leading-none">
