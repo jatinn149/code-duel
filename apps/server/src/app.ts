@@ -20,7 +20,12 @@ app.use(
         callback(null, true);
         return;
       }
-      if (origin.endsWith('.trycloudflare.com') || origin.endsWith('.trycloudflared.com') || origin.endsWith('.netlify.app')) {
+      if (
+        origin.endsWith('.trycloudflare.com') ||
+        origin.endsWith('.trycloudflared.com') ||
+        origin.endsWith('.netlify.app') ||
+        origin.endsWith('.vercel.app')
+      ) {
         callback(null, true);
         return;
       }

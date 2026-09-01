@@ -195,7 +195,12 @@ export const initSocket = (
             callback(null, true);
             return;
           }
-          if (origin.endsWith('.trycloudflare.com') || origin.endsWith('.trycloudflared.com')) {
+          if (
+            origin.endsWith('.trycloudflare.com') ||
+            origin.endsWith('.trycloudflared.com') ||
+            origin.endsWith('.netlify.app') ||
+            origin.endsWith('.vercel.app')
+          ) {
             callback(null, true);
             return;
           }
@@ -372,9 +377,8 @@ export const initSocket = (
             const { level: newLevel, xp: newXp } = _progressionService.calculateLevelProgress(u.level, u.xp, xpGain);
             const newMatchesPlayed = u.matchesPlayed + 1;
             const newRank = _progressionService.calculateRank(newRating, newMatchesPlayed);
-            const newStreak = isWin
-              ? (u.streak > 0 ? u.streak + 1 : 1)
-              : (isDraw ? u.streak : (u.streak < 0 ? u.streak - 1 : -1));
+            const currentStreak = Math.max(0, u.streak || 0);
+            const newStreak = isWin ? currentStreak + 1 : (isDraw ? currentStreak : 0);
 
             let newPlacementMatches = u.placementMatchesPlayed ?? 0;
             if (isRanked && ratingChange !== 0) {

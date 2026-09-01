@@ -284,7 +284,7 @@ export const PlayerHoverCard: React.FC<{
                     <span className="text-surface-400 font-bold tracking-widest uppercase text-xs">Current Streak</span>
                     <span className="text-accent-amber font-black font-mono flex items-center gap-2 text-lg">
                       <Flame className="w-5 h-5 text-accent-amber animate-pulse" />
-                      {summary.streak} WINS
+                      {Math.max(0, summary.streak || 0)} WINS
                     </span>
                   </div>
                 </div>

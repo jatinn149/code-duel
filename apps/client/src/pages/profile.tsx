@@ -291,7 +291,7 @@ export const ProfilePage = () => {
                   Coding Streak (Current / Best)
                 </span>
                 <span className="text-2xl font-bold text-white tracking-tight leading-none block mt-1.5 font-mono">
-                  {user?.streak ?? 0} / {user?.highestStreak ?? 0}
+                  {Math.max(0, user?.streak ?? 0)} / {Math.max(0, user?.highestStreak ?? 0)}
                 </span>
                 <span className="text-[9px] font-mono text-neutral-600 block mt-3 uppercase font-semibold">Consecutive wins</span>
               </div>

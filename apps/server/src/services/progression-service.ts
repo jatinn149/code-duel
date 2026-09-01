@@ -50,9 +50,9 @@ export class ProgressionService {
     const newHighestRating = Math.max(user.highestRating, newRating);
     
     // Streak logic
-    const newStreak = result.isWin 
-      ? (user.streak > 0 ? user.streak + 1 : 1)
-      : (user.streak < 0 ? user.streak - 1 : -1);
+    const currentStreak = Math.max(0, user.streak || 0);
+    const newStreak = result.isWin ? currentStreak + 1 : 0;
+    const newHighestStreak = Math.max(user.highestStreak || 0, newStreak);
 
     const { level: newLevel, xp: newXp } = this.calculateLevelProgress(user.level, user.xp, result.xpGain);
     const newRank = this.calculateRank(newRating, newMatchesPlayed);
@@ -71,6 +71,7 @@ export class ProgressionService {
       rating: newRating,
       highestRating: newHighestRating,
       streak: newStreak,
+      highestStreak: newHighestStreak,
       level: newLevel,
       xp: newXp,
       rank: newRank,
