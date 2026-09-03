@@ -614,17 +614,13 @@ export function sanitizeRoomForUser(room: Room, userId: string): Room {
   const sanitizedRoom = JSON.parse(JSON.stringify(room)) as Room;
   
   if (sanitizedRoom.state === MatchState.PLAYING) {
-    const roundIndex = sanitizedRoom.currentRound ?? 0;
+    const roundIndex = sanitizedRoom.currentRound || (sanitizedRoom.rounds && sanitizedRoom.rounds.length > 0 ? sanitizedRoom.rounds[sanitizedRoom.rounds.length - 1].roundIndex : 1);
     const round = sanitizedRoom.rounds?.find(r => r.roundIndex === roundIndex);
     const mySub = round?.submissions?.[userId ?? ''];
     
     let showWaiting = false;
-    if (mySub) {
-      if (sanitizedRoom.gameMode === GameMode.MULTI_ROUND) {
-        showWaiting = mySub.status === 'ACCEPTED' || mySub.status === 'PENDING';
-      } else {
-        showWaiting = !!mySub.submittedAt;
-      }
+    if (mySub && mySub.submittedAt) {
+      showWaiting = true;
     }
 
     if (showWaiting) {

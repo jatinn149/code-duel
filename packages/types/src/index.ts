@@ -542,6 +542,11 @@ export interface PlayerResult {
   efficiencyScore?: number;
   speedScore?: number;
   disqualificationReason?: string;
+  ratingChange?: number;
+  newRating?: number;
+  xpGain?: number;
+  newLevel?: number;
+  newXp?: number;
 }
 
 export interface MatchResult {

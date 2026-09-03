@@ -81,6 +81,10 @@ export class AntiCheatService {
   clearSuspicion(userId: string): void {
     this.suspiciousUsers.delete(userId);
   }
+
+  resetMatch(userIds: string[]): void {
+    userIds.forEach((uid) => this.suspiciousUsers.delete(uid));
+  }
 }
 
 export const antiCheatService = new AntiCheatService();

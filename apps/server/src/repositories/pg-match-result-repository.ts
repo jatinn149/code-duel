@@ -64,8 +64,13 @@ export class PgMatchResultRepository implements IMatchResultRepository {
               if (player.placementMatchesPlayed !== undefined) updateData.placementMatchesPlayed = player.placementMatchesPlayed;
               if (player.seasonalTier !== undefined) updateData.seasonalTier = player.seasonalTier;
               if (player.newStreak !== undefined) {
-                updateData.streak = player.newStreak;
+                updateData.streak = Math.max(0, player.newStreak);
                 updateData.highestStreak = Math.max(user.highestStreak, player.newStreak);
+                updateData.lastDailyResetAt = new Date();
+              }
+              if (summary.winnerId === player.userId) {
+                updateData.dailyWins = { increment: 1 };
+                updateData.lastDailyWinAt = new Date();
               }
 
               await tx.user.update({

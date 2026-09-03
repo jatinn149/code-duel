@@ -174,6 +174,23 @@ export async function initializeAndValidateDb(): Promise<void> {
       throw new Error(errMsg);
     }
     logger.info('Database schema validation succeeded. All critical tables exist.');
+
+    // 4. Self-healing: Repair any legacy negative streaks in the database
+    try {
+      await instance.$executeRawUnsafe(`
+        UPDATE "User" 
+        SET "streak" = 0 
+        WHERE "streak" < 0;
+      `);
+      await instance.$executeRawUnsafe(`
+        UPDATE "User" 
+        SET "highestStreak" = 0 
+        WHERE "highestStreak" < 0;
+      `);
+      logger.info('Database self-healing: sanitized legacy negative streaks to 0');
+    } catch (e: any) {
+      logger.warn({ err: e.message }, 'Self-healing streak sanitize skipped or failed');
+    }
   } catch (validationError: any) {
     logger.error({ error: validationError.message }, 'FATAL: Database schema validation failed.');
     throw validationError;

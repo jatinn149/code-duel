@@ -6,7 +6,7 @@ export class QuickodeService {
 
   async initializeRoom(room: Room, durationOptions: { duration: number }): Promise<void> {
     room.gameMode = GameMode.QUICKODE;
-    room.ruleSet = MatchRuleSet.CASUAL;
+    room.ruleSet = room.ruleSet || MatchRuleSet.RANKED;
     room.powerupsEnabled = false;
     room.totalRounds = 1;
     room.currentRound = 0;

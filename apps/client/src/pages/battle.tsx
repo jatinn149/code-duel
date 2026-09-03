@@ -16,6 +16,8 @@ import { useTelemetry } from '@/hooks/use-telemetry';
 import { QuickodeBattle } from '@/components/battle/quickode-battle';
 import { MultiRoundBattle } from '@/components/battle/multi-round-battle';
 import { ChaosArenaBattle } from '@/components/battle/chaos-arena-battle';
+import { WaitingResults } from '@/components/battle/waiting-results';
+import { RoundSummaryInterstitial } from '@/components/battle/round-summary-interstitial';
 
 export const BattlePage = () => {
   const { roomId } = useParams<{ roomId: string }>();
@@ -91,13 +93,26 @@ export const BattlePage = () => {
       lastLoadedRoundIndexRef.current = currentRoundIndex;
       setCode(problem.initialCode || 'def solution():\n    # Write your code here\n    pass');
       useRoomStore.getState().setJudgeResult(null);
+      resetTelemetry();
     }
   }, [currentRoundIndex, currentRoom?.rounds]);
 
   useLatency(socket);
   useCountdown(currentRoom?.countdownStartAt);
   useRoomEvents(socket, roomId);
-  const { getKeystrokeCount } = useTelemetry(socket, roomId);
+  const { getKeystrokeCount, recordKeystroke, resetTelemetry } = useTelemetry(socket, roomId);
+
+  useEffect(() => {
+    if (currentRoom?.state === MatchState.COUNTDOWN || currentRoom?.state === MatchState.PLAYING) {
+      resetTelemetry();
+    }
+  }, [currentRoom?.state, currentRoom?.matchStartAt]);
+
+  const handleCodeChange = (newCode: string) => {
+    const diff = Math.abs(newCode.length - code.length);
+    recordKeystroke(Math.max(1, diff));
+    setCode(newCode);
+  };
 
   useEffect(() => {
     if (!currentRoom || !user) return;
@@ -344,6 +359,8 @@ export const BattlePage = () => {
   const isRoundDataReady = !isMatchMode || 
                            currentRoom.state === MatchState.WAITING || 
                            currentRoom.state === MatchState.COUNTDOWN || 
+                           currentRoom.state === MatchState.SUBMITTED_WAITING ||
+                           currentRoom.state === MatchState.ROUND_SUMMARY ||
                            (currentRound && (currentRound.problem || (currentRoom as any).problem || currentRound.problemId) && user);
 
   if (!currentRoom || !isRoundDataReady) {
@@ -361,6 +378,16 @@ export const BattlePage = () => {
     );
   }
 
+  // Render Waiting Screen if player submitted and is waiting for opponent
+  if (currentRoom.state === MatchState.SUBMITTED_WAITING) {
+    return <WaitingResults />;
+  }
+
+  // Render 10-Second Round Interstitial when round concludes
+  if (currentRoom.state === MatchState.ROUND_SUMMARY) {
+    return <RoundSummaryInterstitial />;
+  }
+
   const currentPlayer = currentRoom.players.find((p: Player) => p.id === user?.id);
 
   return (
@@ -372,7 +399,7 @@ export const BattlePage = () => {
         opponents={opponents}
         user={user}
         code={code}
-        setCode={setCode}
+        setCode={handleCodeChange}
         isSubmitting={isSubmitting}
         latency={latency}
         countdown={countdown}

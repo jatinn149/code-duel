@@ -47,8 +47,8 @@ export class PgUserRepository implements IUserRepository {
         rank: user.rank,
         wins: user.wins,
         losses: user.losses,
-        streak: user.streak,
-        highestStreak: user.highestStreak,
+        streak: Math.max(0, user.streak || 0),
+        highestStreak: Math.max(0, user.highestStreak || 0),
         highestRating: user.highestRating,
         dailyChallengeWins: user.dailyChallengeWins,
         dailyChallengeBestRank: user.dailyChallengeBestRank,
@@ -71,6 +71,8 @@ export class PgUserRepository implements IUserRepository {
     if (data.lastDailyWinAt !== undefined) updateData.lastDailyWinAt = data.lastDailyWinAt ? new Date(data.lastDailyWinAt) : null;
     if (data.lastStreakResetAt !== undefined) updateData.lastStreakResetAt = data.lastStreakResetAt ? new Date(data.lastStreakResetAt) : null;
     if (data.lastDailyResetAt !== undefined) updateData.lastDailyResetAt = data.lastDailyResetAt ? new Date(data.lastDailyResetAt) : null;
+    if (data.streak !== undefined) updateData.streak = Math.max(0, data.streak);
+    if (data.highestStreak !== undefined) updateData.highestStreak = Math.max(0, data.highestStreak);
     delete updateData.id;
     delete updateData.createdAt;
     delete updateData.updatedAt;
@@ -106,6 +108,8 @@ export class PgUserRepository implements IUserRepository {
   private mapToDomain(user: PrismaUser): User {
     return {
       ...user,
+      streak: Math.max(0, user.streak || 0),
+      highestStreak: Math.max(0, user.highestStreak || 0),
       role: user.role as UserRole,
       rank: user.rank as Rank,
       status: user.status as PresenceStatus,

@@ -54,11 +54,20 @@ export const createAuthRouter = () => {
 
   router.post('/logout-all', authMiddleware, authController.logoutAll);
 
-  router.get('/me', authMiddleware, (req, res) => {
-    res.json({
-      success: true,
-      data: { user: req.user },
-    });
+  router.get('/me', authMiddleware, async (req, res) => {
+    try {
+      const userDetails = await userRepository.findById(req.user!.id);
+      if (!userDetails) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+      const { passwordHash, ...safeUser } = userDetails;
+      res.json({
+        success: true,
+        data: { user: safeUser },
+      });
+    } catch {
+      res.status(500).json({ success: false, message: 'Failed to retrieve profile' });
+    }
   });
 
   router.get('/profile', authMiddleware, async (req, res, next) => {

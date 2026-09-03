@@ -25,6 +25,7 @@ import {
   MatchRuleSet,
   RoundType,
   ExecutionVerdict,
+  MissionType,
 } from '@code-duel/types';
 import { roomManager, sanitizeRoomForUser } from './room-manager';
 import {
@@ -52,6 +53,7 @@ import { RatingService } from '@/services/rating-service';
 import { SocialService } from '@/services/social-service';
 import { NotificationService } from '@/services/notification-service';
 import { PresenceService } from '@/services/presence-service';
+import { calculateDailyStreak } from '@/services/progression-service';
 
 export interface RateLimiterStore {
   isRateLimited(key: string, limit: number, windowMs: number): Promise<boolean>;
@@ -378,7 +380,8 @@ export const initSocket = (
             const newMatchesPlayed = u.matchesPlayed + 1;
             const newRank = _progressionService.calculateRank(newRating, newMatchesPlayed);
             const currentStreak = Math.max(0, u.streak || 0);
-            const newStreak = isWin ? currentStreak + 1 : (isDraw ? currentStreak : 0);
+            const lastActive = u.lastDailyWinAt || u.lastDailyResetAt;
+            const newStreak = calculateDailyStreak(currentStreak, lastActive);
 
             let newPlacementMatches = u.placementMatchesPlayed ?? 0;
             if (isRanked && ratingChange !== 0) {
@@ -402,30 +405,66 @@ export const initSocket = (
             };
           }));
 
-            const durationMs = Date.now() - new Date(room.matchStartAt || room.createdAt || Date.now()).getTime();
-            const summary = {
-              roomId: room.id,
-              winnerId: overallWinnerId === 'DRAW' ? undefined : overallWinnerId,
-              durationMs,
-              mode: room.gameMode,
-              endedAt: new Date().toISOString(),
-              results: resultsPayload,
-            };
+          // Attach progression and rating changes to playerResults so the client can display animations
+          resultsPayload.forEach((res) => {
+            if (playerResults[res.userId]) {
+              playerResults[res.userId].ratingChange = res.ratingChange;
+              playerResults[res.userId].newRating = res.newRating;
+              playerResults[res.userId].xpGain = res.xpGain;
+              playerResults[res.userId].newLevel = res.newLevel;
+              playerResults[res.userId].newXp = res.newXp;
+            }
+          });
 
-            const saved = await _repositories?.matchResultRepository?.saveMatchWithLock(summary, true);
-            if (saved) {
-              logger.info({ roomId: room.id }, 'Match results saved successfully inside transaction');
-              room.players.forEach((player) => {
-                const res = resultsPayload.find(r => r.userId === player.id);
-                if (res) {
-                  player.rating = res.newRating;
-                }
-              });
+          const durationMs = Date.now() - new Date(room.matchStartAt || room.createdAt || Date.now()).getTime();
+          const summary = {
+            roomId: room.id,
+            winnerId: overallWinnerId === 'DRAW' ? undefined : overallWinnerId,
+            durationMs,
+            mode: room.gameMode,
+            endedAt: new Date().toISOString(),
+            results: resultsPayload,
+          };
+
+          const saved = await _repositories?.matchResultRepository?.saveMatchWithLock(summary, true);
+          if (saved) {
+            logger.info({ roomId: room.id }, 'Match results saved successfully inside transaction');
+            room.players.forEach((player) => {
+              const res = resultsPayload.find(r => r.userId === player.id);
+              if (res) {
+                player.rating = res.newRating;
+              }
+            });
+          }
+
+          // Track Daily Missions upon match conclusion
+          if (_retentionService) {
+            try {
+              await Promise.all(
+                validUsers.map(async (u) => {
+                  // 1. Play Matches mission
+                  await _retentionService.trackMissionProgress(u.id, MissionType.PLAY_MATCHES, 1);
+
+                  // 2. Win Duels mission
+                  if (overallWinnerId === u.id) {
+                    await _retentionService.trackMissionProgress(u.id, MissionType.WIN_DUELS, 1);
+                  }
+
+                  // 3. Perfect Solve mission (passed testcases with no runtime/compilation error)
+                  const pRes = playerResults[u.id];
+                  if (pRes && pRes.passedCount > 0 && pRes.verdict !== Verdict.COMPILATION_ERROR && pRes.verdict !== Verdict.RUNTIME_ERROR) {
+                    await _retentionService.trackMissionProgress(u.id, MissionType.PERFECT_SOLVE, 1);
+                  }
+                })
+              );
+            } catch (missionErr) {
+              logger.error({ err: missionErr, roomId: room.id }, 'Failed to update daily mission progress');
             }
           }
-        } catch (err) {
-          logger.error({ err, roomId: room.id }, 'Failed to save match results/ratings inside roundEnded socket event');
         }
+      } catch (err) {
+        logger.error({ err, roomId: room.id }, 'Failed to save match results/ratings inside roundEnded socket event');
+      }
     }
 
     await matchFinalizer.finalizeRound(
@@ -496,6 +535,7 @@ export const initSocket = (
       });
 
       if (updated) {
+        antiCheatService.resetMatch(updated.players.map((p) => p.id));
         emitRoomUpdated(roomId, updated);
         scheduleTransitionTimeout(roomId, MatchState.PLAYING, new Date(initializationEndsAt));
       }
@@ -1044,6 +1084,9 @@ export const initSocket = (
       const room = await roomManager.startCountdown(user.id);
       if (!room) return;
 
+      // Reset suspicion scores for all room players when a match begins
+      antiCheatService.resetMatch(room.players.map((p) => p.id));
+
       emitRoomUpdated(room.id, room);
       io.to(room.id).emit(SocketEvents.START_COUNTDOWN);
 
@@ -1052,6 +1095,7 @@ export const initSocket = (
         try {
           const updatedRoom = await roomManager.startMatch(room.id);
           if (updatedRoom && updatedRoom.state === MatchState.PLAYING) {
+            antiCheatService.resetMatch(updatedRoom.players.map((p) => p.id));
             emitRoomUpdated(room.id, updatedRoom);
             io.to(room.id).emit(SocketEvents.GAME_START);
 
@@ -1512,6 +1556,7 @@ export const initSocket = (
     socket.on(SocketEvents.RETURN_TO_LOBBY, async () => {
       const room = await roomManager.returnToLobby(user.id);
       if (room) {
+        antiCheatService.resetMatch(room.players.map((p) => p.id));
         socket.emit(SocketEvents.ROOM_UPDATED, room);
       }
     });

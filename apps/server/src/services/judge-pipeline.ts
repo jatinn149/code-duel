@@ -364,7 +364,7 @@ export class MatchFinalizer {
         room.matchResult = matchResult;
       } else {
         room.state = MatchState.ROUND_SUMMARY;
-        room.summaryEndsAt = new Date(Date.now() + 5000).toISOString();
+        room.summaryEndsAt = new Date(Date.now() + 10000).toISOString();
       }
 
       room.updatedAt = new Date().toISOString();
@@ -407,8 +407,11 @@ export class MatchFinalizer {
 
       const isFinalRound = roundIndex === (finalizedRoom.totalRounds || 1);
       if (isFinalRound) {
-        // Emit GAME_END with the overall winnerId (or default to owner if DRAW/undefined)
-        io.to(roomId).emit(SocketEvents.GAME_END, { winnerId: finalOverallWinnerId || finalizedRoom.players[0]?.id });
+        // Emit GAME_END with the overall winnerId and matchResult summary
+        io.to(roomId).emit(SocketEvents.GAME_END, {
+          winnerId: finalOverallWinnerId || finalizedRoom.players[0]?.id,
+          summary: finalizedRoom.matchResult as any,
+        });
         
         // Clean up player persistent containers for the match
         try {

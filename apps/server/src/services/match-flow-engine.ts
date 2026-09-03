@@ -148,8 +148,12 @@ export class MatchFlowEngine extends EventEmitter {
       // Score the round for current submissions so we can display progress
       this.scoreCurrentRound(room);
       
-      const allSolved = room.players.every(p => currentRound.submissions[p.id]?.status === 'ACCEPTED');
-      if (allSolved) {
+      const allSubmitted = room.players.every(p => {
+        const sub = currentRound.submissions[p.id];
+        return sub && sub.submittedAt;
+      });
+
+      if (allSubmitted && !hasPending) {
         shouldEndRound = true;
       } else {
         const elapsedMs = Date.now() - new Date(currentRound.startedAt || 0).getTime();

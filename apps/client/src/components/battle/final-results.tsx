@@ -1,13 +1,34 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRoomStore } from '@/store/room-store';
 import { useAuthStore } from '@/store/auth-store';
 import { useSocket } from '@/hooks/use-socket';
 import { useNavigate } from 'react-router-dom';
-import { SocketEvents } from '@code-duel/shared';
+import { SocketEvents, calculateCpRank } from '@code-duel/shared';
 import { motion } from 'framer-motion';
-import { Trophy, LogOut, RefreshCw, Code2, Award, Zap, Cpu, Terminal, AlertTriangle, ShieldAlert } from 'lucide-react';
+import { Trophy, LogOut, RefreshCw, Code2, Award, Zap, Cpu, Terminal, AlertTriangle, ShieldAlert, TrendingUp, TrendingDown, Flame, Sparkles } from 'lucide-react';
 import { clsx } from 'clsx';
 import { GameMode } from '@code-duel/types';
+
+function useAnimatedCounter(target: number, duration: number = 1200) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (target === 0) {
+      setCount(0);
+      return;
+    }
+    const startTime = Date.now();
+    const startVal = 0;
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.round(startVal + (target - startVal) * ease));
+      if (progress >= 1) clearInterval(interval);
+    }, 16);
+    return () => clearInterval(interval);
+  }, [target, duration]);
+  return count;
+}
 
 export const FinalResults = () => {
   const { currentRoom } = useRoomStore();
@@ -30,6 +51,34 @@ export const FinalResults = () => {
   }, [currentRoom, matchResult]);
 
   const isMeWinner = matchResult?.winnerId === user?.id;
+
+  const myResult = useMemo(() => {
+    if (!matchResult || !user) return null;
+    return matchResult.playerResults[user.id] || null;
+  }, [matchResult, user]);
+
+  const cpChange = myResult?.ratingChange ?? 0;
+  const currentCp = myResult?.newRating ?? (user?.rating ? user.rating + cpChange : 0);
+  const xpGained = myResult?.xpGain ?? (isMeWinner ? 100 : (matchResult?.isDraw ? 50 : 30));
+  const newLevel = myResult?.newLevel ?? user?.level ?? 1;
+  const newXp = myResult?.newXp ?? user?.xp ?? 0;
+  const isLevelUp = newLevel > (user?.level ?? 1);
+
+  const displayCpChange = useAnimatedCounter(cpChange, 1200);
+  const displayXp = useAnimatedCounter(xpGained, 1200);
+
+  useEffect(() => {
+    if (!matchResult || !user || !myResult) return;
+    if (myResult.newRating !== undefined || myResult.newXp !== undefined) {
+      useAuthStore.getState().setUser({
+        ...user,
+        rating: myResult.newRating ?? user.rating,
+        xp: myResult.newXp ?? user.xp,
+        level: myResult.newLevel ?? user.level,
+        streak: user.streak ? Math.max(1, user.streak) : 1,
+      });
+    }
+  }, [matchResult, user, myResult]);
 
   const getCumulativeScore = (playerId: string) => {
     return currentRoom?.roundResults?.reduce((sum, res) => sum + (res.scores[playerId] || 0), 0) || 0;
@@ -99,6 +148,110 @@ export const FinalResults = () => {
           </p>
         </div>
 
+        {/* Animated Game Progression & Rating HUD */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.15, duration: 0.4 }}
+          className="mb-8 p-5 bg-gradient-to-b from-zinc-900/90 to-zinc-950 border border-zinc-800/90 rounded-2xl relative overflow-hidden backdrop-blur-md shadow-2xl"
+        >
+          <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 font-bold mb-3 flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-spin" style={{ animationDuration: '6s' }} />
+              Combat Rewards & Rating Delta
+            </span>
+            {isLevelUp && (
+              <span className="bg-amber-500/20 text-amber-400 border border-amber-500/40 px-2 py-0.5 rounded-full text-[9px] font-black tracking-wider animate-pulse">
+                🎉 LEVEL UP! LVL {newLevel}
+              </span>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* CP Delta Card */}
+            <div className={clsx(
+              "p-4 rounded-xl border flex flex-col justify-between transition-all",
+              cpChange > 0
+                ? "bg-emerald-950/25 border-emerald-500/35 shadow-[0_0_20px_rgba(16,185,129,0.12)]"
+                : cpChange < 0
+                ? "bg-rose-950/25 border-rose-500/35 shadow-[0_0_20px_rgba(244,63,94,0.12)]"
+                : "bg-zinc-900/50 border-zinc-800"
+            )}>
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-400 text-xs font-semibold">Rating (CP)</span>
+                {cpChange > 0 ? (
+                  <TrendingUp className="w-4 h-4 text-emerald-400" />
+                ) : cpChange < 0 ? (
+                  <TrendingDown className="w-4 h-4 text-rose-400" />
+                ) : (
+                  <Zap className="w-4 h-4 text-zinc-400" />
+                )}
+              </div>
+              <div className="my-2 flex items-baseline gap-2">
+                <span className={clsx(
+                  "text-3xl font-black font-mono tracking-tight",
+                  cpChange > 0 ? "text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.4)]" :
+                  cpChange < 0 ? "text-rose-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.4)]" :
+                  "text-zinc-300"
+                )}>
+                  {displayCpChange > 0 ? `+${displayCpChange}` : displayCpChange} CP
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400">
+                <span>{currentCp} CP Total</span>
+                <span className="text-amber-400/90 font-bold">{calculateCpRank(currentCp)}</span>
+              </div>
+            </div>
+
+            {/* XP Progression Card */}
+            <div className="p-4 rounded-xl border bg-cyan-950/20 border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.1)] flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-400 text-xs font-semibold">Experience (XP)</span>
+                <Zap className="w-4 h-4 text-cyan-400" />
+              </div>
+              <div className="my-2 flex items-baseline gap-1.5">
+                <span className="text-3xl font-black font-mono text-cyan-400 tracking-tight drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]">
+                  +{displayXp}
+                </span>
+                <span className="text-xs font-mono text-cyan-400/70 font-semibold">XP</span>
+              </div>
+              {/* Animated Progress Bar */}
+              <div className="space-y-1">
+                <div className="flex justify-between text-[10px] font-mono text-zinc-400">
+                  <span>Level {newLevel}</span>
+                  <span>{newXp} / 100 XP</span>
+                </div>
+                <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                  <motion.div
+                    className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(100, Math.max(5, (newXp % 100)))}%` }}
+                    transition={{ duration: 1.2, ease: "easeOut" }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Daily Streak Card */}
+            <div className="p-4 rounded-xl border bg-amber-950/20 border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.1)] flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-400 text-xs font-semibold">Daily Streak</span>
+                <Flame className="w-4 h-4 text-amber-500 animate-pulse" />
+              </div>
+              <div className="my-2 flex items-baseline gap-1.5">
+                <span className="text-3xl font-black font-mono text-amber-400 tracking-tight drop-shadow-[0_0_8px_rgba(245,158,11,0.4)]">
+                  {user?.streak ? Math.max(1, user.streak) : 1}
+                </span>
+                <span className="text-xs font-mono text-amber-400/70 font-semibold">Days</span>
+              </div>
+              <div className="text-[11px] text-zinc-400 font-mono flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-ping" />
+                Active Streak Extended!
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 my-auto max-w-4xl mx-auto w-full">
           {currentRoom?.players.map((player) => {
             const isPlayerWinner = winner?.id === player.id;
@@ -160,9 +313,21 @@ export const FinalResults = () => {
                         </span>
                       )}
                     </h3>
-                    <p className="text-[10px] font-mono text-zinc-500 block mt-0.5">
-                      {player.rating} CP
-                    </p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-[10px] font-mono text-zinc-500">
+                        {playerResult.newRating ?? player.rating} CP
+                      </span>
+                      {playerResult.ratingChange !== undefined && playerResult.ratingChange !== 0 && (
+                        <span className={clsx(
+                          "text-[9px] font-mono font-bold px-1.5 py-0.2 rounded border",
+                          playerResult.ratingChange > 0
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/25"
+                            : "bg-rose-500/10 text-rose-400 border-rose-500/25"
+                        )}>
+                          {playerResult.ratingChange > 0 ? `+${playerResult.ratingChange}` : playerResult.ratingChange} CP
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
 

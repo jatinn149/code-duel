@@ -124,9 +124,9 @@ export class RatingService {
     const n = players.length;
     if (n < 2) return results;
 
-    // 2. Ignore rating calculations if any player has not completed the match
-    const allCompleted = players.every(p => p.status === 'completed');
-    if (!allCompleted) {
+    // 2. Only ignore rating calculations if NO player completed the match or scored anything
+    const anyActiveOrCompleted = players.some(p => p.status === 'completed' || p.score > 0);
+    if (!anyActiveOrCompleted) {
       return results;
     }
 
@@ -143,9 +143,16 @@ export class RatingService {
         // Expected score of I against J
         const expectedIJ = 1 / (1 + Math.pow(10, (pJ.rating - pI.rating) / 400));
 
-        // Actual outcome score
+        // Actual outcome score (disconnected / disqualified automatically forfeits to opponent)
         let actualIJ = 0.5;
-        if (pI.score > pJ.score) {
+        const isIFailed = pI.status === 'disconnected' || pI.status === 'disqualified';
+        const isJFailed = pJ.status === 'disconnected' || pJ.status === 'disqualified';
+
+        if (isIFailed && !isJFailed) {
+          actualIJ = 0.0;
+        } else if (!isIFailed && isJFailed) {
+          actualIJ = 1.0;
+        } else if (pI.score > pJ.score) {
           actualIJ = 1.0;
         } else if (pI.score < pJ.score) {
           actualIJ = 0.0;

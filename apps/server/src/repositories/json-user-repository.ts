@@ -15,8 +15,8 @@ export class JsonUserRepository implements IUserRepository {
       rank: user.rank ?? Rank.UNRANKED,
       wins: user.wins ?? user.matchesWon ?? 0,
       losses: user.losses ?? ((user.matchesPlayed || 0) - (user.wins ?? user.matchesWon ?? 0)),
-      streak: user.streak ?? 0,
-      highestStreak: user.highestStreak ?? user.streak ?? 0,
+      streak: Math.max(0, user.streak ?? 0),
+      highestStreak: Math.max(0, user.highestStreak ?? user.streak ?? 0),
       highestRating: user.highestRating ?? user.rating ?? 0,
       dailyChallengeWins: user.dailyChallengeWins ?? 0,
       dailyChallengeBestRank: user.dailyChallengeBestRank ?? 0,
@@ -67,8 +67,11 @@ export class JsonUserRepository implements IUserRepository {
       if (index === -1) {
         throw new Error(`User with id ${id} not found`);
       }
-      users[index] = { ...users[index], ...data };
-      updatedUser = users[index];
+      const merged = { ...users[index], ...data };
+      if (data.streak !== undefined) merged.streak = Math.max(0, data.streak);
+      if (data.highestStreak !== undefined) merged.highestStreak = Math.max(0, data.highestStreak);
+      users[index] = merged;
+      updatedUser = this.normalize(users[index]);
     });
     return updatedUser!;
   }
