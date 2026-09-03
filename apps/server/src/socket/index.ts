@@ -1238,8 +1238,9 @@ export const initSocket = (
           }
         }
 
-        // Anti-cheat validation
-        const isValid = antiCheatService.validateSubmission(
+        // Anti-cheat validation (exempt PREDICT_OUTPUT as users only type a short digit or word)
+        const isPredictOutput = (round.roundType as any) === 'PREDICT_OUTPUT' || (round.roundType as any) === RoundType.PREDICT_OUTPUT;
+        const isValid = isPredictOutput || antiCheatService.validateSubmission(
           user.id,
           parsed.code,
           parsed.keystrokes || 0,
@@ -1336,18 +1337,30 @@ export const initSocket = (
             const problem = await _repositories?.problemRepository?.findById(currentRound.problemId);
             const expectedSolution = problem?.solutionCode || '';
 
-            const normalizePrediction = (str: string) => {
-              return str
-                .replace(/\r\n/g, '\n')
+            const extractPrediction = (raw: string) => {
+              if (!raw) return '';
+              const nonCommentLines = raw
                 .split('\n')
-                .map(line => line.trimEnd())
-                .join('\n')
-                .replace(/\n$/, '');
+                .map(line => line.replace(/#.*$/, '').trim())
+                .filter(line => line.length > 0);
+
+              const cleaned = nonCommentLines.join('\n').trim();
+              if (!cleaned) return '';
+
+              // Check if wrapped in print(...)
+              const printMatch = cleaned.match(/print\s*\(\s*(['"]?)(.*?)\1\s*\)/s);
+              if (printMatch) {
+                return printMatch[2].trim().toLowerCase();
+              }
+
+              // Extract last non-empty line and strip quotes
+              const lastLine = nonCommentLines[nonCommentLines.length - 1] || cleaned;
+              return lastLine.replace(/^['"]|['"]$/g, '').trim().toLowerCase();
             };
 
-            const userAns = normalizePrediction(parsed.code);
-            const expectedAns = normalizePrediction(expectedSolution);
-            const isCorrect = userAns === expectedAns;
+            const userAns = extractPrediction(parsed.code);
+            const expectedAns = extractPrediction(expectedSolution || problem?.testCases?.[0]?.expectedOutput || '');
+            const isCorrect = userAns.length > 0 && userAns === expectedAns;
 
             const results = [
               {
@@ -1470,6 +1483,10 @@ export const initSocket = (
         const round = room.rounds?.find(r => r.roundIndex === roundIndex);
         if (!round) {
           return socket.emit(SocketEvents.ROOM_ERROR, 'Round not found.');
+        }
+        const isPredictOutput = (round.roundType as any) === 'PREDICT_OUTPUT' || (round.roundType as any) === RoundType.PREDICT_OUTPUT;
+        if (isPredictOutput) {
+          return socket.emit(SocketEvents.ROOM_ERROR, 'Dry-run execution is disabled for Predict / Trace Output rounds.');
         }
 
         const problem = await _repositories?.problemRepository?.findById(round.problemId);

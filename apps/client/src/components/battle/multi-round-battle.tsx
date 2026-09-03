@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { Room, Player, User, MatchState } from '@code-duel/types';
 import Editor from '@monaco-editor/react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { clsx } from 'clsx';
 import {
   Play,
   CheckCircle2,
@@ -137,6 +138,11 @@ export const MultiRoundBattle: React.FC<BattleComponentProps> = ({
   const currentRoundIndex = currentRoom.currentRound || 1;
   const currentRoundObj = currentRoom.rounds?.find(r => r.roundIndex === currentRoundIndex) || (currentRoom.rounds && currentRoom.rounds.length > 0 ? currentRoom.rounds[currentRoom.rounds.length - 1] : undefined);
   const problem = currentRoundObj?.problem || (currentRoom as any).problem;
+
+  const isPredictOutput = 
+    (currentRoundObj?.roundType as any) === 'PREDICT_OUTPUT' || 
+    (currentRoundObj?.roundType as any) === 'OUTPUT_TRACING' ||
+    (problem as any)?.questionType === 'PREDICT_OUTPUT';
 
   const problemTitle = problem?.title || 'Loading Problem...';
   const problemDescription = problem?.description || '';
@@ -421,15 +427,21 @@ export const MultiRoundBattle: React.FC<BattleComponentProps> = ({
             <div className="flex items-center space-x-2">
               <button
                 onClick={handleRunCode}
-                disabled={isRunningCode || isJudging || !isPlaying}
-                className="flex items-center space-x-1.5 px-3 py-1.5 bg-neutral-900 hover:bg-neutral-850 hover:text-white disabled:opacity-30 text-neutral-350 text-[10px] font-black uppercase rounded border border-neutral-800 transition-all active:scale-95 font-mono"
+                disabled={isPredictOutput || isRunningCode || isJudging || !isPlaying}
+                title={isPredictOutput ? 'Dry-Run is disabled for Trace / Predict Output rounds' : undefined}
+                className={clsx(
+                  "flex items-center space-x-1.5 px-3 py-1.5 text-[10px] font-black uppercase rounded border transition-all font-mono",
+                  isPredictOutput
+                    ? "bg-neutral-900/40 border-neutral-800/40 text-neutral-600 cursor-not-allowed opacity-40"
+                    : "bg-neutral-900 hover:bg-neutral-850 hover:text-white disabled:opacity-30 text-neutral-350 border-neutral-800 active:scale-95"
+                )}
               >
                 {isRunningCode ? (
                   <Loader2 className="w-2.5 h-2.5 animate-spin text-indigo-500" />
                 ) : (
                   <Play className="w-2.5 h-2.5 fill-current text-indigo-500" />
                 )}
-                <span>Run Dry-Run</span>
+                <span>{isPredictOutput ? 'Dry-Run Disabled' : 'Run Dry-Run'}</span>
               </button>
               <button
                 onClick={handleSubmitCode}

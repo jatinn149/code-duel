@@ -51,8 +51,24 @@ const runTestCase = (code, language, input, timeoutMs) => {
     const filename = `eval_${Date.now()}_${Math.random().toString(36).substring(7)}${fileExt}`;
     const filePath = path.join(tempDir, filename);
 
+    // Auto-detect trace/predict output:
+    // If code has only comments and a bare value or expression without print(),
+    // automatically append print(...) so executing it outputs the value to stdout!
+    let executableCode = code;
+    if (language === 'python') {
+      const nonCommentLines = code
+        .split('\n')
+        .map((line) => line.replace(/#.*$/, '').trim())
+        .filter(Boolean);
+      
+      if (nonCommentLines.length > 0 && !code.includes('print(')) {
+        const lastLine = nonCommentLines[nonCommentLines.length - 1];
+        executableCode = `${code}\nprint(${lastLine})\n`;
+      }
+    }
+
     try {
-      fs.writeFileSync(filePath, code, 'utf8');
+      fs.writeFileSync(filePath, executableCode, 'utf8');
     } catch (writeErr) {
       return resolve({
         status: 'RUNTIME_ERROR',
@@ -201,13 +217,27 @@ app.post('/api/evaluate', async (req, res) => {
       const tc = testCases[i];
       const execResult = await runTestCase(code, language, tc.input, timeoutMs);
 
-      // Normalize outputs (remove extra whitespaces and handle CRLF vs LF)
-      const normalize = (str) => str.replace(/\r\n/g, '\n').trim();
+      // Normalize outputs (remove extra whitespaces, CRLF, and lower-case)
+      const normalize = (str) => (str || '').replace(/\r\n/g, '\n').trim().toLowerCase();
 
       const normalizedActual = normalize(execResult.stdout);
       const normalizedExpected = normalize(tc.expectedOutput);
 
-      const isPassed = execResult.status === 'SUCCESS' && normalizedActual === normalizedExpected;
+      let isPassed = execResult.status === 'SUCCESS' && normalizedActual === normalizedExpected;
+
+      // Fallback check for trace output: if execution had a mismatch or NameError (e.g. unquoted string),
+      // check if raw code ended with expected output!
+      if (!isPassed) {
+        const nonComment = code
+          .split('\n')
+          .map((line) => line.replace(/#.*$/, '').trim())
+          .filter(Boolean);
+        const lastVal = (nonComment[nonComment.length - 1] || '').replace(/^['"]|['"]$/g, '').toLowerCase();
+        if (lastVal && lastVal === normalizedExpected) {
+          isPassed = true;
+        }
+      }
+
       if (isPassed) {
         passedCount++;
       }

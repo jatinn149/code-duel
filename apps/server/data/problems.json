@@ -3165,23 +3165,86 @@
   },
   {
     "id": "MR-PO-001",
-    "title": "Trace the Transformation",
-    "description": "Trace the transformation python script execution output.\n\nInput Program:\n```python\ndef transform(values):\n    result = []\n\n    for i, value in enumerate(values):\n        if i % 2 == 0:\n            result.append(value + i)\n        else:\n            result.insert(0, value - i)\n\n    return result\n\n\ndata = [4, 7, 2, 9, 5]\n\nfirst = transform(data)\n\nmapping = {\n    value: index\n    for index, value in enumerate(first)\n    if value % 2 == 0\n}\n\ntotal = 0\n\nfor key, value in mapping.items():\n    if key > value:\n        total += key - value\n    else:\n        total += value\n\nprint(first)\nprint(mapping)\nprint(total)\n```",
-    "difficulty": 5,
+    "title": "Trace the Loop Accumulator",
+    "description": "Trace the following Python loop execution and predict the final printed integer output.\n\n```python\ndef compute():\n    total = 0\n    for i in range(1, 6):\n        if i % 2 == 0:\n            total += i * 2\n        else:\n            total -= i\n    return total\n\nprint(compute())\n```",
+    "difficulty": 3,
     "timeLimit": 2000,
     "memoryLimit": 256,
     "compatibleModes": ["MULTI_ROUND"],
     "compatibleRounds": ["PREDICT_OUTPUT"],
-    "speedRating": 5,
-    "pressureRating": 5,
-    "estimatedSolveTimeSec": 90,
-    "tags": ["tracing", "basics"],
+    "speedRating": 4,
+    "pressureRating": 4,
+    "estimatedSolveTimeSec": 60,
+    "tags": ["tracing", "loops", "arithmetic"],
     "questionType": "PREDICT_OUTPUT",
     "questionFamilyId": "FAM_TRACING",
-    "initialCode": "# Trace the program and output what it prints.\n# Your prediction must match the exact output of Python.",
-    "solutionCode": "[6, 6, 4, 4, 9]\n{6: 1, 4: 3}\n6",
+    "initialCode": "# ========================================================\n# TRACE THE PROGRAM BELOW:\n# ========================================================\n# def compute():\n#     total = 0\n#     for i in range(1, 6):\n#         if i % 2 == 0:\n#             total += i * 2\n#         else:\n#             total -= i\n#     return total\n#\n# print(compute())\n# ========================================================\n# PREDICT THE EXACT OUTPUT (single digit/number below):\n# ========================================================\n",
+    "solutionCode": "3",
     "testCases": [
-      { "id": "t1", "input": "", "expectedOutput": "[6, 6, 4, 4, 9]\n{6: 1, 4: 3}\n6", "isHidden": false, "weight": 100 }
+      { "id": "t1", "input": "", "expectedOutput": "3", "isHidden": false, "weight": 100 }
+    ]
+  },
+  {
+    "id": "MR-PO-002",
+    "title": "Bitwise Shift and XOR",
+    "description": "Trace the following Python script using bitwise operations and arithmetic to predict the final output integer.\n\n```python\ndef bit_ops(n):\n    shifted = n << 2\n    divided = shifted // 3\n    return divided ^ n\n\nprint(bit_ops(6))\n```",
+    "difficulty": 4,
+    "timeLimit": 2000,
+    "memoryLimit": 256,
+    "compatibleModes": ["MULTI_ROUND"],
+    "compatibleRounds": ["PREDICT_OUTPUT"],
+    "speedRating": 4,
+    "pressureRating": 4,
+    "estimatedSolveTimeSec": 60,
+    "tags": ["tracing", "bitwise"],
+    "questionType": "PREDICT_OUTPUT",
+    "questionFamilyId": "FAM_TRACING",
+    "initialCode": "# ========================================================\n# TRACE THE PROGRAM BELOW:\n# ========================================================\n# def bit_ops(n):\n#     shifted = n << 2\n#     divided = shifted // 3\n#     return divided ^ n\n#\n# print(bit_ops(6))\n# ========================================================\n# PREDICT THE EXACT OUTPUT (single digit/number below):\n# ========================================================\n",
+    "solutionCode": "14",
+    "testCases": [
+      { "id": "t1", "input": "", "expectedOutput": "14", "isHidden": false, "weight": 100 }
+    ]
+  },
+  {
+    "id": "MR-PO-003",
+    "title": "Recursive Multiplication Trace",
+    "description": "Trace the recursive Python function execution and predict the final returned output integer.\n\n```python\ndef mystery(a, b):\n    if b == 0:\n        return 0\n    if b % 2 == 1:\n        return a + mystery(a, b - 1)\n    return mystery(a * 2, b // 2)\n\nprint(mystery(7, 6))\n```",
+    "difficulty": 4,
+    "timeLimit": 2000,
+    "memoryLimit": 256,
+    "compatibleModes": ["MULTI_ROUND"],
+    "compatibleRounds": ["PREDICT_OUTPUT"],
+    "speedRating": 4,
+    "pressureRating": 4,
+    "estimatedSolveTimeSec": 60,
+    "tags": ["tracing", "recursion"],
+    "questionType": "PREDICT_OUTPUT",
+    "questionFamilyId": "FAM_TRACING",
+    "initialCode": "# ========================================================\n# TRACE THE PROGRAM BELOW:\n# ========================================================\n# def mystery(a, b):\n#     if b == 0:\n#         return 0\n#     if b % 2 == 1:\n#         return a + mystery(a, b - 1)\n#     return mystery(a * 2, b // 2)\n#\n# print(mystery(7, 6))\n# ========================================================\n# PREDICT THE EXACT OUTPUT (single digit/number below):\n# ========================================================\n",
+    "solutionCode": "42",
+    "testCases": [
+      { "id": "t1", "input": "", "expectedOutput": "42", "isHidden": false, "weight": 100 }
+    ]
+  },
+  {
+    "id": "MR-PO-004",
+    "title": "List Slicing and String Join",
+    "description": "Trace the following string manipulation script and predict the printed word output.\n\n```python\ndef format_code():\n    chars = ['d', 'u', 'e', 'l', 'c', 'o', 'd', 'e']\n    first = chars[:4]\n    return ''.join(first).upper()\n\nprint(format_code())\n```",
+    "difficulty": 3,
+    "timeLimit": 2000,
+    "memoryLimit": 256,
+    "compatibleModes": ["MULTI_ROUND"],
+    "compatibleRounds": ["PREDICT_OUTPUT"],
+    "speedRating": 3,
+    "pressureRating": 3,
+    "estimatedSolveTimeSec": 45,
+    "tags": ["tracing", "strings"],
+    "questionType": "PREDICT_OUTPUT",
+    "questionFamilyId": "FAM_TRACING",
+    "initialCode": "# ========================================================\n# TRACE THE PROGRAM BELOW:\n# ========================================================\n# def format_code():\n#     chars = ['d', 'u', 'e', 'l', 'c', 'o', 'd', 'e']\n#     first = chars[:4]\n#     return ''.join(first).upper()\n#\n# print(format_code())\n# ========================================================\n# PREDICT THE EXACT OUTPUT (single word below):\n# ========================================================\n",
+    "solutionCode": "DUEL",
+    "testCases": [
+      { "id": "t1", "input": "", "expectedOutput": "DUEL", "isHidden": false, "weight": 100 }
     ]
   }
 ]
