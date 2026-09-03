@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useRoomStore } from '@/store/room-store';
 import { useAuthStore } from '@/store/auth-store';
 import { useSocket } from '@/hooks/use-socket';
@@ -9,7 +9,7 @@ import { Trophy, LogOut, RefreshCw, Code2, Award, Zap, Cpu, Terminal, AlertTrian
 import { clsx } from 'clsx';
 import { GameMode } from '@code-duel/types';
 
-function useAnimatedCounter(target: number, duration: number = 1200) {
+function useAnimatedCounter(target: number, duration: number = 1000) {
   const [count, setCount] = useState(0);
   useEffect(() => {
     if (target === 0) {
@@ -24,7 +24,7 @@ function useAnimatedCounter(target: number, duration: number = 1200) {
       const ease = 1 - Math.pow(1 - progress, 3);
       setCount(Math.round(startVal + (target - startVal) * ease));
       if (progress >= 1) clearInterval(interval);
-    }, 16);
+    }, 25);
     return () => clearInterval(interval);
   }, [target, duration]);
   return count;
@@ -36,6 +36,7 @@ export const FinalResults = () => {
   const socket = useSocket();
   const navigate = useNavigate();
   const [selectedUserCodeId, setSelectedUserCodeId] = useState<string | null>(null);
+  const lastProcessedMatchIdRef = useRef<string | null>(null);
 
   const matchResult = currentRoom?.matchResult;
 
@@ -55,7 +56,7 @@ export const FinalResults = () => {
   const myResult = useMemo(() => {
     if (!matchResult || !user) return null;
     return matchResult.playerResults[user.id] || null;
-  }, [matchResult, user]);
+  }, [matchResult, user?.id]);
 
   const cpChange = myResult?.ratingChange ?? 0;
   const currentCp = myResult?.newRating ?? (user?.rating ? user.rating + cpChange : 0);
@@ -64,21 +65,27 @@ export const FinalResults = () => {
   const newXp = myResult?.newXp ?? user?.xp ?? 0;
   const isLevelUp = newLevel > (user?.level ?? 1);
 
-  const displayCpChange = useAnimatedCounter(cpChange, 1200);
-  const displayXp = useAnimatedCounter(xpGained, 1200);
+  const displayCpChange = useAnimatedCounter(cpChange, 1000);
+  const displayXp = useAnimatedCounter(xpGained, 1000);
 
   useEffect(() => {
     if (!matchResult || !user || !myResult) return;
+    if (lastProcessedMatchIdRef.current === matchResult.roomId) return;
+
     if (myResult.newRating !== undefined || myResult.newXp !== undefined) {
-      useAuthStore.getState().setUser({
-        ...user,
-        rating: myResult.newRating ?? user.rating,
-        xp: myResult.newXp ?? user.xp,
-        level: myResult.newLevel ?? user.level,
-        streak: user.streak ? Math.max(1, user.streak) : 1,
-      });
+      lastProcessedMatchIdRef.current = matchResult.roomId;
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser) {
+        useAuthStore.getState().setUser({
+          ...currentUser,
+          rating: myResult.newRating ?? currentUser.rating,
+          xp: myResult.newXp ?? currentUser.xp,
+          level: myResult.newLevel ?? currentUser.level,
+          streak: currentUser.streak ? Math.max(1, currentUser.streak) : 1,
+        });
+      }
     }
-  }, [matchResult, user, myResult]);
+  }, [matchResult?.roomId, myResult?.newRating, myResult?.newXp, myResult?.newLevel]);
 
   const getCumulativeScore = (playerId: string) => {
     return currentRoom?.roundResults?.reduce((sum, res) => sum + (res.scores[playerId] || 0), 0) || 0;
