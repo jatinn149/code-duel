@@ -32,7 +32,7 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   hideTriggerButton = false,
 }) => {
   const { notifications, unreadNotificationsCount } = useSocialStore();
-  const { markRead, respondToFriendRequest, respondToDuelInvite } = useSocial();
+  const { markRead, markAllRead, respondToFriendRequest, respondToDuelInvite } = useSocial();
   const [internalOpen, setInternalOpen] = useState(false);
 
   const isControlled = typeof isOpenControlled === 'boolean';
@@ -55,11 +55,7 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   };
 
   const handleMarkAllRead = () => {
-    notifications.forEach((n) => {
-      if (!n.isRead) {
-        markRead(n.id);
-      }
-    });
+    markAllRead();
   };
 
   const getIcon = (type: NotificationType) => {

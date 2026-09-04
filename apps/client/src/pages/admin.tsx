@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth-store';
+import { useSocket } from '@/hooks/use-socket';
 import { adminApi, AdminStats, AdminUser, AdminRoom } from '@/api/admin-api';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -111,8 +112,50 @@ export const AdminPage: React.FC = () => {
     }
   };
 
+  const socket = useSocket();
+
+  const refreshRooms = async () => {
+    try {
+      const roomsData = await adminApi.getRooms();
+      setRooms(roomsData);
+    } catch {
+      // silent background update
+    }
+  };
+
+  const refreshStats = async () => {
+    try {
+      const statsData = await adminApi.getStats();
+      if (statsData) setStats(statsData);
+    } catch {
+      // silent background update
+    }
+  };
+
   useEffect(() => {
     loadAllData();
+  }, []);
+
+  // Real-time socket event for active rooms update
+  useEffect(() => {
+    if (!socket) return;
+    const handleRoomsChanged = () => {
+      refreshRooms();
+      refreshStats();
+    };
+    socket.on('admin:rooms_changed', handleRoomsChanged);
+    return () => {
+      socket.off('admin:rooms_changed', handleRoomsChanged);
+    };
+  }, [socket]);
+
+  // Automated background polling every 3 seconds for instant updates
+  useEffect(() => {
+    const timer = setInterval(() => {
+      refreshRooms();
+      refreshStats();
+    }, 3000);
+    return () => clearInterval(timer);
   }, []);
 
   const showFeedback = (msg: string) => {
@@ -716,6 +759,29 @@ export const AdminPage: React.FC = () => {
         {/* TAB 3: ACTIVE DUEL ROOMS */}
         {activeTab === 'rooms' && (
           <div className="space-y-4 max-w-6xl mx-auto">
+            {/* Live Indicator Bar */}
+            <div className="flex items-center justify-between p-3 bg-zinc-900/60 border border-zinc-800 rounded-xl">
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                </span>
+                <span className="text-xs font-mono font-bold text-emerald-400 tracking-wider">
+                  REAL-TIME ARENA RADAR ACTIVE
+                </span>
+                <span className="text-[10px] font-mono text-zinc-500 hidden sm:inline">
+                  (Live push + 3s Auto-Sync)
+                </span>
+              </div>
+              <button
+                onClick={refreshRooms}
+                className="px-3 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-mono rounded-lg transition-colors flex items-center gap-1.5 border border-zinc-700"
+              >
+                <RefreshCw size={12} />
+                <span>Refresh Arenas ({rooms.length})</span>
+              </button>
+            </div>
+
             {rooms.length === 0 ? (
               <div className="p-12 text-center bg-zinc-900/50 border border-zinc-800 rounded-xl space-y-2">
                 <Swords size={32} className="mx-auto text-zinc-600 mb-2" />

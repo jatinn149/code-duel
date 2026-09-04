@@ -3,12 +3,14 @@ import { useAuthStore } from '@/store/auth-store';
 import { useSocialStore } from '@/store/social-store';
 import { FriendSidebar } from '@/components/social/friend-sidebar';
 import { NotificationDropdown } from '@/components/social/notification-dropdown';
+import { useSocialSubscription } from '@/hooks/use-social';
 import { LogOut, Sword, Mail, User, Trophy, Users, ShieldAlert, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useMemo } from 'react';
 import { clsx } from 'clsx';
 
 export const Layout = () => {
+  useSocialSubscription();
   const { user, logout } = useAuthStore();
   const { friends, unreadNotificationsCount } = useSocialStore();
   const navigate = useNavigate();

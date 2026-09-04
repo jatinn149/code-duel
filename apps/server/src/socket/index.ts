@@ -907,6 +907,9 @@ export const initSocket = (
 
     // Join user-specific notification room
     socket.join(`user:${user.id}`);
+    if (user.role === 'ADMIN') {
+      socket.join('admin:channel');
+    }
 
     // Sync initial social data
     socialService.getInitialData(user.id).then((initialData) => {
@@ -995,6 +998,7 @@ export const initSocket = (
         const room = await roomManager.createRoom(user, parsed.maxPlayers, parsed.gameMode as any, parsed.options);
         socket.join(room.id);
         socket.emit(SocketEvents.ROOM_UPDATED, room);
+        io.to('admin:channel').emit('admin:rooms_changed');
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Failed to create room';
         socket.emit(SocketEvents.ROOM_ERROR, message);
@@ -1646,9 +1650,11 @@ export const initSocket = (
           const leaveRes = await roomManager.leaveRoom(user.id);
           if (leaveRes && leaveRes.room) {
             emitRoomUpdated(leaveRes.roomId, leaveRes.room);
+            io.to('admin:channel').emit('admin:rooms_changed');
           } else if (leaveRes) {
             // Room became empty and was deleted
             io.to(leaveRes.roomId).emit(SocketEvents.ROOM_UPDATED as any, null as any);
+            io.to('admin:channel').emit('admin:rooms_changed');
           }
         }
       }
@@ -1681,9 +1687,6 @@ export const initSocket = (
         
         if (request.status === 'ACCEPTED') {
           // Mutual friending occurred! Sync friends list of both users
-          const fromUserSockets = userActiveSockets.get(user.id);
-          const toUserSockets = userActiveSockets.get(targetUserId);
-
           const [f1, f2, n1, n2] = await Promise.all([
             socialService.getFriends(user.id),
             socialService.getFriends(targetUserId),
@@ -1691,20 +1694,20 @@ export const initSocket = (
             notificationService.getNotifications(targetUserId),
           ]);
 
-          if (fromUserSockets) {
-            fromUserSockets.forEach(sid => io.to(sid).emit(SocketEvents.SOCIAL_INITIAL_SYNC, { friends: f1, notifications: n1, activities: [] }));
-          }
-          if (toUserSockets) {
-            toUserSockets.forEach(sid => io.to(sid).emit(SocketEvents.SOCIAL_INITIAL_SYNC, { friends: f2, notifications: n2, activities: [] }));
-          }
+          io.to(`user:${user.id}`).emit(SocketEvents.SOCIAL_INITIAL_SYNC, { friends: f1, notifications: n1, activities: [] });
+          io.to(`user:${targetUserId}`).emit(SocketEvents.SOCIAL_INITIAL_SYNC, { friends: f2, notifications: n2, activities: [] });
           socket.emit(SocketEvents.ROOM_ERROR, 'You are now friends!');
         } else {
-          // Notify target user via live notification event if online
-          const targetSockets = userActiveSockets.get(targetUserId);
-          if (targetSockets) {
-            const freshNotifications = await notificationService.getNotifications(targetUserId);
-            targetSockets.forEach(sid => io.to(sid).emit(SocketEvents.SOCIAL_INITIAL_SYNC, { friends: [], notifications: freshNotifications, activities: [] }));
-          }
+          // Notify target user via live notification event and initial sync
+          const [freshNotifications, freshFriends] = await Promise.all([
+            notificationService.getNotifications(targetUserId),
+            socialService.getFriends(targetUserId),
+          ]);
+          io.to(`user:${targetUserId}`).emit(SocketEvents.SOCIAL_INITIAL_SYNC, {
+            friends: freshFriends,
+            notifications: freshNotifications,
+            activities: [],
+          });
           socket.emit(SocketEvents.ROOM_ERROR, 'Friend request sent successfully!');
         }
       } catch (err: any) {
@@ -1717,9 +1720,6 @@ export const initSocket = (
         const req = await socialService.respondToFriendRequest(user.id, data.requestId, data.action);
         
         if (req && data.action === 'ACCEPT') {
-          const fromUserSockets = userActiveSockets.get(req.fromUserId);
-          const toUserSockets = userActiveSockets.get(req.toUserId);
-
           const [f1, f2, n1, n2] = await Promise.all([
             socialService.getFriends(req.fromUserId),
             socialService.getFriends(req.toUserId),
@@ -1727,12 +1727,14 @@ export const initSocket = (
             notificationService.getNotifications(req.toUserId),
           ]);
 
-          if (fromUserSockets) {
-            fromUserSockets.forEach(sid => io.to(sid).emit(SocketEvents.SOCIAL_INITIAL_SYNC, { friends: f1, notifications: n1, activities: [] }));
-          }
-          if (toUserSockets) {
-            toUserSockets.forEach(sid => io.to(sid).emit(SocketEvents.SOCIAL_INITIAL_SYNC, { friends: f2, notifications: n2, activities: [] }));
-          }
+          io.to(`user:${req.fromUserId}`).emit(SocketEvents.SOCIAL_INITIAL_SYNC, { friends: f1, notifications: n1, activities: [] });
+          io.to(`user:${req.toUserId}`).emit(SocketEvents.SOCIAL_INITIAL_SYNC, { friends: f2, notifications: n2, activities: [] });
+        } else if (req) {
+          const [n, f] = await Promise.all([
+            notificationService.getNotifications(user.id),
+            socialService.getFriends(user.id),
+          ]);
+          io.to(`user:${user.id}`).emit(SocketEvents.SOCIAL_INITIAL_SYNC, { friends: f, notifications: n, activities: [] });
         }
       } catch (err: any) {
         socket.emit(SocketEvents.ROOM_ERROR, err.message || 'Failed to respond to friend request');
@@ -1769,12 +1771,16 @@ export const initSocket = (
         if (outgoing) {
           await _repositories?.friendRepository?.deleteRequest(outgoing.id);
           
-          // Sync notification state on target
-          const targetSockets = userActiveSockets.get(data.toUserId);
-          if (targetSockets) {
-            const freshNotifications = await notificationService.getNotifications(data.toUserId);
-            targetSockets.forEach(sid => io.to(sid).emit(SocketEvents.SOCIAL_INITIAL_SYNC, { friends: [], notifications: freshNotifications, activities: [] }));
-          }
+          // Sync state on target
+          const [freshNotifications, freshFriends] = await Promise.all([
+            notificationService.getNotifications(data.toUserId),
+            socialService.getFriends(data.toUserId),
+          ]);
+          io.to(`user:${data.toUserId}`).emit(SocketEvents.SOCIAL_INITIAL_SYNC, {
+            friends: freshFriends,
+            notifications: freshNotifications,
+            activities: [],
+          });
         }
       } catch (err: any) {
         socket.emit(SocketEvents.ROOM_ERROR, err.message || 'Failed to cancel friend request');
@@ -1786,6 +1792,23 @@ export const initSocket = (
         await notificationService.markAsRead(user.id, data.notificationId);
       } catch (err: any) {
         logger.error({ err }, 'Failed to mark notification as read');
+      }
+    });
+
+    socket.on('social:notification_mark_all_read' as any, async () => {
+      try {
+        await notificationService.markAllAsRead(user.id);
+        const [freshNotifications, freshFriends] = await Promise.all([
+          notificationService.getNotifications(user.id),
+          socialService.getFriends(user.id),
+        ]);
+        io.to(`user:${user.id}`).emit(SocketEvents.SOCIAL_INITIAL_SYNC, {
+          friends: freshFriends,
+          notifications: freshNotifications,
+          activities: [],
+        });
+      } catch (err: any) {
+        logger.error({ err }, 'Failed to mark all notifications as read');
       }
     });
 

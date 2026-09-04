@@ -479,6 +479,7 @@ export interface ServerToClientEvents {
     executionTimeMs?: number;
     exitCode?: number;
   }) => void;
+  'admin:rooms_changed': () => void;
 }
 
 export interface ClientToServerEvents {

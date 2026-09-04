@@ -43,6 +43,19 @@ export class NotificationService {
     await this.notificationRepo.markAsRead(notificationId);
   }
 
+  async markAllAsRead(userId: string) {
+    if (this.notificationRepo.markAllAsRead) {
+      await this.notificationRepo.markAllAsRead(userId);
+    } else {
+      const notifs = await this.notificationRepo.getByUserId(userId);
+      for (const n of notifs) {
+        if (!n.isRead) {
+          await this.notificationRepo.markAsRead(n.id);
+        }
+      }
+    }
+  }
+
   async getNotifications(userId: string) {
     return this.notificationRepo.getByUserId(userId);
   }

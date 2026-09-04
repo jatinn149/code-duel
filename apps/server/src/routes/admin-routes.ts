@@ -171,7 +171,7 @@ export const createAdminRouter = (
 
         const io = getIo?.();
         if (io) {
-          io.emit(SocketEvents.NOTIFICATION_RECEIVED, notif);
+          io.to(`user:${id}`).emit(SocketEvents.NOTIFICATION_RECEIVED, notif);
         }
       }
 
@@ -232,7 +232,7 @@ export const createAdminRouter = (
 
         const io = getIo?.();
         if (io) {
-          io.emit(SocketEvents.NOTIFICATION_RECEIVED, notif);
+          io.to(`user:${id}`).emit(SocketEvents.NOTIFICATION_RECEIVED, notif);
         }
       }
 
@@ -289,7 +289,7 @@ export const createAdminRouter = (
 
           const io = getIo?.();
           if (io) {
-            io.emit(SocketEvents.NOTIFICATION_RECEIVED, notif);
+            io.to(`user:${u.id}`).emit(SocketEvents.NOTIFICATION_RECEIVED, notif);
           }
         }
       }
@@ -388,6 +388,10 @@ export const createAdminRouter = (
           }
         }
         await redisCache.del(roomKey);
+        const io = getIo?.();
+        if (io) {
+          io.to('admin:channel').emit('admin:rooms_changed');
+        }
       }
       res.json({ success: true, message: `Room ${roomId} terminated by admin.` });
     } catch (error) {

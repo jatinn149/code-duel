@@ -17,6 +17,7 @@ interface SocialState {
   setNotifications: (notifications: Notification[]) => void;
   addNotification: (notification: Notification) => void;
   markNotificationRead: (notificationId: string) => void;
+  markAllNotificationsRead: () => void;
   setActivities: (activities: ActivityEvent[]) => void;
   addActivity: (activity: ActivityEvent) => void;
 }
@@ -34,20 +35,51 @@ export const useSocialStore = create<SocialState>((set) => ({
         f.id === userId ? { ...f, status } : f
       ),
     })),
-  setNotifications: (notifications) => set({ 
-    notifications,
-    unreadNotificationsCount: notifications.filter(n => !n.isRead).length
+  setNotifications: (notifications) => set(() => {
+    // Deduplicate by ID
+    const seen = new Set<string>();
+    const uniqueNotifications: Notification[] = [];
+    for (const n of notifications) {
+      if (!seen.has(n.id)) {
+        seen.add(n.id);
+        uniqueNotifications.push(n);
+      }
+    }
+    return { 
+      notifications: uniqueNotifications,
+      unreadNotificationsCount: uniqueNotifications.filter(n => !n.isRead).length
+    };
   }),
-  addNotification: (notification) => set((state) => ({ 
-    notifications: [notification, ...state.notifications],
-    unreadNotificationsCount: state.unreadNotificationsCount + 1
-  })),
-  markNotificationRead: (notificationId) => set((state) => ({
-    notifications: state.notifications.map(n => 
+  addNotification: (notification) => set((state) => {
+    const existingIndex = state.notifications.findIndex((n) => n.id === notification.id);
+    let updated: Notification[];
+    if (existingIndex !== -1) {
+      updated = [...state.notifications];
+      updated[existingIndex] = notification;
+    } else {
+      updated = [notification, ...state.notifications];
+    }
+    return { 
+      notifications: updated,
+      unreadNotificationsCount: updated.filter((n) => !n.isRead).length
+    };
+  }),
+  markNotificationRead: (notificationId) => set((state) => {
+    const updated = state.notifications.map(n => 
       n.id === notificationId ? { ...n, isRead: true } : n
-    ),
-    unreadNotificationsCount: Math.max(0, state.unreadNotificationsCount - 1)
-  })),
+    );
+    return {
+      notifications: updated,
+      unreadNotificationsCount: updated.filter(n => !n.isRead).length
+    };
+  }),
+  markAllNotificationsRead: () => set((state) => {
+    const updated = state.notifications.map(n => ({ ...n, isRead: true }));
+    return {
+      notifications: updated,
+      unreadNotificationsCount: 0
+    };
+  }),
   setActivities: (activities) => set({ activities }),
   addActivity: (activity) => set((state) => ({
     activities: [activity, ...state.activities].slice(0, 50)

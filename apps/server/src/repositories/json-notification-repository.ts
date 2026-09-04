@@ -30,6 +30,20 @@ export class JsonNotificationRepository implements INotificationRepository {
     }
   }
 
+  async markAllAsRead(userId: string): Promise<void> {
+    const notifications = await this.storage.read<Notification>(this.collection);
+    let modified = false;
+    for (const n of notifications) {
+      if (n.userId === userId && !n.isRead) {
+        n.isRead = true;
+        modified = true;
+      }
+    }
+    if (modified) {
+      await this.storage.write(this.collection, notifications);
+    }
+  }
+
   async delete(id: string): Promise<void> {
     let notifications = await this.storage.read<Notification>(this.collection);
     notifications = notifications.filter((n) => n.id !== id);

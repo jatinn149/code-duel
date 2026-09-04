@@ -9,14 +9,13 @@ import {
   User
 } from '@code-duel/types';
 
-export const useSocial = () => {
+export const useSocialSubscription = () => {
   const socket = useSocket();
   const { 
     setFriends, 
     updateFriendStatus, 
     addNotification, 
     setNotifications,
-    markNotificationRead,
     addActivity,
     setActivities
   } = useSocialStore();
@@ -24,39 +23,48 @@ export const useSocial = () => {
   useEffect(() => {
     if (!socket) return;
 
-    // Listen for initial data sync
-    socket.on(SocketEvents.SOCIAL_INITIAL_SYNC, (data: { 
-      friends: (Partial<User> & { status: PresenceStatus })[],
-      notifications: Notification[],
-      activities: ActivityEvent[]
+    const onInitialSync = (data: { 
+      friends: (Partial<User> & { status: PresenceStatus })[];
+      notifications: Notification[];
+      activities: ActivityEvent[];
     }) => {
-      setFriends(data.friends);
-      setNotifications(data.notifications);
-      setActivities(data.activities);
-    });
+      if (data.friends) setFriends(data.friends);
+      if (data.notifications) setNotifications(data.notifications);
+      if (data.activities) setActivities(data.activities);
+    };
 
-    // Listen for presence updates
-    socket.on(SocketEvents.PRESENCE_UPDATE, (data: { userId: string; status: PresenceStatus }) => {
+    const onPresenceUpdate = (data: { userId: string; status: PresenceStatus }) => {
       updateFriendStatus(data.userId, data.status);
-    });
+    };
 
-    // Listen for notifications
-    socket.on(SocketEvents.NOTIFICATION_RECEIVED, (notification: Notification) => {
+    const onNotificationReceived = (notification: Notification) => {
       addNotification(notification);
-    });
+    };
 
-    // Listen for activity updates
-    socket.on(SocketEvents.ACTIVITY_FEED_UPDATE, (event: ActivityEvent) => {
+    const onActivityFeedUpdate = (event: ActivityEvent) => {
       addActivity(event);
-    });
+    };
+
+    socket.on(SocketEvents.SOCIAL_INITIAL_SYNC, onInitialSync);
+    socket.on(SocketEvents.PRESENCE_UPDATE, onPresenceUpdate);
+    socket.on(SocketEvents.NOTIFICATION_RECEIVED, onNotificationReceived);
+    socket.on(SocketEvents.ACTIVITY_FEED_UPDATE, onActivityFeedUpdate);
 
     return () => {
-      socket.off(SocketEvents.SOCIAL_INITIAL_SYNC);
-      socket.off(SocketEvents.PRESENCE_UPDATE);
-      socket.off(SocketEvents.NOTIFICATION_RECEIVED);
-      socket.off(SocketEvents.ACTIVITY_FEED_UPDATE);
+      socket.off(SocketEvents.SOCIAL_INITIAL_SYNC, onInitialSync);
+      socket.off(SocketEvents.PRESENCE_UPDATE, onPresenceUpdate);
+      socket.off(SocketEvents.NOTIFICATION_RECEIVED, onNotificationReceived);
+      socket.off(SocketEvents.ACTIVITY_FEED_UPDATE, onActivityFeedUpdate);
     };
   }, [socket, setFriends, setNotifications, setActivities, updateFriendStatus, addNotification, addActivity]);
+};
+
+export const useSocial = () => {
+  const socket = useSocket();
+  const { 
+    markNotificationRead,
+    markAllNotificationsRead,
+  } = useSocialStore();
 
   const sendFriendRequest = (toUserId: string) => {
     socket?.emit(SocketEvents.FRIEND_REQUEST_SEND, { toUserId });
@@ -79,8 +87,13 @@ export const useSocial = () => {
   };
 
   const markRead = (notificationId: string) => {
-    socket?.emit(SocketEvents.NOTIFICATION_READ, { notificationId });
     markNotificationRead(notificationId);
+    socket?.emit(SocketEvents.NOTIFICATION_READ, { notificationId });
+  };
+
+  const markAllRead = () => {
+    markAllNotificationsRead();
+    socket?.emit('social:notification_mark_all_read' as any);
   };
 
   return {
@@ -90,5 +103,6 @@ export const useSocial = () => {
     sendDuelInvite,
     respondToDuelInvite,
     markRead,
+    markAllRead,
   };
 };
