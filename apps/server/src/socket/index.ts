@@ -1672,6 +1672,11 @@ export const initSocket = (
         if (!targetUserId) throw new Error('Target user is required');
         if (user.id === targetUserId) throw new Error('Cannot add yourself');
 
+        const targetUserObj = await userRepository.findById(targetUserId);
+        if (targetUserObj?.role === 'ADMIN' && user.role !== 'ADMIN') {
+          throw new Error('User not found');
+        }
+
         const request = await socialService.sendFriendRequest(user.id, targetUserId);
         
         if (request.status === 'ACCEPTED') {
@@ -1786,6 +1791,10 @@ export const initSocket = (
 
     socket.on(SocketEvents.DUEL_INVITE_SEND, async (data: { toUserId: string }) => {
       try {
+        const targetUserObj = await userRepository.findById(data.toUserId);
+        if (targetUserObj?.role === 'ADMIN' && user.role !== 'ADMIN') {
+          throw new Error('User not found');
+        }
         await socialService.sendDuelInvite(user.id, data.toUserId);
       } catch (err: any) {
         socket.emit(SocketEvents.ROOM_ERROR, err.message || 'Failed to send duel invite');

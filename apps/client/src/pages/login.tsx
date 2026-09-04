@@ -41,7 +41,7 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-zinc-950 relative overflow-hidden selection:bg-indigo-500/30 font-sans">
+    <div className="min-h-[100dvh] w-full flex flex-col justify-center items-center bg-zinc-950 relative overflow-x-hidden selection:bg-indigo-500/30 font-sans px-3 sm:px-6 py-6 sm:py-12">
       {/* Premium Ambient Background */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         {/* Subtle grid pattern with center fade */}
@@ -60,10 +60,10 @@ export const LoginPage = () => {
             initial="hidden"
             animate="visible"
             exit={{ opacity: 0, scale: 0.98, filter: 'blur(8px)', transition: { duration: 0.2 } }}
-            className="w-full max-w-[420px] px-4 sm:px-6 relative z-10"
+            className="w-full max-w-[440px] relative z-10"
           >
             {/* Elegant glassmorphic card */}
-            <div className="relative bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/80 rounded-2xl p-6 sm:p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden transition-colors duration-300 hover:border-zinc-700/80 group/card">
+            <div className="relative bg-zinc-900/50 backdrop-blur-xl border border-zinc-800/80 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden transition-colors duration-300 hover:border-zinc-700/80 group/card">
               {/* Subtle top edge glowing line */}
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent" />
               
@@ -113,7 +113,7 @@ export const LoginPage = () => {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-4 pr-10 py-3 bg-zinc-950/40 hover:bg-zinc-950/70 border border-zinc-800/80 rounded-lg text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 hover:border-zinc-700/80 transition-all duration-200 shadow-inner"
+                      className="w-full pl-4 pr-10 py-3.5 sm:py-3 bg-zinc-950/40 hover:bg-zinc-950/70 border border-zinc-800/80 rounded-xl text-base sm:text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 hover:border-zinc-700/80 transition-all duration-200 shadow-inner"
                       placeholder="name@domain.com"
                       required
                     />
@@ -132,7 +132,7 @@ export const LoginPage = () => {
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-4 pr-11 py-3 bg-zinc-950/40 hover:bg-zinc-950/70 border border-zinc-800/80 rounded-lg text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 hover:border-zinc-700/80 transition-all duration-200 shadow-inner"
+                      className="w-full pl-4 pr-11 py-3.5 sm:py-3 bg-zinc-950/40 hover:bg-zinc-950/70 border border-zinc-800/80 rounded-xl text-base sm:text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 hover:border-zinc-700/80 transition-all duration-200 shadow-inner"
                       placeholder="••••••••"
                       required
                     />
@@ -158,7 +158,7 @@ export const LoginPage = () => {
                   whileTap={{ y: 0 }}
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-3 mt-2 bg-gradient-to-b from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium text-sm rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 shadow-[0_1px_2px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.15)] border border-indigo-700 relative overflow-hidden"
+                  className="w-full py-3.5 sm:py-3 mt-2 bg-gradient-to-b from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium text-base sm:text-sm rounded-xl transition-all duration-200 flex items-center justify-center space-x-2 shadow-[0_1px_2px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.15)] border border-indigo-700 relative overflow-hidden active:scale-[0.98]"
                 >
                   {isLoading ? (
                     <Loader2 className="w-4 h-4 animate-spin text-white" />

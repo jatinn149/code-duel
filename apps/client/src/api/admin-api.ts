@@ -84,4 +84,31 @@ export const adminApi = {
   resetDailyChallenge: async (): Promise<void> => {
     await apiClient.post('/admin/daily-challenge/reset');
   },
+
+  giftUser: async (
+    id: string,
+    gift: { xp?: number; rating?: number; level?: number; seasonalTier?: string; note?: string }
+  ): Promise<AdminUser> => {
+    const res = await apiClient.post(`/admin/users/${id}/gift`, gift);
+    return res.data.data;
+  },
+
+  sendUserMail: async (
+    id: string,
+    mail: { title: string; message: string; giftXp?: number; giftCp?: number }
+  ): Promise<void> => {
+    await apiClient.post(`/admin/users/${id}/mail`, mail);
+  },
+
+  broadcastMail: async (
+    mail: { title: string; message: string; giftXp?: number; giftCp?: number }
+  ): Promise<{ recipientsCount: number }> => {
+    const res = await apiClient.post('/admin/broadcast-mail', mail);
+    return res.data.data;
+  },
+
+  resetUserStats: async (id: string): Promise<AdminUser> => {
+    const res = await apiClient.post(`/admin/users/${id}/reset-stats`);
+    return res.data.data;
+  },
 };

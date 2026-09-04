@@ -87,15 +87,20 @@ async function bootstrap() {
       ? new PgMatchResultRepository()
       : new JsonMatchResultRepository(jsonStorage);
 
+    let ioInstance: any = null;
+
     app.use('/api/v1/social', createSocialRouter(userRepository, friendRepository));
-    app.use('/api/v1/admin', createAdminRouter(userRepository, dailyResetEngine));
+    app.use(
+      '/api/v1/admin',
+      createAdminRouter(userRepository, dailyResetEngine, notificationRepository, () => ioInstance),
+    );
 
     server = app.listen(env.PORT, () => {
       logger.info(`Server running on port ${env.PORT} in ${env.NODE_ENV} mode`);
     });
 
     // Initialize Sockets
-    initSocket(server, userRepository, progressionService, retentionService, {
+    ioInstance = initSocket(server, userRepository, progressionService, retentionService, {
       friendRepository,
       notificationRepository,
       activityRepository,

@@ -20,6 +20,13 @@ import {
   Sparkles,
   ArrowLeft,
   Search,
+  Gift,
+  Mail,
+  Send,
+  Radio,
+  RotateCcw,
+  BookOpen,
+  ShieldCheck,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -31,7 +38,7 @@ export const AdminPage: React.FC = () => {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [rooms, setRooms] = useState<AdminRoom[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'system' | 'users' | 'rooms'>('system');
+  const [activeTab, setActiveTab] = useState<'system' | 'users' | 'rooms' | 'guide'>('users');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Modals & Action States
@@ -45,6 +52,38 @@ export const AdminPage: React.FC = () => {
     streak: 0,
     role: 'USER',
   });
+
+  // Gift Modal State
+  const [giftModalUser, setGiftModalUser] = useState<AdminUser | null>(null);
+  const [giftForm, setGiftForm] = useState({
+    xp: 500,
+    rating: 50,
+    level: 1,
+    seasonalTier: '',
+    note: 'HQ Command Commendation',
+  });
+  const [isGifting, setIsGifting] = useState(false);
+
+  // Mail Modal State
+  const [mailModalUser, setMailModalUser] = useState<AdminUser | null>(null);
+  const [mailForm, setMailForm] = useState({
+    title: 'HQ Transmission to Operative',
+    message: '',
+    giftXp: 0,
+    giftCp: 0,
+  });
+  const [isSendingMail, setIsSendingMail] = useState(false);
+
+  // Broadcast Modal State
+  const [broadcastModalOpen, setBroadcastModalOpen] = useState(false);
+  const [broadcastForm, setBroadcastForm] = useState({
+    title: 'CODE DUEL LEAGUE ANNOUNCEMENT',
+    message: '',
+    giftXp: 0,
+    giftCp: 0,
+  });
+  const [isBroadcasting, setIsBroadcasting] = useState(false);
+
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
 
   // Security Guard: Only ADMIN allowed
@@ -152,6 +191,94 @@ export const AdminPage: React.FC = () => {
       await loadAllData();
     } catch (err: any) {
       alert(err.response?.data?.message || 'Delete failed');
+    }
+  };
+
+  // 5.1 Open & Execute Gift
+  const handleOpenGift = (u: AdminUser) => {
+    setGiftModalUser(u);
+    setGiftForm({
+      xp: 500,
+      rating: 50,
+      level: u.level || 1,
+      seasonalTier: u.rank || 'Initiate',
+      note: 'HQ Command Commendation',
+    });
+  };
+
+  const handleExecuteGift = async () => {
+    if (!giftModalUser) return;
+    try {
+      setIsGifting(true);
+      await adminApi.giftUser(giftModalUser.id, giftForm);
+      showFeedback(`🎁 Granted rewards to @${giftModalUser.username}!`);
+      setGiftModalUser(null);
+      await loadAllData();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Gift failed');
+    } finally {
+      setIsGifting(false);
+    }
+  };
+
+  // 5.2 Open & Execute Direct System Mail
+  const handleOpenMail = (u: AdminUser) => {
+    setMailModalUser(u);
+    setMailForm({
+      title: 'HQ Transmission to Operative',
+      message: `Greetings @${u.username}, your tactical progression has been acknowledged by League Administration.`,
+      giftXp: 0,
+      giftCp: 0,
+    });
+  };
+
+  const handleExecuteMail = async () => {
+    if (!mailModalUser) return;
+    if (!mailForm.title.trim() || !mailForm.message.trim()) {
+      alert('Subject title and message body are required.');
+      return;
+    }
+    try {
+      setIsSendingMail(true);
+      await adminApi.sendUserMail(mailModalUser.id, mailForm);
+      showFeedback(`✉️ Mail dispatched to @${mailModalUser.username}!`);
+      setMailModalUser(null);
+      await loadAllData();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Mail delivery failed');
+    } finally {
+      setIsSendingMail(false);
+    }
+  };
+
+  // 5.3 Execute Broadcast Announcement
+  const handleExecuteBroadcast = async () => {
+    if (!broadcastForm.title.trim() || !broadcastForm.message.trim()) {
+      alert('Broadcast title and message are required.');
+      return;
+    }
+    try {
+      setIsBroadcasting(true);
+      const res = await adminApi.broadcastMail(broadcastForm);
+      showFeedback(`📢 Broadcast delivered to ${res.recipientsCount} operative(s)!`);
+      setBroadcastModalOpen(false);
+      await loadAllData();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Broadcast failed');
+    } finally {
+      setIsBroadcasting(false);
+    }
+  };
+
+  // 5.4 Reset User Progression Stats
+  const handleResetUserStats = async (u: AdminUser) => {
+    if (!window.confirm(`Reset stats for @${u.username} back to starter rank? (Rating 1000 CP, XP 0, Level 1, wins/losses 0). Account credentials will remain intact.`)) return;
+    try {
+      await adminApi.resetUserStats(u.id);
+      showFeedback(`🔄 Progression stats reset for @${u.username}`);
+      await loadAllData();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Reset stats failed');
     }
   };
 
@@ -297,6 +424,19 @@ export const AdminPage: React.FC = () => {
           <Swords size={15} />
           Active Duel Arenas ({rooms.length})
         </button>
+
+        <button
+          onClick={() => setActiveTab('guide')}
+          className={clsx(
+            'px-3 sm:px-4 py-2 text-xs font-mono font-bold rounded-t-lg transition-all border-b-2 flex items-center gap-1.5 sm:gap-2 shrink-0 whitespace-nowrap',
+            activeTab === 'guide'
+              ? 'border-rose-500 text-rose-400 bg-rose-500/10'
+              : 'border-transparent text-zinc-400 hover:text-white',
+          )}
+        >
+          <BookOpen size={15} />
+          Powers Codex & Guide
+        </button>
       </div>
 
       {/* Main Content Area */}
@@ -421,7 +561,33 @@ export const AdminPage: React.FC = () => {
         {/* TAB 2: OPERATIVES / USERS MANAGER */}
         {activeTab === 'users' && (
           <div className="space-y-4 max-w-6xl mx-auto">
-            <div className="flex items-center justify-between gap-4">
+            {/* Super Admin Cloaking Notice & Broadcast Announcement Action */}
+            <div className="p-3 sm:p-4 bg-gradient-to-r from-rose-950/40 via-zinc-900/60 to-zinc-900/60 border border-rose-500/30 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg shadow-rose-950/10">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0">
+                  <ShieldCheck size={18} />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-white flex items-center gap-1.5 font-mono">
+                    <span>ADMIN ISOLATION PROTOCOL ACTIVE</span>
+                    <span className="px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 text-[9px]">CLOAKED</span>
+                  </div>
+                  <p className="text-[11px] text-zinc-400 mt-0.5">
+                    Admin accounts are completely hidden from public leaderboards, daily challenge rankings, live arena match listings, and user searches.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setBroadcastModalOpen(true)}
+                className="w-full sm:w-auto px-3.5 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-mono font-bold flex items-center justify-center gap-2 shrink-0 shadow-lg shadow-rose-600/30 transition-all active:scale-95"
+              >
+                <Radio size={14} />
+                <span>Broadcast Announcement</span>
+              </button>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               <div className="relative flex-1 max-w-md">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
                 <input
@@ -429,61 +595,60 @@ export const AdminPage: React.FC = () => {
                   placeholder="Search by username, email, or player ID..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-zinc-900 border border-zinc-800 rounded-xl text-xs font-mono text-white focus:outline-none focus:border-rose-500"
+                  className="w-full pl-9 pr-4 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-xs font-mono text-white focus:outline-none focus:border-rose-500"
                 />
               </div>
 
-              <div className="text-xs font-mono text-zinc-400">
-                Showing {filteredUsers.length} of {users.length} users
+              <div className="text-xs font-mono text-zinc-400 flex items-center justify-between sm:justify-end gap-2">
+                <span>Showing <strong className="text-white">{filteredUsers.length}</strong> of {users.length} registered operatives</span>
               </div>
             </div>
 
-            <div className="bg-zinc-900/70 border border-zinc-800 rounded-xl overflow-hidden shadow-xl">
+            <div className="bg-zinc-900/70 border border-zinc-800 rounded-2xl overflow-hidden shadow-xl">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs font-mono">
-                  <thead className="bg-zinc-950/80 border-b border-zinc-800 text-zinc-400 text-[11px]">
+                  <thead className="bg-zinc-950/90 border-b border-zinc-800 text-zinc-400 text-[11px] uppercase tracking-wider">
                     <tr>
-                      <th className="p-3">Operative</th>
-                      <th className="p-3">Email</th>
-                      <th className="p-3">Rating / Rank</th>
-                      <th className="p-3">Level / XP</th>
-                      <th className="p-3">Streak</th>
-                      <th className="p-3">Role</th>
-                      <th className="p-3 text-right">Actions</th>
+                      <th className="p-3.5">Operative</th>
+                      <th className="p-3.5">Rating & Rank</th>
+                      <th className="p-3.5">Level & XP</th>
+                      <th className="p-3.5">Streak</th>
+                      <th className="p-3.5">Role</th>
+                      <th className="p-3.5 text-right">Admin Powers</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-800/60">
                     {filteredUsers.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="p-8 text-center text-zinc-500">
+                        <td colSpan={6} className="p-8 text-center text-zinc-500">
                           No operatives match the search query.
                         </td>
                       </tr>
                     ) : (
                       filteredUsers.map((u) => (
                         <tr key={u.id} className="hover:bg-zinc-850/50 transition-colors">
-                          <td className="p-3 font-bold text-white flex items-center gap-2">
-                            <span className="w-7 h-7 rounded bg-zinc-800 border border-zinc-700 flex items-center justify-center text-xs">
+                          <td className="p-3.5 font-bold text-white flex items-center gap-2.5">
+                            <span className="w-8 h-8 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-xs text-indigo-400 font-black">
                               {u.username.charAt(0).toUpperCase()}
                             </span>
-                            <div>
-                              <div>{u.username}</div>
-                              <span className="text-[10px] text-zinc-500">{u.playerId}</span>
+                            <div className="min-w-0">
+                              <div className="truncate">{u.username}</div>
+                              <span className="text-[10px] text-zinc-500 block truncate">{u.playerId} • {u.email}</span>
                             </div>
                           </td>
-                          <td className="p-3 text-zinc-400">{u.email}</td>
-                          <td className="p-3">
+                          <td className="p-3.5">
                             <span className="text-amber-400 font-bold">{u.rating} CP</span>
                             <span className="text-[10px] text-zinc-500 ml-1.5">({u.rank})</span>
                           </td>
-                          <td className="p-3 text-zinc-300">
-                            Lvl {u.level} • {u.xp} XP
+                          <td className="p-3.5 text-zinc-300">
+                            <span className="text-indigo-400 font-bold">Lvl {u.level}</span>
+                            <span className="text-zinc-500 text-[10px] ml-1.5">• {u.xp} XP</span>
                           </td>
-                          <td className="p-3 text-rose-400 font-bold">{u.streak} 🔥</td>
-                          <td className="p-3">
+                          <td className="p-3.5 text-rose-400 font-bold">{u.streak} 🔥</td>
+                          <td className="p-3.5">
                             {u.role === 'ADMIN' ? (
-                              <span className="px-2 py-0.5 bg-rose-500/20 text-rose-300 border border-rose-500/40 rounded text-[10px] font-bold">
-                                ADMIN
+                              <span className="px-2 py-0.5 bg-rose-500/20 text-rose-300 border border-rose-500/40 rounded text-[10px] font-bold tracking-wider">
+                                ADMIN (CLOAKED)
                               </span>
                             ) : (
                               <span className="px-2 py-0.5 bg-zinc-800 text-zinc-400 rounded text-[10px]">
@@ -491,23 +656,52 @@ export const AdminPage: React.FC = () => {
                               </span>
                             )}
                           </td>
-                          <td className="p-3 text-right space-x-2">
-                            <button
-                              onClick={() => handleOpenEdit(u)}
-                              title="Edit CP / Level / Role"
-                              className="p-1.5 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded transition-colors"
-                            >
-                              <Edit3 size={15} />
-                            </button>
-                            {u.id !== user?.id && (
+                          <td className="p-3.5 text-right">
+                            <div className="flex items-center justify-end gap-1 sm:gap-1.5 flex-wrap">
                               <button
-                                onClick={() => handleDeleteUser(u)}
-                                title="Delete User"
-                                className="p-1.5 hover:bg-rose-500/20 text-zinc-500 hover:text-rose-400 rounded transition-colors"
+                                onClick={() => handleOpenGift(u)}
+                                title="Gift XP, CP & Resources"
+                                className="px-2 sm:px-2.5 py-1 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 rounded-lg text-[11px] font-mono flex items-center gap-1 transition-all active:scale-95 shadow-sm"
                               >
-                                <Trash2 size={15} />
+                                <Gift size={12} />
+                                <span className="hidden xs:inline">Gift</span>
                               </button>
-                            )}
+
+                              <button
+                                onClick={() => handleOpenMail(u)}
+                                title="Send Direct System Mail"
+                                className="px-2 sm:px-2.5 py-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-lg text-[11px] font-mono flex items-center gap-1 transition-all active:scale-95 shadow-sm"
+                              >
+                                <Mail size={12} />
+                                <span className="hidden xs:inline">Mail</span>
+                              </button>
+
+                              <button
+                                onClick={() => handleOpenEdit(u)}
+                                title="Calibrate Stats (Rating, XP, Streak, Role)"
+                                className="p-1.5 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-lg transition-colors"
+                              >
+                                <Edit3 size={14} />
+                              </button>
+
+                              <button
+                                onClick={() => handleResetUserStats(u)}
+                                title="Reset Stats Back to Starter (1000 CP, 0 XP, Level 1)"
+                                className="p-1.5 hover:bg-amber-500/20 text-zinc-500 hover:text-amber-400 rounded-lg transition-colors"
+                              >
+                                <RotateCcw size={14} />
+                              </button>
+
+                              {u.id !== user?.id && (
+                                <button
+                                  onClick={() => handleDeleteUser(u)}
+                                  title="Permanently Delete User"
+                                  className="p-1.5 hover:bg-rose-500/20 text-zinc-500 hover:text-rose-400 rounded-lg transition-colors"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ))
@@ -571,6 +765,132 @@ export const AdminPage: React.FC = () => {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* TAB 4: POWERS CODEX & COMPREHENSIVE DOCUMENTATION */}
+        {activeTab === 'guide' && (
+          <div className="space-y-6 max-w-5xl mx-auto font-sans pb-12">
+            {/* Header Banner */}
+            <div className="p-6 bg-gradient-to-r from-rose-950/40 via-zinc-900/60 to-zinc-900/60 border border-rose-500/30 rounded-2xl shadow-xl space-y-2">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                  <BookOpen size={22} />
+                </div>
+                <div>
+                  <h2 className="text-base font-black text-white font-mono tracking-wider">
+                    SUPER ADMIN PROTOCOL & POWERS CODEX
+                  </h2>
+                  <p className="text-xs text-zinc-400 font-mono">
+                    Full specifications of administrative capabilities, account stealth, resource granting, and system controls.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Documentation Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              {/* Card 1: Cloaking & Stealth */}
+              <div className="p-5 bg-zinc-900/70 border border-zinc-800 rounded-2xl space-y-3">
+                <div className="flex items-center gap-2.5 text-rose-400 font-bold text-sm font-mono">
+                  <ShieldCheck size={18} />
+                  <span>1. Full Admin Account Isolation (Cloaking)</span>
+                </div>
+                <p className="text-xs text-zinc-300 leading-relaxed">
+                  All accounts with the <code className="text-rose-300 bg-rose-950/50 px-1 py-0.5 rounded font-mono">ADMIN</code> role are strictly quarantined from player discovery:
+                </p>
+                <ul className="text-xs text-zinc-400 space-y-1.5 list-disc list-inside">
+                  <li><strong className="text-white">Global Leaderboard:</strong> Filtered out entirely. Admins will never rank among regular players.</li>
+                  <li><strong className="text-white">Daily Challenge Hall of Fame:</strong> Admin challenge submissions and rankings are scrubbed from public display.</li>
+                  <li><strong className="text-white">Live Arena Matches:</strong> Active rooms hosted by admins are invisible to regular users on the Dashboard.</li>
+                  <li><strong className="text-white">Player Search & Summary:</strong> Regular players searching for admin handles will receive a <span className="text-zinc-300">"Player not found"</span> response.</li>
+                  <li><strong className="text-white">Friend & Duel Guard:</strong> Regular users cannot send friend requests or duel challenges to admin accounts.</li>
+                </ul>
+              </div>
+
+              {/* Card 2: Resource & Progression Grants */}
+              <div className="p-5 bg-zinc-900/70 border border-zinc-800 rounded-2xl space-y-3">
+                <div className="flex items-center gap-2.5 text-yellow-400 font-bold text-sm font-mono">
+                  <Gift size={18} />
+                  <span>2. Resource & Progression Gifting Suite</span>
+                </div>
+                <p className="text-xs text-zinc-300 leading-relaxed">
+                  Admins hold supreme authorization to calibrate or gift progression metrics to any account:
+                </p>
+                <ul className="text-xs text-zinc-400 space-y-1.5 list-disc list-inside">
+                  <li><strong className="text-white">XP Gifting:</strong> Grant custom quantities of Experience Points (e.g., +500 XP, +5,000 XP).</li>
+                  <li><strong className="text-white">CP (Rating) Gifting:</strong> Directly increment competitive Code Points (e.g., +100 CP, +500 CP). Ranks automatically recalibrate instantly.</li>
+                  <li><strong className="text-white">Level Assignment:</strong> Set operative level directly to any target tier.</li>
+                  <li><strong className="text-white">Seasonal Tier Calibration:</strong> Assign designated titles (<em className="text-amber-300">Initiate, Coder, Specialist, Expert, Master, Grandmaster, Apex Coder</em>).</li>
+                  <li><strong className="text-white">Instant Live Dispatch:</strong> When gifts are granted, an encrypted reward transmission is deposited into the player's inbox immediately.</li>
+                </ul>
+              </div>
+
+              {/* Card 3: System Mail Center */}
+              <div className="p-5 bg-zinc-900/70 border border-zinc-800 rounded-2xl space-y-3">
+                <div className="flex items-center gap-2.5 text-indigo-400 font-bold text-sm font-mono">
+                  <Mail size={18} />
+                  <span>3. Direct System Mail Transmissions</span>
+                </div>
+                <p className="text-xs text-zinc-300 leading-relaxed">
+                  Admins can send official communications directly to operative mailboxes:
+                </p>
+                <ul className="text-xs text-zinc-400 space-y-1.5 list-disc list-inside">
+                  <li><strong className="text-white">Direct Inbox Placement:</strong> Messages arrive in the user's Mail Center (the Mail icon right beside Friends in the navigation bar).</li>
+                  <li><strong className="text-white">Attached Rewards:</strong> Attach optional XP or CP grants to any message. Attached resources are credited to the user account on delivery and badged.</li>
+                  <li><strong className="text-white">Real-Time Notification:</strong> If the operative is currently online, a live socket notification pushes to their HUD immediately.</li>
+                </ul>
+              </div>
+
+              {/* Card 4: Broadcast Announcements */}
+              <div className="p-5 bg-zinc-900/70 border border-zinc-800 rounded-2xl space-y-3">
+                <div className="flex items-center gap-2.5 text-rose-400 font-bold text-sm font-mono">
+                  <Radio size={18} />
+                  <span>4. League Broadcast Dispatches</span>
+                </div>
+                <p className="text-xs text-zinc-300 leading-relaxed">
+                  Transmit global announcements across the entire active network:
+                </p>
+                <ul className="text-xs text-zinc-400 space-y-1.5 list-disc list-inside">
+                  <li><strong className="text-white">Network-Wide Delivery:</strong> Transmits simultaneously to every registered non-admin operative.</li>
+                  <li><strong className="text-white">Global Celebrations / Gifts:</strong> Attach XP or CP rewards to deliver network-wide compensation or championship celebration gifts to all operatives.</li>
+                </ul>
+              </div>
+
+              {/* Card 5: Stat Zeroing & Recalibration */}
+              <div className="p-5 bg-zinc-900/70 border border-zinc-800 rounded-2xl space-y-3">
+                <div className="flex items-center gap-2.5 text-amber-400 font-bold text-sm font-mono">
+                  <RotateCcw size={18} />
+                  <span>5. Stat Zeroing & Recalibration</span>
+                </div>
+                <p className="text-xs text-zinc-300 leading-relaxed">
+                  Quickly reset any player's competitive record without deleting their account:
+                </p>
+                <ul className="text-xs text-zinc-400 space-y-1.5 list-disc list-inside">
+                  <li><strong className="text-white">Reset to Starter:</strong> Re-initializes Rating to 1000 CP, Rank to Initiate, XP to 0, Level to 1, and zeroes streak, wins, and losses.</li>
+                  <li><strong className="text-white">Credential Preservation:</strong> User password, email, and identity tokens remain fully operational.</li>
+                </ul>
+              </div>
+
+              {/* Card 6: Infrastructure & Arena Overwatch */}
+              <div className="p-5 bg-zinc-900/70 border border-zinc-800 rounded-2xl space-y-3">
+                <div className="flex items-center gap-2.5 text-emerald-400 font-bold text-sm font-mono">
+                  <Database size={18} />
+                  <span>6. Tactical Infrastructure Controls</span>
+                </div>
+                <p className="text-xs text-zinc-300 leading-relaxed">
+                  Direct controls for cluster maintenance and match hygiene:
+                </p>
+                <ul className="text-xs text-zinc-400 space-y-1.5 list-disc list-inside">
+                  <li><strong className="text-white">Arena Termination:</strong> Force-close locked, disconnected, or orphaned arena duel rooms.</li>
+                  <li><strong className="text-white">Redis Cache Flush:</strong> Clear all in-memory Redis keys and ghost matchmaking queues.</li>
+                  <li><strong className="text-white">Force Daily Rotation:</strong> Trigger an on-demand reset and problem re-seeding for today's Daily Challenges.</li>
+                  <li><strong className="text-white">Database Purge:</strong> Wipes non-admin data while safely preserving admin credentials.</li>
+                </ul>
+              </div>
+
+            </div>
           </div>
         )}
       </div>
@@ -709,6 +1029,303 @@ export const AdminPage: React.FC = () => {
                   className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-mono font-bold rounded-xl transition-colors"
                 >
                   Save Changes
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL: GIFT XP, CP & RESOURCES */}
+      <AnimatePresence>
+        {giftModalUser && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-md bg-zinc-900 border border-yellow-500/30 rounded-2xl p-6 space-y-5 shadow-2xl"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-yellow-400">
+                  <Gift size={20} />
+                  <h3 className="text-sm font-bold text-white">Gift Resources: @{giftModalUser.username}</h3>
+                </div>
+                <button onClick={() => setGiftModalUser(null)} className="text-zinc-500 hover:text-white">
+                  <X size={18} />
+                </button>
+              </div>
+
+              <p className="text-xs text-zinc-400">
+                Granted resources and level adjustments will update the user's account immediately and dispatch an encrypted HQ reward mail to their inbox.
+              </p>
+
+              <div className="space-y-3.5 text-xs font-mono">
+                <div>
+                  <label className="block text-zinc-300 mb-1">XP Points to Grant (+XP)</label>
+                  <input
+                    type="number"
+                    value={giftForm.xp}
+                    onChange={(e) => setGiftForm({ ...giftForm, xp: Number(e.target.value) })}
+                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white focus:border-yellow-500 focus:outline-none"
+                    placeholder="e.g. 500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-zinc-300 mb-1">CP (Rating) to Grant (+CP)</label>
+                  <input
+                    type="number"
+                    value={giftForm.rating}
+                    onChange={(e) => setGiftForm({ ...giftForm, rating: Number(e.target.value) })}
+                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white focus:border-yellow-500 focus:outline-none"
+                    placeholder="e.g. 50"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-zinc-300 mb-1">Set Level</label>
+                    <input
+                      type="number"
+                      value={giftForm.level}
+                      onChange={(e) => setGiftForm({ ...giftForm, level: Number(e.target.value) })}
+                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white focus:border-yellow-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-zinc-300 mb-1">Set Seasonal Tier</label>
+                    <select
+                      value={giftForm.seasonalTier}
+                      onChange={(e) => setGiftForm({ ...giftForm, seasonalTier: e.target.value })}
+                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white focus:border-yellow-500 focus:outline-none"
+                    >
+                      <option value="Initiate">Initiate</option>
+                      <option value="Coder">Coder</option>
+                      <option value="Specialist">Specialist</option>
+                      <option value="Expert">Expert</option>
+                      <option value="Elite">Elite</option>
+                      <option value="Master">Master</option>
+                      <option value="Grandmaster">Grandmaster</option>
+                      <option value="Apex Coder">Apex Coder</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-zinc-300 mb-1">Notification Note / Commendation</label>
+                  <input
+                    type="text"
+                    value={giftForm.note}
+                    onChange={(e) => setGiftForm({ ...giftForm, note: e.target.value })}
+                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white focus:border-yellow-500 focus:outline-none"
+                    placeholder="e.g. For outstanding tournament participation"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  onClick={() => setGiftModalUser(null)}
+                  className="flex-1 py-2 bg-zinc-800 hover:bg-zinc-750 text-zinc-300 text-xs font-mono rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleExecuteGift}
+                  disabled={isGifting}
+                  className="flex-1 py-2 bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-mono font-bold rounded-xl transition-all shadow-lg shadow-yellow-500/20 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-1.5"
+                >
+                  <Gift size={14} />
+                  <span>{isGifting ? 'Granting...' : 'Grant Rewards'}</span>
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL: DIRECT SYSTEM MAIL */}
+      <AnimatePresence>
+        {mailModalUser && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-md bg-zinc-900 border border-indigo-500/30 rounded-2xl p-6 space-y-5 shadow-2xl"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-indigo-400">
+                  <Mail size={20} />
+                  <h3 className="text-sm font-bold text-white">Send Direct Mail: @{mailModalUser.username}</h3>
+                </div>
+                <button onClick={() => setMailModalUser(null)} className="text-zinc-500 hover:text-white">
+                  <X size={18} />
+                </button>
+              </div>
+
+              <p className="text-xs text-zinc-400">
+                This transmission will be delivered directly to the operative's Mailbox (the Mail icon in their header and bottom bar).
+              </p>
+
+              <div className="space-y-3.5 text-xs font-mono">
+                <div>
+                  <label className="block text-zinc-300 mb-1">Subject Title</label>
+                  <input
+                    type="text"
+                    value={mailForm.title}
+                    onChange={(e) => setMailForm({ ...mailForm, title: e.target.value })}
+                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white focus:border-indigo-500 focus:outline-none"
+                    placeholder="Message title..."
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-zinc-300 mb-1">Message Content</label>
+                  <textarea
+                    rows={4}
+                    value={mailForm.message}
+                    onChange={(e) => setMailForm({ ...mailForm, message: e.target.value })}
+                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white focus:border-indigo-500 focus:outline-none font-sans text-xs"
+                    placeholder="Type official message..."
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-zinc-300 mb-1">Attached XP (Optional)</label>
+                    <input
+                      type="number"
+                      value={mailForm.giftXp}
+                      onChange={(e) => setMailForm({ ...mailForm, giftXp: Number(e.target.value) })}
+                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white focus:border-indigo-500 focus:outline-none"
+                      placeholder="+XP"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-zinc-300 mb-1">Attached CP (Optional)</label>
+                    <input
+                      type="number"
+                      value={mailForm.giftCp}
+                      onChange={(e) => setMailForm({ ...mailForm, giftCp: Number(e.target.value) })}
+                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white focus:border-indigo-500 focus:outline-none"
+                      placeholder="+CP"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  onClick={() => setMailModalUser(null)}
+                  className="flex-1 py-2 bg-zinc-800 hover:bg-zinc-750 text-zinc-300 text-xs font-mono rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleExecuteMail}
+                  disabled={isSendingMail}
+                  className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-mono font-bold rounded-xl transition-all shadow-lg shadow-indigo-600/30 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-1.5"
+                >
+                  <Send size={14} />
+                  <span>{isSendingMail ? 'Transmitting...' : 'Send Transmission'}</span>
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL: BROADCAST ANNOUNCEMENT */}
+      <AnimatePresence>
+        {broadcastModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-lg bg-zinc-900 border border-rose-500/40 rounded-2xl p-6 space-y-5 shadow-2xl"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-rose-400">
+                  <Radio size={20} />
+                  <h3 className="text-sm font-bold text-white">Broadcast Announcement to All Operatives</h3>
+                </div>
+                <button onClick={() => setBroadcastModalOpen(false)} className="text-zinc-500 hover:text-white">
+                  <X size={18} />
+                </button>
+              </div>
+
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                This transmission will be delivered to every active registered user on the platform. If rewards are attached, every recipient will receive the credits immediately.
+              </p>
+
+              <div className="space-y-3.5 text-xs font-mono">
+                <div>
+                  <label className="block text-zinc-300 mb-1">Broadcast Title</label>
+                  <input
+                    type="text"
+                    value={broadcastForm.title}
+                    onChange={(e) => setBroadcastForm({ ...broadcastForm, title: e.target.value })}
+                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white focus:border-rose-500 focus:outline-none"
+                    placeholder="ANNOUNCEMENT HEADLINE..."
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-zinc-300 mb-1">Broadcast Body</label>
+                  <textarea
+                    rows={4}
+                    value={broadcastForm.message}
+                    onChange={(e) => setBroadcastForm({ ...broadcastForm, message: e.target.value })}
+                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white focus:border-rose-500 focus:outline-none font-sans text-xs"
+                    placeholder="Enter message for all players..."
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 p-3 bg-zinc-950/60 rounded-xl border border-zinc-800">
+                  <div>
+                    <label className="block text-zinc-400 text-[11px] mb-1">Grant XP to All (+XP)</label>
+                    <input
+                      type="number"
+                      value={broadcastForm.giftXp}
+                      onChange={(e) => setBroadcastForm({ ...broadcastForm, giftXp: Number(e.target.value) })}
+                      className="w-full px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded-lg text-white focus:border-rose-500 focus:outline-none"
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-zinc-400 text-[11px] mb-1">Grant CP to All (+CP)</label>
+                    <input
+                      type="number"
+                      value={broadcastForm.giftCp}
+                      onChange={(e) => setBroadcastForm({ ...broadcastForm, giftCp: Number(e.target.value) })}
+                      className="w-full px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded-lg text-white focus:border-rose-500 focus:outline-none"
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  onClick={() => setBroadcastModalOpen(false)}
+                  className="flex-1 py-2 bg-zinc-800 hover:bg-zinc-750 text-zinc-300 text-xs font-mono rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleExecuteBroadcast}
+                  disabled={isBroadcasting}
+                  className="flex-1 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-mono font-bold rounded-xl transition-all shadow-lg shadow-rose-600/30 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-1.5"
+                >
+                  <Radio size={14} />
+                  <span>{isBroadcasting ? 'Broadcasting...' : 'Execute Broadcast'}</span>
                 </button>
               </div>
             </motion.div>

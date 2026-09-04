@@ -48,6 +48,8 @@ export enum NotificationType {
   INVITE_EXPIRED = 'INVITE_EXPIRED',
   STREAK_REMINDER = 'STREAK_REMINDER',
   CHALLENGE_RESET = 'CHALLENGE_RESET',
+  SYSTEM_MAIL = 'SYSTEM_MAIL',
+  ADMIN_REWARD = 'ADMIN_REWARD',
 }
 
 export interface Notification {

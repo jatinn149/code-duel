@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { IUserRepository } from '@/repositories/interfaces';
+import { IUserRepository, INotificationRepository } from '@/repositories/interfaces';
 import { requireAuth, requireRole } from '@/middleware/auth-middleware';
-import { UserRole } from '@code-duel/types';
-import { calculateCpRank } from '@code-duel/shared';
+import { UserRole, NotificationType, Rank } from '@code-duel/types';
+import { calculateCpRank, SocketEvents } from '@code-duel/shared';
 import { clearUserDatabase, flushAllRedisCache } from '@/services/admin-service';
 import { redisCache } from '@/utils/redis-cache';
 import { DailyResetEngine } from '@/services/daily-reset-engine';
@@ -11,6 +11,8 @@ import { logger } from '@/utils/logger';
 export const createAdminRouter = (
   userRepository: IUserRepository,
   dailyResetEngine?: DailyResetEngine,
+  notificationRepository?: INotificationRepository,
+  getIo?: () => any,
 ) => {
   const router = Router();
   const auth = requireAuth(userRepository);
@@ -109,6 +111,230 @@ export const createAdminRouter = (
       }
       await userRepository.delete(id);
       res.json({ success: true, message: 'User successfully deleted' });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // 4.1 Gift XP, CP/Rating, Level, Tier to User
+  router.post('/users/:id/gift', async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const targetUser = await userRepository.findById(id);
+      if (!targetUser) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+
+      const { xp, rating, level, seasonalTier, note } = req.body;
+      const updates: any = {};
+
+      if (rating !== undefined && !isNaN(Number(rating))) {
+        updates.rating = Math.max(0, (targetUser.rating || 0) + Number(rating));
+        updates.rank = calculateCpRank(updates.rating);
+      }
+      if (xp !== undefined && !isNaN(Number(xp))) {
+        updates.xp = Math.max(0, (targetUser.xp || 0) + Number(xp));
+      }
+      if (level !== undefined && !isNaN(Number(level))) {
+        updates.level = Math.max(1, Number(level));
+      }
+      if (seasonalTier) {
+        updates.seasonalTier = String(seasonalTier);
+      }
+
+      const updatedUser = await userRepository.update(id, updates);
+
+      if (notificationRepository) {
+        const giftDesc = [
+          xp ? `+${xp} XP` : null,
+          rating ? `+${rating} CP` : null,
+          level ? `Level ${level}` : null,
+          seasonalTier ? `Tier ${seasonalTier}` : null,
+        ].filter(Boolean).join(' • ');
+
+        const notif = await notificationRepository.create({
+          id: `notif-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+          userId: id,
+          type: NotificationType.ADMIN_REWARD,
+          title: 'HQ Command: Resources Granted!',
+          message: note?.trim() || `The administration granted rewards to your account: ${giftDesc}`,
+          data: {
+            giftXp: xp ? Number(xp) : undefined,
+            giftCp: rating ? Number(rating) : undefined,
+            newLevel: updates.level,
+            newTier: updates.seasonalTier,
+            grantedBy: (req.user as any)?.username || 'HQ Admin',
+          },
+          isRead: false,
+          createdAt: new Date().toISOString(),
+        });
+
+        const io = getIo?.();
+        if (io) {
+          io.emit(SocketEvents.NOTIFICATION_RECEIVED, notif);
+        }
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { passwordHash: _p, ...safe } = updatedUser;
+      res.json({
+        success: true,
+        message: `Successfully granted rewards to @${updatedUser.username}`,
+        data: safe,
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // 4.2 Send Direct System Mail to User
+  router.post('/users/:id/mail', async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const targetUser = await userRepository.findById(id);
+      if (!targetUser) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+
+      const { title, message, giftXp, giftCp } = req.body;
+      if (!title?.trim() || !message?.trim()) {
+        return res.status(400).json({ success: false, message: 'Title and message are required' });
+      }
+
+      const updates: any = {};
+      if (giftCp && !isNaN(Number(giftCp))) {
+        updates.rating = Math.max(0, (targetUser.rating || 0) + Number(giftCp));
+        updates.rank = calculateCpRank(updates.rating);
+      }
+      if (giftXp && !isNaN(Number(giftXp))) {
+        updates.xp = Math.max(0, (targetUser.xp || 0) + Number(giftXp));
+      }
+
+      if (Object.keys(updates).length > 0) {
+        await userRepository.update(id, updates);
+      }
+
+      if (notificationRepository) {
+        const notif = await notificationRepository.create({
+          id: `notif-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+          userId: id,
+          type: (giftXp || giftCp) ? NotificationType.ADMIN_REWARD : NotificationType.SYSTEM_MAIL,
+          title: title.trim(),
+          message: message.trim(),
+          data: {
+            giftXp: giftXp ? Number(giftXp) : undefined,
+            giftCp: giftCp ? Number(giftCp) : undefined,
+            sender: (req.user as any)?.username || 'HQ Administration',
+          },
+          isRead: false,
+          createdAt: new Date().toISOString(),
+        });
+
+        const io = getIo?.();
+        if (io) {
+          io.emit(SocketEvents.NOTIFICATION_RECEIVED, notif);
+        }
+      }
+
+      res.json({
+        success: true,
+        message: `System mail dispatched to @${targetUser.username}`,
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // 4.3 Broadcast System Mail to All Non-Admin Users
+  router.post('/broadcast-mail', async (req, res, next) => {
+    try {
+      const { title, message, giftXp, giftCp } = req.body;
+      if (!title?.trim() || !message?.trim()) {
+        return res.status(400).json({ success: false, message: 'Title and message are required' });
+      }
+
+      const allUsers = await userRepository.findAll();
+      const regularUsers = allUsers.filter(u => u.role !== UserRole.ADMIN);
+
+      for (const u of regularUsers) {
+        const updates: any = {};
+        if (giftCp && !isNaN(Number(giftCp))) {
+          updates.rating = Math.max(0, (u.rating || 0) + Number(giftCp));
+          updates.rank = calculateCpRank(updates.rating);
+        }
+        if (giftXp && !isNaN(Number(giftXp))) {
+          updates.xp = Math.max(0, (u.xp || 0) + Number(giftXp));
+        }
+
+        if (Object.keys(updates).length > 0) {
+          await userRepository.update(u.id, updates);
+        }
+
+        if (notificationRepository) {
+          const notif = await notificationRepository.create({
+            id: `notif-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+            userId: u.id,
+            type: (giftXp || giftCp) ? NotificationType.ADMIN_REWARD : NotificationType.SYSTEM_MAIL,
+            title: title.trim(),
+            message: message.trim(),
+            data: {
+              giftXp: giftXp ? Number(giftXp) : undefined,
+              giftCp: giftCp ? Number(giftCp) : undefined,
+              sender: 'HQ Broadcast',
+              isBroadcast: true,
+            },
+            isRead: false,
+            createdAt: new Date().toISOString(),
+          });
+
+          const io = getIo?.();
+          if (io) {
+            io.emit(SocketEvents.NOTIFICATION_RECEIVED, notif);
+          }
+        }
+      }
+
+      res.json({
+        success: true,
+        message: `Broadcast successfully sent to ${regularUsers.length} operative(s)`,
+        data: { recipientsCount: regularUsers.length },
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // 4.4 Reset User Progression Stats (Keep account, reset rating, XP, rank)
+  router.post('/users/:id/reset-stats', async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const targetUser = await userRepository.findById(id);
+      if (!targetUser) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+
+      const updated = await userRepository.update(id, {
+        rating: 1000,
+        rank: Rank.INITIATE,
+        xp: 0,
+        level: 1,
+        wins: 0,
+        losses: 0,
+        streak: 0,
+        highestStreak: 0,
+        highestRating: 1000,
+        matchesPlayed: 0,
+        dailyChallengeWins: 0,
+        seasonalTier: 'Initiate',
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { passwordHash: _p, ...safe } = updated;
+      res.json({
+        success: true,
+        message: `Progression stats for @${targetUser.username} have been reset to starter values`,
+        data: safe,
+      });
     } catch (error) {
       next(error);
     }

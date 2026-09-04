@@ -22,6 +22,7 @@ import { jsonStorage } from '@/storage/json-adapter';
 import { validateRequest } from '@/middleware/validate-request';
 import { signupSchema, loginSchema, refreshTokenSchema } from '@code-duel/validation';
 import { requireAuth } from '@/middleware/auth-middleware';
+import { UserRole } from '@code-duel/types';
 
 const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -207,6 +208,12 @@ export const createAuthRouter = () => {
             continue;
           }
 
+          // Keep admin accounts out of reach of regular users
+          const isUserAdmin = req.user?.role === UserRole.ADMIN;
+          if (!isUserAdmin && owner.role === UserRole.ADMIN) {
+            continue;
+          }
+
           // Only list truly active rooms
           if (room.state === 'PLAYING' || room.state === 'COUNTDOWN' || (room.state === 'WAITING' && connectedPlayers.length > 0)) {
             liveMatches.push({
@@ -245,6 +252,7 @@ export const createAuthRouter = () => {
     try {
       const rawUsers = await userRepository.findAll();
       const users = rawUsers
+        .filter(u => u.role !== UserRole.ADMIN)
         .map(u => ({
           id: u.id,
           username: u.username,
@@ -308,7 +316,7 @@ export const createAuthRouter = () => {
       // Get today's leaderboard
       const leaderboardKey = `daily_leaderboard:${today}`;
       const leaderboardRaw = await redisCache.get(leaderboardKey);
-      const leaderboard = leaderboardRaw ? JSON.parse(leaderboardRaw) : [];
+      const leaderboard: any[] = leaderboardRaw ? JSON.parse(leaderboardRaw) : [];
 
       // Calculate time remaining until midnight UTC
       const now = new Date();
@@ -329,7 +337,7 @@ export const createAuthRouter = () => {
           },
           alreadySolved,
           userResult,
-          leaderboard: leaderboard.slice(0, 20),
+          leaderboard: leaderboard.filter((e) => !e.role || e.role !== UserRole.ADMIN).slice(0, 20),
           todayDate: today,
           timeRemainingSec,
           streak: user.streak || 0,
@@ -413,17 +421,19 @@ export const createAuthRouter = () => {
           };
           await redisCache.set(solvedKey, JSON.stringify(resultRecord), 'EX', 86400 * 2);
 
-          const leaderboardKey = `daily_leaderboard:${today}`;
-          const leaderboardRaw = await redisCache.get(leaderboardKey);
-          const leaderboard = leaderboardRaw ? JSON.parse(leaderboardRaw) : [];
-          leaderboard.push({
-            userId: user.id,
-            username: user.username,
-            timeElapsedSec: timeElapsedSec || 60,
-            completedAt: new Date().toISOString(),
-          });
-          leaderboard.sort((a: any, b: any) => a.timeElapsedSec - b.timeElapsedSec);
-          await redisCache.set(leaderboardKey, JSON.stringify(leaderboard), 'EX', 86400 * 2);
+          if (user.role !== UserRole.ADMIN) {
+            const leaderboardKey = `daily_leaderboard:${today}`;
+            const leaderboardRaw = await redisCache.get(leaderboardKey);
+            const leaderboard = leaderboardRaw ? JSON.parse(leaderboardRaw) : [];
+            leaderboard.push({
+              userId: user.id,
+              username: user.username,
+              timeElapsedSec: timeElapsedSec || 60,
+              completedAt: new Date().toISOString(),
+            });
+            leaderboard.sort((a: any, b: any) => a.timeElapsedSec - b.timeElapsedSec);
+            await redisCache.set(leaderboardKey, JSON.stringify(leaderboard), 'EX', 86400 * 2);
+          }
         }
       }
 

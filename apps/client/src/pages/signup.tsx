@@ -13,7 +13,6 @@ import {
   Eye,
   EyeOff,
   CheckCircle2,
-  Sparkles,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -103,7 +102,7 @@ export const SignupPage = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-zinc-950 relative overflow-hidden selection:bg-emerald-500/30 font-sans">
+    <div className="min-h-[100dvh] w-full flex flex-col justify-center items-center bg-zinc-950 relative overflow-x-hidden selection:bg-emerald-500/30 font-sans px-3 sm:px-6 py-6 sm:py-12">
       {/* Premium Ambient Background */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         {/* Subtle grid pattern with center fade */}
@@ -122,10 +121,10 @@ export const SignupPage = () => {
             initial="hidden"
             animate="visible"
             exit={{ opacity: 0, scale: 0.98, filter: 'blur(8px)', transition: { duration: 0.2 } }}
-            className="w-full max-w-[440px] px-4 sm:px-6 relative z-10"
+            className="w-full max-w-[460px] relative z-10"
           >
             {/* Elegant glassmorphic card */}
-            <div className="relative bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/80 rounded-2xl p-6 sm:p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden transition-colors duration-300 hover:border-zinc-700/80 group/card">
+            <div className="relative bg-zinc-900/50 backdrop-blur-xl border border-zinc-800/80 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden transition-colors duration-300 hover:border-zinc-700/80 group/card">
               {/* Subtle top edge glowing line */}
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
               
@@ -166,7 +165,7 @@ export const SignupPage = () => {
                       type="text"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      className="w-full pl-4 pr-10 py-2.5 bg-zinc-950/40 hover:bg-zinc-950/70 border border-zinc-800/80 rounded-lg text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 hover:border-zinc-700/80 transition-all duration-200 shadow-inner"
+                      className="w-full pl-4 pr-10 py-3.5 sm:py-2.5 bg-zinc-950/40 hover:bg-zinc-950/70 border border-zinc-800/80 rounded-xl text-base sm:text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 hover:border-zinc-700/80 transition-all duration-200 shadow-inner"
                       placeholder="CODEWARRIOR_01"
                       required
                     />
@@ -221,7 +220,7 @@ export const SignupPage = () => {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-4 pr-10 py-2.5 bg-zinc-950/40 hover:bg-zinc-950/70 border border-zinc-800/80 rounded-lg text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 hover:border-zinc-700/80 transition-all duration-200 shadow-inner"
+                      className="w-full pl-4 pr-10 py-3.5 sm:py-2.5 bg-zinc-950/40 hover:bg-zinc-950/70 border border-zinc-800/80 rounded-xl text-base sm:text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 hover:border-zinc-700/80 transition-all duration-200 shadow-inner"
                       placeholder="recruit@league.com"
                       required
                     />
@@ -240,7 +239,7 @@ export const SignupPage = () => {
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-4 pr-11 py-2.5 bg-zinc-950/40 hover:bg-zinc-950/70 border border-zinc-800/80 rounded-lg text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 hover:border-zinc-700/80 transition-all duration-200 shadow-inner"
+                      className="w-full pl-4 pr-11 py-3.5 sm:py-2.5 bg-zinc-950/40 hover:bg-zinc-950/70 border border-zinc-800/80 rounded-xl text-base sm:text-sm text-zinc-100 placeholder:text-zinc-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 hover:border-zinc-700/80 transition-all duration-200 shadow-inner"
                       placeholder="••••••••"
                       required
                     />
@@ -260,28 +259,25 @@ export const SignupPage = () => {
                   </div>
                 </motion.div>
 
-                {/* Skill Rating Slider (1 to 10) */}
-                <motion.div variants={itemVariants} className="space-y-2 p-3.5 bg-zinc-950/60 rounded-xl border border-zinc-800/80 mt-1">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[11px] font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                      Rate Your Coding Skill: <span className="text-emerald-400 font-bold font-mono">{skillRating}/10</span>
+                <motion.div variants={itemVariants} className="space-y-2 pt-1">
+                  <div className="flex justify-between items-center ml-0.5">
+                    <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+                      Initial Baseline Rating (Skill Assessment)
                     </label>
-                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 font-bold">
-                      Base: {skillInfo.cp}
+                    <span className="text-[10px] font-mono text-emerald-400 font-bold">
+                      {skillRating} / 10 • {skillInfo.cp}
                     </span>
                   </div>
-
+                  
                   <input
                     type="range"
                     min="1"
                     max="10"
-                    step="1"
                     value={skillRating}
                     onChange={(e) => setSkillRating(Number(e.target.value))}
-                    className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                    className="w-full h-2 bg-zinc-850 rounded-lg appearance-none cursor-pointer accent-emerald-500"
                   />
-
+                  
                   <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500 pt-0.5">
                     <span>1 (Beginner)</span>
                     <span className={skillInfo.color + " font-bold font-mono"}>{skillInfo.label} ({skillInfo.rank})</span>
@@ -295,7 +291,7 @@ export const SignupPage = () => {
                   whileTap={{ y: 0 }}
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-3 mt-4 bg-gradient-to-b from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium text-sm rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 shadow-[0_1px_2px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.15)] border border-emerald-700 relative overflow-hidden"
+                  className="w-full py-3.5 sm:py-3 mt-4 bg-gradient-to-b from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium text-base sm:text-sm rounded-xl transition-all duration-200 flex items-center justify-center space-x-2 shadow-[0_1px_2px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.15)] border border-emerald-700 relative overflow-hidden active:scale-[0.98]"
                 >
                   {isLoading ? (
                     <Loader2 className="w-4 h-4 animate-spin text-white" />

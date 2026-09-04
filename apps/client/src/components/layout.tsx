@@ -2,18 +2,20 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth-store';
 import { useSocialStore } from '@/store/social-store';
 import { FriendSidebar } from '@/components/social/friend-sidebar';
-import { LogOut, Sword, Bell, User, Trophy, Users, ShieldAlert, Zap } from 'lucide-react';
+import { NotificationDropdown } from '@/components/social/notification-dropdown';
+import { LogOut, Sword, Mail, User, Trophy, Users, ShieldAlert, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useMemo } from 'react';
 import { clsx } from 'clsx';
 
 export const Layout = () => {
   const { user, logout } = useAuthStore();
-  const { friends } = useSocialStore();
+  const { friends, unreadNotificationsCount } = useSocialStore();
   const navigate = useNavigate();
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [friendsOpen, setFriendsOpen] = useState(false);
+  const [mobileMailOpen, setMobileMailOpen] = useState(false);
 
   const onlineFriendsCount = useMemo(() => {
     return friends.filter(f => (f.status as any) === 'ONLINE' || (f.status as any) === 'IN_GAME').length;
@@ -73,7 +75,7 @@ export const Layout = () => {
 
           {user && (
             <div className="flex items-center space-x-8">
-              <nav className="hidden md:flex items-center space-x-6">
+              <nav className="hidden lg:flex items-center space-x-6">
                 {['Dashboard', 'Leaderboard', 'Arena', 'Training'].map((item) => (
                   <button
                     key={item}
@@ -97,7 +99,7 @@ export const Layout = () => {
                 ))}
               </nav>
 
-              <div className="h-4 w-px bg-neutral-800 hidden md:block" />
+              <div className="h-4 w-px bg-neutral-800 hidden lg:block" />
 
               <div className="flex items-center space-x-3">
                 {user?.role === 'ADMIN' && (
@@ -111,10 +113,7 @@ export const Layout = () => {
                   </button>
                 )}
 
-                <button className="p-2 text-neutral-500 hover:text-white transition-colors relative rounded-lg hover:bg-neutral-900">
-                  <Bell className="w-4.5 h-4.5" />
-                  <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-neutral-400 rounded-full border border-black" />
-                </button>
+                <NotificationDropdown />
 
                 <button
                   onClick={() => setFriendsOpen(!friendsOpen)}
@@ -209,7 +208,7 @@ export const Layout = () => {
       </header>
       )}
 
-      <main className={clsx("flex-1 flex flex-col overflow-hidden relative", !isLobbyOrBattle && user && "pb-16 md:pb-0")}>
+      <main className={clsx("flex-1 flex flex-col overflow-hidden relative", !isLobbyOrBattle && user && "pb-16 lg:pb-0")}>
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
@@ -251,64 +250,84 @@ export const Layout = () => {
             </>
           )}
         </AnimatePresence>
+
+        {/* Mobile Mail Modal/Drawer Mount */}
+        <NotificationDropdown
+          isOpenControlled={mobileMailOpen}
+          onCloseControlled={() => setMobileMailOpen(false)}
+          hideTriggerButton={true}
+        />
       </main>
 
-      {/* Mobile Bottom Navigation Bar (< md) */}
+      {/* Mobile Bottom Navigation Bar (< lg) */}
       {!isLobbyOrBattle && user && (
-        <nav className="fixed bottom-0 left-0 right-0 z-40 bg-zinc-950/95 backdrop-blur-xl border-t border-zinc-850 md:hidden px-2 py-1 flex items-center justify-around shadow-2xl safe-area-bottom h-16">
+        <nav className="fixed bottom-0 left-0 right-0 z-40 bg-zinc-950/95 backdrop-blur-xl border-t border-zinc-800 lg:hidden px-2 py-1 flex items-center justify-around shadow-2xl safe-area-bottom h-16">
           <button
             onClick={() => navigate('/')}
             className={clsx(
-              "flex flex-col items-center gap-1 transition-all py-1 px-3 rounded-xl active:scale-90",
+              "flex flex-col items-center gap-1 transition-all py-1 px-2.5 rounded-xl active:scale-90",
               location.pathname === '/' ? "text-indigo-400 font-bold" : "text-zinc-400 hover:text-zinc-200"
             )}
           >
-            <Sword className="w-5 h-5" />
-            <span className="text-[11px] font-sans font-semibold tracking-tight">Arena</span>
+            <Sword className="w-4.5 h-4.5" />
+            <span className="text-[10px] font-sans font-semibold tracking-tight">Arena</span>
           </button>
 
           <button
             onClick={() => navigate('/daily-challenge')}
             className={clsx(
-              "flex flex-col items-center gap-1 transition-all py-1 px-3 rounded-xl active:scale-90",
+              "flex flex-col items-center gap-1 transition-all py-1 px-2.5 rounded-xl active:scale-90",
               location.pathname === '/daily-challenge' ? "text-amber-400 font-bold" : "text-zinc-400 hover:text-zinc-200"
             )}
           >
-            <Zap className="w-5 h-5" />
-            <span className="text-[11px] font-sans font-semibold tracking-tight">Daily</span>
+            <Zap className="w-4.5 h-4.5" />
+            <span className="text-[10px] font-sans font-semibold tracking-tight">Daily</span>
           </button>
 
           <button
             onClick={() => navigate('/leaderboard')}
             className={clsx(
-              "flex flex-col items-center gap-1 transition-all py-1 px-3 rounded-xl active:scale-90",
+              "flex flex-col items-center gap-1 transition-all py-1 px-2.5 rounded-xl active:scale-90",
               location.pathname === '/leaderboard' ? "text-indigo-400 font-bold" : "text-zinc-400 hover:text-zinc-200"
             )}
           >
-            <Trophy className="w-5 h-5" />
-            <span className="text-[11px] font-sans font-semibold tracking-tight">Rankings</span>
+            <Trophy className="w-4.5 h-4.5" />
+            <span className="text-[10px] font-sans font-semibold tracking-tight">Rankings</span>
+          </button>
+
+          <button
+            onClick={() => setMobileMailOpen(true)}
+            className="flex flex-col items-center gap-1 transition-all py-1 px-2.5 rounded-xl relative text-zinc-400 hover:text-zinc-200 active:scale-90"
+          >
+            <Mail className="w-4.5 h-4.5" />
+            {unreadNotificationsCount > 0 && (
+              <span className="absolute top-0.5 right-1.5 px-1 min-w-[14px] h-[14px] bg-rose-500 text-white text-[8px] font-black rounded-full flex items-center justify-center border border-black shadow-[0_0_8px_rgba(244,63,94,0.6)]">
+                {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
+              </span>
+            )}
+            <span className="text-[10px] font-sans font-semibold tracking-tight">Mail</span>
           </button>
 
           <button
             onClick={() => setFriendsOpen(true)}
-            className="flex flex-col items-center gap-1 transition-all py-1 px-3 rounded-xl relative text-zinc-400 hover:text-zinc-200 active:scale-90"
+            className="flex flex-col items-center gap-1 transition-all py-1 px-2.5 rounded-xl relative text-zinc-400 hover:text-zinc-200 active:scale-90"
           >
-            <Users className="w-5 h-5" />
+            <Users className="w-4.5 h-4.5" />
             {onlineFriendsCount > 0 && (
-              <span className="absolute top-0.5 right-2.5 w-2 h-2 bg-emerald-500 rounded-full border border-black animate-pulse" />
+              <span className="absolute top-0.5 right-1.5 w-2 h-2 bg-emerald-500 rounded-full border border-black animate-pulse" />
             )}
-            <span className="text-[11px] font-sans font-semibold tracking-tight">Friends</span>
+            <span className="text-[10px] font-sans font-semibold tracking-tight">Friends</span>
           </button>
 
           <button
             onClick={() => navigate('/profile')}
             className={clsx(
-              "flex flex-col items-center gap-1 transition-all py-1 px-3 rounded-xl active:scale-90",
+              "flex flex-col items-center gap-1 transition-all py-1 px-2.5 rounded-xl active:scale-90",
               location.pathname === '/profile' ? "text-indigo-400 font-bold" : "text-zinc-400 hover:text-zinc-200"
             )}
           >
-            <User className="w-5 h-5" />
-            <span className="text-[11px] font-sans font-semibold tracking-tight">Profile</span>
+            <User className="w-4.5 h-4.5" />
+            <span className="text-[10px] font-sans font-semibold tracking-tight">Profile</span>
           </button>
         </nav>
       )}

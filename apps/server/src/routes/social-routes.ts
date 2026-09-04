@@ -3,6 +3,7 @@ import rateLimit from 'express-rate-limit';
 import { requireAuth } from '@/middleware/auth-middleware';
 import { IUserRepository, IFriendRepository } from '@/repositories/interfaces';
 import { ValidationError, NotFoundError } from '@/errors';
+import { UserRole } from '@code-duel/types';
 
 export const createSocialRouter = (
   userRepository: IUserRepository,
@@ -36,6 +37,11 @@ export const createSocialRouter = (
         targetUser = await userRepository.findByPlayerId(cleanQuery.toUpperCase());
       }
       if (!targetUser) {
+        throw new NotFoundError('Player not found');
+      }
+
+      // Isolate admin accounts: regular users cannot find or target admins
+      if (targetUser.role === UserRole.ADMIN && req.user!.role !== UserRole.ADMIN) {
         throw new NotFoundError('Player not found');
       }
 
@@ -85,6 +91,11 @@ export const createSocialRouter = (
 
       const targetUser = await userRepository.findById(targetUserId);
       if (!targetUser) {
+        throw new NotFoundError('Player not found');
+      }
+
+      // Isolate admin accounts: regular users cannot view summary of admins
+      if (targetUser.role === UserRole.ADMIN && req.user!.role !== UserRole.ADMIN) {
         throw new NotFoundError('Player not found');
       }
 
