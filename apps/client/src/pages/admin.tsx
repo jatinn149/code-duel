@@ -194,38 +194,38 @@ export const AdminPage: React.FC = () => {
   return (
     <div className="flex-1 flex flex-col h-full bg-zinc-950 text-zinc-100 font-sans overflow-hidden">
       {/* Top Admin Header */}
-      <header className="h-16 px-6 border-b border-rose-500/20 bg-zinc-900/80 backdrop-blur-md flex items-center justify-between shrink-0 z-20 shadow-lg shadow-rose-950/20">
-        <div className="flex items-center gap-4">
+      <header className="min-h-16 py-2 px-3 sm:px-6 border-b border-rose-500/20 bg-zinc-900/80 backdrop-blur-md flex flex-wrap sm:flex-nowrap items-center justify-between shrink-0 z-20 shadow-lg shadow-rose-950/20 gap-2">
+        <div className="flex items-center gap-2 sm:gap-4">
           <button
             onClick={() => navigate('/')}
-            className="p-2 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-lg transition-colors flex items-center gap-1.5 text-xs font-mono"
+            className="p-1.5 sm:p-2 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-lg transition-colors flex items-center gap-1.5 text-xs font-mono shrink-0"
           >
-            <ArrowLeft size={16} /> Back to Arena
+            <ArrowLeft size={16} /> <span className="hidden xs:inline">Back to Arena</span>
           </button>
-          <div className="h-4 w-px bg-zinc-800" />
+          <div className="h-4 w-px bg-zinc-800 hidden xs:block" />
           <div className="flex items-center gap-2">
-            <span className="p-1.5 bg-rose-500/10 border border-rose-500/30 rounded-lg text-rose-400">
+            <span className="p-1.5 bg-rose-500/10 border border-rose-500/30 rounded-lg text-rose-400 shrink-0">
               <ShieldAlert size={18} />
             </span>
             <div>
-              <h1 className="text-sm font-black text-white tracking-wider flex items-center gap-2">
+              <h1 className="text-xs sm:text-sm font-black text-white tracking-wider flex items-center gap-1.5 sm:gap-2">
                 GOD MODE CONTROL CENTER
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                <span className="text-[9px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40">
                   SUPER ADMIN
                 </span>
               </h1>
-              <p className="text-[10px] font-mono text-zinc-400">
+              <p className="text-[9px] sm:text-[10px] font-mono text-zinc-400">
                 System Storage: {stats?.storageMode || 'Detecting...'} • Uptime: {stats?.uptimeSec || 0}s
               </p>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 ml-auto sm:ml-0">
           <button
             onClick={handleGodBoostSelf}
             title="Grant Max CP & Stats to Admin"
-            className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold rounded-lg transition-colors flex items-center gap-1.5"
+            className="px-2.5 sm:px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold rounded-lg transition-colors flex items-center gap-1.5 active:scale-95"
           >
             <Sparkles size={14} />
             God Boost Self (3000 CP)
@@ -234,7 +234,7 @@ export const AdminPage: React.FC = () => {
           <button
             onClick={loadAllData}
             disabled={loading}
-            className="p-2 bg-zinc-800 hover:bg-zinc-750 text-zinc-300 rounded-lg transition-colors"
+            className="p-1.5 sm:p-2 bg-zinc-800 hover:bg-zinc-750 text-zinc-300 rounded-lg transition-colors active:scale-95"
             title="Refresh Data"
           >
             <RefreshCw size={16} className={clsx(loading && 'animate-spin')} />
@@ -258,11 +258,11 @@ export const AdminPage: React.FC = () => {
       </AnimatePresence>
 
       {/* Admin Tabs */}
-      <div className="px-6 pt-4 border-b border-zinc-800 bg-zinc-900/40 flex items-center gap-2 shrink-0">
+      <div className="px-3 sm:px-6 pt-3 sm:pt-4 border-b border-zinc-800 bg-zinc-900/40 flex items-center gap-1 sm:gap-2 shrink-0 overflow-x-auto scrollbar-hide">
         <button
           onClick={() => setActiveTab('system')}
           className={clsx(
-            'px-4 py-2 text-xs font-mono font-bold rounded-t-lg transition-all border-b-2 flex items-center gap-2',
+            'px-3 sm:px-4 py-2 text-xs font-mono font-bold rounded-t-lg transition-all border-b-2 flex items-center gap-1.5 sm:gap-2 shrink-0 whitespace-nowrap',
             activeTab === 'system'
               ? 'border-rose-500 text-rose-400 bg-rose-500/10'
               : 'border-transparent text-zinc-400 hover:text-white',
@@ -275,7 +275,7 @@ export const AdminPage: React.FC = () => {
         <button
           onClick={() => setActiveTab('users')}
           className={clsx(
-            'px-4 py-2 text-xs font-mono font-bold rounded-t-lg transition-all border-b-2 flex items-center gap-2',
+            'px-3 sm:px-4 py-2 text-xs font-mono font-bold rounded-t-lg transition-all border-b-2 flex items-center gap-1.5 sm:gap-2 shrink-0 whitespace-nowrap',
             activeTab === 'users'
               ? 'border-rose-500 text-rose-400 bg-rose-500/10'
               : 'border-transparent text-zinc-400 hover:text-white',
@@ -288,7 +288,7 @@ export const AdminPage: React.FC = () => {
         <button
           onClick={() => setActiveTab('rooms')}
           className={clsx(
-            'px-4 py-2 text-xs font-mono font-bold rounded-t-lg transition-all border-b-2 flex items-center gap-2',
+            'px-3 sm:px-4 py-2 text-xs font-mono font-bold rounded-t-lg transition-all border-b-2 flex items-center gap-1.5 sm:gap-2 shrink-0 whitespace-nowrap',
             activeTab === 'rooms'
               ? 'border-rose-500 text-rose-400 bg-rose-500/10'
               : 'border-transparent text-zinc-400 hover:text-white',
@@ -300,12 +300,12 @@ export const AdminPage: React.FC = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
         {/* TAB 1: SYSTEM & DATABASE CONTROL */}
         {activeTab === 'system' && (
-          <div className="space-y-6 max-w-6xl mx-auto">
+          <div className="space-y-4 sm:space-y-6 max-w-6xl mx-auto">
             {/* Live Diagnostics Metrics */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <div className="p-4 bg-zinc-900/70 border border-zinc-800 rounded-xl">
                 <div className="flex items-center justify-between text-zinc-400 text-xs font-mono">
                   <span>TOTAL USERS</span>

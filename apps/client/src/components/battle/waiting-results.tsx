@@ -138,7 +138,7 @@ export const WaitingResults = () => {
   }
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-6 bg-black text-neutral-200 min-h-screen relative overflow-y-auto select-none py-10">
+    <div className="flex-1 flex flex-col items-center justify-center p-3 sm:p-6 md:p-8 bg-black text-neutral-200 min-h-screen relative overflow-y-auto select-none py-8 sm:py-12">
       {/* Background glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-indigo-600/10 rounded-full blur-[140px] pointer-events-none" />
 
@@ -147,7 +147,7 @@ export const WaitingResults = () => {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="w-full max-w-2xl p-6 md:p-8 bg-zinc-950/95 border border-zinc-900 rounded-2xl shadow-2xl relative z-10 text-center backdrop-blur-xl"
+        className="w-full max-w-2xl p-4 sm:p-6 md:p-8 bg-zinc-950/95 border border-zinc-900 rounded-2xl shadow-2xl relative z-10 text-center backdrop-blur-xl"
       >
         {/* Header Icon & Status */}
         <div className="flex justify-center mb-4">
@@ -157,7 +157,7 @@ export const WaitingResults = () => {
           </div>
         </div>
 
-        <h2 className="text-2xl font-black text-white uppercase tracking-tight mb-2">
+        <h2 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight mb-2">
           Waiting for Opponent
         </h2>
         <p className="text-xs text-zinc-400 max-w-md mx-auto leading-relaxed mb-6 font-medium">
@@ -165,29 +165,29 @@ export const WaitingResults = () => {
         </p>
 
         {/* Timer & Stats Banner */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="bg-black/60 border border-zinc-900 rounded-xl p-3 text-center">
-            <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest block mb-1">
-              Time Remaining
+        <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-6">
+          <div className="bg-black/60 border border-zinc-900 rounded-xl p-2.5 sm:p-3 text-center">
+            <span className="text-[8.5px] sm:text-[9px] font-mono text-zinc-500 uppercase tracking-widest block mb-1">
+              Remaining
             </span>
-            <span className="font-mono font-black text-xl text-indigo-400 flex items-center justify-center gap-1.5">
-              <Clock className="w-4 h-4 text-indigo-400" />
+            <span className="font-mono font-black text-sm sm:text-xl text-indigo-400 flex items-center justify-center gap-1 sm:gap-1.5">
+              <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-400 shrink-0" />
               <span>{formattedTimeLeft}</span>
             </span>
           </div>
-          <div className="bg-black/60 border border-zinc-900 rounded-xl p-3 text-center">
-            <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest block mb-1">
+          <div className="bg-black/60 border border-zinc-900 rounded-xl p-2.5 sm:p-3 text-center">
+            <span className="text-[8.5px] sm:text-[9px] font-mono text-zinc-500 uppercase tracking-widest block mb-1">
               Submitted
             </span>
-            <span className="font-mono font-black text-xl text-emerald-400">
+            <span className="font-mono font-black text-sm sm:text-xl text-emerald-400">
               {stats.finishedCount} / {stats.totalCount}
             </span>
           </div>
-          <div className="bg-black/60 border border-zinc-900 rounded-xl p-3 text-center">
-            <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest block mb-1">
-              Still Coding
+          <div className="bg-black/60 border border-zinc-900 rounded-xl p-2.5 sm:p-3 text-center">
+            <span className="text-[8.5px] sm:text-[9px] font-mono text-zinc-500 uppercase tracking-widest block mb-1">
+              Coding
             </span>
-            <span className="font-mono font-black text-xl text-amber-500">
+            <span className="font-mono font-black text-sm sm:text-xl text-amber-500">
               {stats.stillCodingCount}
             </span>
           </div>
@@ -256,7 +256,7 @@ export const WaitingResults = () => {
         </div>
 
         {/* SPEED TYPER PASS-TIME MINI-GAME */}
-        <div className="mt-6 border border-zinc-800/80 bg-black/60 rounded-xl p-5 text-left relative overflow-hidden">
+        <div className="mt-6 border border-zinc-800/80 bg-black/60 rounded-xl p-3.5 sm:p-5 text-left relative overflow-hidden">
           <div className="flex items-center justify-between pb-3 mb-3 border-b border-zinc-900">
             <div className="flex items-center space-x-2 text-indigo-400 font-mono text-xs font-bold">
               <Keyboard className="w-4 h-4" />

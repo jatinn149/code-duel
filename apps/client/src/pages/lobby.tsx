@@ -288,7 +288,7 @@ export const LobbyPage = () => {
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-black text-neutral-200 p-6 md:p-10 justify-between relative select-none">
+    <div className="flex-1 flex flex-col overflow-y-auto bg-black text-neutral-200 p-4 sm:p-6 md:p-10 justify-between relative select-none pb-16 md:pb-10 min-h-screen">
       {/* Background glow effects */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[70%] h-[30%] bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none" />
 
@@ -296,7 +296,7 @@ export const LobbyPage = () => {
       <div className="flex items-center justify-between border-b border-neutral-900 pb-4 mb-6">
         <div
           onClick={handleLogoClick}
-          className="flex items-center space-x-3 cursor-pointer group"
+          className="flex items-center space-x-2 sm:space-x-3 cursor-pointer group"
         >
           <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center border border-neutral-800 transition-colors group-hover:bg-neutral-200">
             <Sword className="w-4 h-4 text-black transform -rotate-12 animate-pulse" />
@@ -305,28 +305,28 @@ export const LobbyPage = () => {
             <span className="text-sm font-extrabold tracking-[0.2em] text-white">
               CODE<span className="text-neutral-500">_</span>DUEL
             </span>
-            <span className="text-[9px] font-mono text-neutral-600 tracking-widest uppercase border-l border-neutral-800 pl-2 mt-0.5">
+            <span className="text-[9px] font-mono text-neutral-600 tracking-widest uppercase border-l border-neutral-800 pl-2 mt-0.5 hidden xs:inline-block">
               LEAGUE
             </span>
           </div>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 sm:space-x-3">
           <button
             onClick={handleCopyRoomCode}
-            className="flex items-center space-x-2 bg-neutral-950 border border-neutral-905 px-3.5 py-1.5 rounded-lg text-xs font-mono text-neutral-400 hover:text-white hover:border-neutral-800 transition-all active:scale-95"
+            className="flex items-center space-x-1.5 sm:space-x-2 bg-neutral-950 border border-neutral-900 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-mono text-neutral-400 hover:text-white hover:border-neutral-800 transition-all active:scale-95 max-w-[160px] sm:max-w-none"
           >
-            <span>DEPL_ID: {roomId}</span>
+            <span className="truncate">DEPL_ID: {roomId}</span>
             {isCopied ? (
-              <Check className="w-3.5 h-3.5 text-emerald-400" />
+              <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
             ) : (
-              <Copy className="w-3.5 h-3.5" />
+              <Copy className="w-3.5 h-3.5 shrink-0" />
             )}
           </button>
 
           <button
             onClick={handleLeaveRoom}
-            className="p-2 hover:bg-red-950/20 text-neutral-500 hover:text-red-400 rounded-lg transition-colors border border-transparent hover:border-red-900/30 active:scale-95"
+            className="p-2 hover:bg-red-950/20 text-neutral-500 hover:text-red-400 rounded-lg transition-colors border border-transparent hover:border-red-900/30 active:scale-95 shrink-0"
             title="Disconnect Sector"
           >
             <LogOut className="w-4.5 h-4.5" />
@@ -336,12 +336,12 @@ export const LobbyPage = () => {
 
       {/* Main Competitive VS Display */}
       {currentRoom.maxPlayers === 2 ? (
-        <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-8 items-center max-w-6xl mx-auto w-full mb-8 min-h-0">
+        <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-center max-w-6xl mx-auto w-full mb-8 min-h-0">
           {/* Left Side: Host Panel (5 cols) */}
-          <div className="md:col-span-5 flex justify-end w-full">
+          <div className="md:col-span-5 flex justify-center md:justify-end w-full">
             {hostPlayer ? (
               <PlayerHoverCard userId={hostPlayer.id} username={hostPlayer.username}>
-                <div className="w-80 p-6 bg-neutral-950 border border-neutral-900 rounded-2xl flex flex-col items-center text-center shadow-lg relative group transition-all duration-300 hover:border-indigo-500/40">
+                <div className="w-full max-w-[320px] p-5 sm:p-6 bg-neutral-950 border border-neutral-900 rounded-2xl flex flex-col items-center text-center shadow-lg relative group transition-all duration-300 hover:border-indigo-500/40">
                   <div className="absolute top-4 left-4 bg-indigo-500/10 text-indigo-400 px-2.5 py-0.5 rounded text-[8px] font-mono uppercase tracking-widest font-black flex items-center gap-1 border border-indigo-500/20">
                     <Crown className="w-3 h-3 text-indigo-400" /> Host
                   </div>
@@ -391,14 +391,14 @@ export const LobbyPage = () => {
                 </div>
               </PlayerHoverCard>
             ) : (
-              <div className="w-80 h-64 bg-neutral-950 border border-neutral-900 border-dashed rounded-2xl flex items-center justify-center text-neutral-600 font-mono text-xs uppercase tracking-wider">
+              <div className="w-full max-w-[320px] h-64 bg-neutral-950 border border-neutral-900 border-dashed rounded-2xl flex items-center justify-center text-neutral-600 font-mono text-xs uppercase tracking-wider">
                 Awaiting Host...
               </div>
             )}
           </div>
 
           {/* Center Side: VS Status Indicator (2 cols) */}
-          <div className="md:col-span-2 flex flex-col items-center justify-center text-center">
+          <div className="md:col-span-2 flex flex-col items-center justify-center text-center my-2 md:my-0">
             <div className="w-16 h-16 rounded-full bg-neutral-950 border border-neutral-800 flex items-center justify-center relative shadow-[0_0_30px_rgba(99,102,241,0.05)]">
               <span className="text-xl font-black italic tracking-tighter text-indigo-400 font-mono">VS</span>
               <div className="absolute inset-0 rounded-full border border-indigo-500/20 animate-ping" />
@@ -459,10 +459,10 @@ export const LobbyPage = () => {
           </div>
 
           {/* Right Side: Challenger Panel (5 cols) */}
-          <div className="md:col-span-5 flex justify-start w-full">
+          <div className="md:col-span-5 flex justify-center md:justify-start w-full">
             {challengerPlayer ? (
               <PlayerHoverCard userId={challengerPlayer.id} username={challengerPlayer.username}>
-                <div className={`w-80 p-6 bg-neutral-950 border rounded-2xl flex flex-col items-center text-center shadow-lg relative group transition-all duration-300 ${
+                <div className={`w-full max-w-[320px] p-5 sm:p-6 bg-neutral-950 border rounded-2xl flex flex-col items-center text-center shadow-lg relative group transition-all duration-300 ${
                   challengerPlayer.isReady
                     ? 'border-emerald-500/40'
                     : 'border-neutral-900 hover:border-neutral-800'
@@ -516,7 +516,7 @@ export const LobbyPage = () => {
                 </div>
               </PlayerHoverCard>
             ) : (
-              <div className="w-80 h-64 bg-neutral-950 border border-neutral-900 border-dashed rounded-2xl flex flex-col items-center justify-center text-center p-6 text-neutral-600 relative overflow-hidden group">
+              <div className="w-full max-w-[320px] h-64 bg-neutral-950 border border-neutral-900 border-dashed rounded-2xl flex flex-col items-center justify-center text-center p-6 text-neutral-600 relative overflow-hidden group">
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-neutral-900/40 via-transparent to-transparent opacity-60 animate-pulse" />
                 <Loader2 className="w-6 h-6 animate-spin mb-3 text-neutral-700" />
                 <span className="font-mono text-xs uppercase tracking-wider font-bold">
@@ -532,7 +532,7 @@ export const LobbyPage = () => {
       ) : (
         <div className="flex-1 flex flex-col items-center justify-center max-w-7xl mx-auto w-full mb-8 min-h-0 space-y-6">
           {/* HUD Settings Bar */}
-          <div className="bg-neutral-950 border border-neutral-900 rounded-xl px-6 py-3 flex flex-wrap items-center justify-center gap-6 shadow-md text-xs font-mono text-neutral-400">
+          <div className="bg-neutral-950 border border-neutral-900 rounded-xl px-3 sm:px-6 py-2.5 sm:py-3 flex flex-wrap items-center justify-center gap-3 sm:gap-6 shadow-md text-[11px] sm:text-xs font-mono text-neutral-400">
             <span className="font-bold text-white uppercase">Duel Settings:</span>
             <span className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full" />
@@ -563,9 +563,9 @@ export const LobbyPage = () => {
       )}
 
       {/* Bottom Panel: Chat Terminal & Controls */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 max-w-6xl mx-auto w-full items-stretch h-64">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 max-w-6xl mx-auto w-full items-stretch min-h-[16rem] lg:h-64">
         {/* Chat Terminal Panel (7 cols) */}
-        <div className="lg:col-span-7 bg-neutral-950 border border-neutral-900 rounded-xl p-4 flex flex-col h-full">
+        <div className="lg:col-span-7 bg-neutral-950 border border-neutral-900 rounded-xl p-3.5 sm:p-4 flex flex-col h-64 lg:h-full">
           <div className="flex items-center space-x-2 border-b border-neutral-900 pb-2 mb-3 text-neutral-400 font-mono text-[9px] font-bold uppercase tracking-wider">
             <MessageSquare className="w-3.5 h-3.5" />
             <span>Lobby Chat Terminal</span>
@@ -607,7 +607,7 @@ export const LobbyPage = () => {
         </div>
 
         {/* Ready State Control Panel (5 cols) */}
-        <div className="lg:col-span-5 bg-neutral-950 border border-neutral-900 rounded-xl p-6 flex flex-col justify-between h-full">
+        <div className="lg:col-span-5 bg-neutral-950 border border-neutral-900 rounded-xl p-4 sm:p-6 flex flex-col justify-between min-h-[12rem] lg:h-full gap-4">
           <div>
             <span className="block text-[9px] font-bold text-neutral-500 uppercase tracking-widest font-mono mb-2">
               Engagement Authorization
@@ -627,7 +627,7 @@ export const LobbyPage = () => {
                 whileTap={{ scale: 0.99 }}
                 onClick={handleStartDuel}
                 disabled={!allReady || !allConnected}
-                className="w-full py-3 bg-white hover:bg-neutral-100 disabled:opacity-20 text-black font-semibold uppercase tracking-wider text-xs rounded-lg transition-all flex items-center justify-center space-x-2 shadow-lg"
+                className="w-full py-3 sm:py-3.5 bg-white hover:bg-neutral-100 disabled:opacity-20 text-black font-semibold uppercase tracking-wider text-xs rounded-lg transition-all flex items-center justify-center space-x-2 shadow-lg active:scale-95 font-mono"
               >
                 <Zap className="w-3.5 h-3.5 fill-current" />
                 <span>{allReady ? 'Start Match' : 'Awaiting Players Ready'}</span>
@@ -637,7 +637,7 @@ export const LobbyPage = () => {
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
                 onClick={handleToggleReady}
-                className={`w-full py-3 font-semibold uppercase tracking-wider text-xs rounded-lg transition-all flex items-center justify-center space-x-2 border ${
+                className={`w-full py-3 sm:py-3.5 font-semibold uppercase tracking-wider text-xs rounded-lg transition-all flex items-center justify-center space-x-2 border active:scale-95 font-mono ${
                   currentPlayer?.isReady
                     ? 'bg-neutral-900 border-neutral-700 text-white'
                     : 'bg-transparent border-neutral-800 text-neutral-400 hover:text-white'
@@ -672,7 +672,7 @@ export const LobbyPage = () => {
               transition={{ duration: 0.4 }}
               className="flex flex-col items-center"
             >
-              <span className="text-[120px] font-bold text-white italic tracking-tighter leading-none font-mono">
+              <span className="text-7xl sm:text-[120px] font-bold text-white italic tracking-tighter leading-none font-mono">
                 {countdown || 0}
               </span>
               <span className="text-xs font-semibold text-neutral-500 uppercase tracking-[0.3em] mt-3">

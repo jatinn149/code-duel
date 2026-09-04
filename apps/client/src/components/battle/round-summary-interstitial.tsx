@@ -34,7 +34,7 @@ export const RoundSummaryInterstitial: React.FC = () => {
   }, [currentRoom?.summaryEndsAt]);
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-6 bg-black text-neutral-200 min-h-screen relative overflow-hidden select-none">
+    <div className="flex-1 flex flex-col items-center justify-center p-3 sm:p-6 md:p-8 bg-black text-neutral-200 min-h-screen relative overflow-y-auto select-none py-8 sm:py-12">
       {/* Background glow effects */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-indigo-600/10 rounded-full blur-[140px] pointer-events-none" />
 
@@ -42,7 +42,7 @@ export const RoundSummaryInterstitial: React.FC = () => {
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="w-full max-w-lg p-8 bg-zinc-950/90 border border-zinc-900/90 rounded-2xl shadow-2xl relative z-10 text-center backdrop-blur-xl"
+        className="w-full max-w-lg p-5 sm:p-8 bg-zinc-950/90 border border-zinc-900/90 rounded-2xl shadow-2xl relative z-10 text-center backdrop-blur-xl"
       >
         {/* Badge & Title */}
         <div className="inline-flex items-center space-x-2 px-3.5 py-1 bg-indigo-500/10 border border-indigo-500/25 rounded-full text-indigo-400 font-mono text-[10px] font-bold uppercase tracking-widest mb-4">
@@ -50,7 +50,7 @@ export const RoundSummaryInterstitial: React.FC = () => {
           <span>Round {currentRoundIndex} of {totalRounds} Concluded</span>
         </div>
 
-        <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight uppercase mb-2">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight uppercase mb-2">
           Preparing Round {nextRoundIndex}
         </h2>
         <p className="text-xs text-zinc-400 font-medium max-w-md mx-auto mb-6">
@@ -58,7 +58,7 @@ export const RoundSummaryInterstitial: React.FC = () => {
         </p>
 
         {/* Combatants Ready Status */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
           {currentRoom?.players.map((player) => {
             const isMe = player.id === user?.id;
 

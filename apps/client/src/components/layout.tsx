@@ -47,7 +47,7 @@ export const Layout = () => {
     return 'bg-neutral-600 text-white';
   }, [userLevel]);
 
-  const isLobbyOrBattle = location.pathname.includes('/lobby/') || location.pathname.includes('/battle/');
+  const isLobbyOrBattle = location.pathname.includes('/lobby/') || location.pathname.includes('/battle/') || location.pathname.includes('/results/');
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-black text-neutral-200 selection:bg-neutral-800">

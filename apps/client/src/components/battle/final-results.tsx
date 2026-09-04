@@ -119,7 +119,7 @@ export const FinalResults = () => {
   }
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-6 bg-black text-neutral-200 min-h-screen relative overflow-y-auto select-none py-12">
+    <div className="flex-1 flex flex-col items-center justify-center p-3 sm:p-6 md:p-8 bg-black text-neutral-200 min-h-screen relative overflow-y-auto select-none py-8 sm:py-12">
       {/* Subtle top background glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none" />
 
@@ -128,25 +128,25 @@ export const FinalResults = () => {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="w-full max-w-3xl p-8 bg-zinc-950 border border-zinc-900 rounded-2xl shadow-2xl relative z-10"
+        className="w-full max-w-3xl p-4 sm:p-6 md:p-8 bg-zinc-950 border border-zinc-900 rounded-2xl shadow-2xl relative z-10"
       >
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl mb-4 relative shadow-md">
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="inline-flex items-center justify-center p-3 sm:p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl mb-4 relative shadow-md">
             {isMeWinner ? (
               <>
                 <div className="absolute inset-0 bg-amber-500/20 blur-xl rounded-2xl scale-125 animate-pulse" />
-                <Trophy className="w-10 h-10 text-amber-500 relative z-10 drop-shadow-[0_0_12px_rgba(245,158,11,0.5)]" />
+                <Trophy className="w-8 h-8 sm:w-10 sm:h-10 text-amber-500 relative z-10 drop-shadow-[0_0_12px_rgba(245,158,11,0.5)]" />
               </>
             ) : (
-              <Award className="w-10 h-10 text-zinc-400 relative z-10" />
+              <Award className="w-8 h-8 sm:w-10 sm:h-10 text-zinc-400 relative z-10" />
             )}
           </div>
 
-          <h2 className="text-3xl font-black tracking-widest text-white uppercase drop-shadow-md">
+          <h2 className="text-2xl sm:text-3xl font-black tracking-widest text-white uppercase drop-shadow-md">
             {isMeWinner ? 'VICTORY ACHIEVED' : 'MATCH CONCLUDED'}
           </h2>
 
-          <p className="text-zinc-400 text-sm max-w-md mx-auto font-medium">
+          <p className="text-zinc-400 text-xs sm:text-sm max-w-md mx-auto font-medium mt-1">
             {matchResult?.isDraw
               ? 'Both players demonstrated equal proficiency in this challenge.'
               : isMeWinner
@@ -160,7 +160,7 @@ export const FinalResults = () => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.15, duration: 0.4 }}
-          className="mb-8 p-5 bg-gradient-to-b from-zinc-900/90 to-zinc-950 border border-zinc-800/90 rounded-2xl relative overflow-hidden backdrop-blur-md shadow-2xl"
+          className="mb-6 sm:mb-8 p-3.5 sm:p-5 bg-gradient-to-b from-zinc-900/90 to-zinc-950 border border-zinc-800/90 rounded-2xl relative overflow-hidden backdrop-blur-md shadow-2xl"
         >
           <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 font-bold mb-3 flex items-center justify-between">
             <span className="flex items-center gap-1.5">
@@ -550,17 +550,17 @@ export const FinalResults = () => {
           </motion.div>
         )}
 
-        <div className="flex flex-col sm:flex-row gap-4 border-t border-zinc-900 pt-6">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 border-t border-zinc-900 pt-6">
           <button
             onClick={handleReturnToLobby}
-            className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold uppercase tracking-wider text-xs rounded-lg shadow-lg shadow-indigo-500/10 flex items-center justify-center space-x-2 transition-all"
+            className="flex-1 py-3 sm:py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold uppercase tracking-wider text-xs rounded-lg shadow-lg shadow-indigo-500/10 flex items-center justify-center space-x-2 transition-all active:scale-95 font-mono"
           >
             <RefreshCw className="w-4 h-4 animate-spin-slow" />
             <span>RETURN TO LOBBY</span>
           </button>
           <button
             onClick={handleLeaveRoom}
-            className="sm:w-48 py-3 bg-zinc-900 hover:bg-red-950/20 text-neutral-450 hover:text-red-400 border border-zinc-800 hover:border-red-950/30 font-bold uppercase tracking-wider text-xs rounded-lg transition-all"
+            className="w-full sm:w-48 py-3 sm:py-3.5 bg-zinc-900 hover:bg-red-950/20 text-neutral-450 hover:text-red-400 border border-zinc-800 hover:border-red-950/30 font-bold uppercase tracking-wider text-xs rounded-lg transition-all active:scale-95 font-mono"
           >
             <LogOut className="w-4 h-4 inline-block mr-1.5 -mt-0.5" />
             <span>LEAVE ROOM</span>
