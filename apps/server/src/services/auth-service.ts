@@ -2,8 +2,9 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
-import { User, UserRole, PresenceStatus, AuthResponse, Rank } from '@code-duel/types';
+import { User, UserRole, PresenceStatus, AuthResponse } from '@code-duel/types';
 import { SignupInput, LoginInput } from '@code-duel/validation';
+import { calculateStartingCp, calculateCpRank } from '@code-duel/shared';
 import { IUserRepository } from '@/repositories/interfaces';
 import { SessionService } from './session-service';
 import { env } from '@/config/env';
@@ -47,6 +48,7 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(input.password, 12);
     const now = new Date().toISOString();
+    const startingRating = calculateStartingCp((input as any).skillRating);
 
     const user: User = {
       id: uuidv4(),
@@ -58,15 +60,15 @@ export class AuthService {
       tokenVersion: 0,
       matchesPlayed: 0,
       matchesWon: 0,
-      rating: 0,
+      rating: startingRating,
       xp: 0,
       level: 1,
-      rank: Rank.INITIATE,
+      rank: calculateCpRank(startingRating) as any,
       wins: 0,
       losses: 0,
       streak: 0,
       highestStreak: 0,
-      highestRating: 0,
+      highestRating: startingRating,
       dailyChallengeWins: 0,
       dailyChallengeBestRank: 0,
       placementMatchesPlayed: 0,

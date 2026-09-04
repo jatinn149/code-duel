@@ -15,6 +15,8 @@ import { PgProblemRepository } from '@/repositories/pg-problem-repository';
 import { JsonProblemRepository } from '@/repositories/json-problem-repository';
 import { ProgressionService } from '@/services/progression-service';
 import { RetentionService } from '@/services/retention-service';
+import { DailyResetEngine } from '@/services/daily-reset-engine';
+import { JudgeService } from '@/services/judge-pipeline';
 import { redisCache } from '@/utils/redis-cache';
 import { jsonStorage } from '@/storage/json-adapter';
 import { validateRequest } from '@/middleware/validate-request';
@@ -43,6 +45,39 @@ export const createAuthRouter = () => {
   const authController = new AuthController(authService);
 
   const authMiddleware = requireAuth(userRepository);
+
+  router.get('/check-username', async (req, res) => {
+    try {
+      const rawUsername = (req.query.username as string || '').trim();
+      if (!rawUsername) {
+        return res.json({ available: false, message: 'Username is required' });
+      }
+      if (rawUsername.length < 3) {
+        return res.json({ available: false, message: 'Username must be at least 3 characters' });
+      }
+      if (rawUsername.length > 20) {
+        return res.json({ available: false, message: 'Username must be less than 20 characters' });
+      }
+      if (!/^[a-zA-Z0-9_]+$/.test(rawUsername)) {
+        return res.json({ available: false, message: 'Only alphanumeric characters and underscores are allowed' });
+      }
+
+      const existing = await userRepository.findByUsername(rawUsername);
+      if (existing) {
+        const rand = Math.floor(10 + Math.random() * 89);
+        const suggestions = [
+          `${rawUsername}_coder`,
+          `${rawUsername}${rand}`,
+          `dev_${rawUsername}`,
+        ];
+        return res.json({ available: false, suggestions, message: 'Username already in use' });
+      }
+
+      return res.json({ available: true, message: 'Username is available' });
+    } catch (err: any) {
+      return res.status(500).json({ available: false, message: 'Failed to verify username availability' });
+    }
+  });
 
   router.post('/signup', authRateLimiter, validateRequest(signupSchema), authController.signup);
 
@@ -228,6 +263,182 @@ export const createAuthRouter = () => {
         data: {
           leaderboard: users
         }
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  const judgeService = new JudgeService();
+
+  router.get('/daily-challenge', authMiddleware, async (req, res, next) => {
+    try {
+      const user = await userRepository.findById(req.user!.id);
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+      const dailyChallengeRepository = new JsonDailyChallengeRepository(jsonStorage);
+      const problemRepository = isPgEnabled ? new PgProblemRepository() : new JsonProblemRepository(jsonStorage);
+
+      const today = new Date().toISOString().split('T')[0];
+      const tier = user.rating < 1000 ? 'BEGINNER' : user.rating < 2000 ? 'INTERMEDIATE' : 'ADVANCED';
+      
+      let challenge = await dailyChallengeRepository.getCurrent(tier, today);
+      if (!challenge) {
+        const dailyResetEngine = new DailyResetEngine(dailyChallengeRepository, problemRepository);
+        await dailyResetEngine.ensureDailyChallenges(today);
+        challenge = await dailyChallengeRepository.getCurrent(tier, today);
+      }
+
+      if (!challenge) {
+        return res.status(404).json({ success: false, message: 'No daily challenge available today' });
+      }
+
+      const problem = await problemRepository.findById(challenge.problemId);
+      if (!problem) {
+        return res.status(404).json({ success: false, message: 'Challenge problem not found' });
+      }
+
+      // Check if user has already solved today
+      const solvedKey = `daily_solved:${today}:${user.id}`;
+      const solvedRaw = await redisCache.get(solvedKey);
+      const alreadySolved = !!solvedRaw;
+      const userResult = solvedRaw ? JSON.parse(solvedRaw) : null;
+
+      // Get today's leaderboard
+      const leaderboardKey = `daily_leaderboard:${today}`;
+      const leaderboardRaw = await redisCache.get(leaderboardKey);
+      const leaderboard = leaderboardRaw ? JSON.parse(leaderboardRaw) : [];
+
+      // Calculate time remaining until midnight UTC
+      const now = new Date();
+      const nextMidnight = new Date(now);
+      nextMidnight.setUTCHours(24, 0, 0, 0);
+      const timeRemainingSec = Math.max(0, Math.floor((nextMidnight.getTime() - now.getTime()) / 1000));
+
+      res.json({
+        success: true,
+        data: {
+          problem: {
+            id: problem.id,
+            title: problem.title,
+            description: problem.description,
+            difficulty: problem.difficulty <= 3 ? 'Easy' : problem.difficulty <= 6 ? 'Medium' : 'Hard',
+            initialCode: problem.initialCode || '# Write your solution here in Python\ndef solution():\n    pass\n',
+            sampleTestCases: (problem.testCases || []).slice(0, 3),
+          },
+          alreadySolved,
+          userResult,
+          leaderboard: leaderboard.slice(0, 20),
+          todayDate: today,
+          timeRemainingSec,
+          streak: user.streak || 0,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post('/daily-challenge/run', authMiddleware, async (req, res, next) => {
+    try {
+      const user = await userRepository.findById(req.user!.id);
+      if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+      const { code, language } = req.body;
+      const dailyChallengeRepository = new JsonDailyChallengeRepository(jsonStorage);
+      const problemRepository = isPgEnabled ? new PgProblemRepository() : new JsonProblemRepository(jsonStorage);
+      const today = new Date().toISOString().split('T')[0];
+      const tier = user.rating < 1000 ? 'BEGINNER' : user.rating < 2000 ? 'INTERMEDIATE' : 'ADVANCED';
+      const challenge = await dailyChallengeRepository.getCurrent(tier, today);
+      if (!challenge) return res.status(404).json({ success: false, message: 'Challenge not found' });
+      const problem = await problemRepository.findById(challenge.problemId);
+      if (!problem) return res.status(404).json({ success: false, message: 'Problem not found' });
+
+      const sampleTests = (problem.testCases || []).slice(0, 3);
+      const facts = await judgeService.execute(code, language || 'python', sampleTests);
+      res.json({
+        success: true,
+        data: {
+          verdict: facts.verdict,
+          results: facts.testResults,
+          executionTimeMs: facts.executionTimeMs,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post('/daily-challenge/submit', authMiddleware, async (req, res, next) => {
+    try {
+      const user = await userRepository.findById(req.user!.id);
+      if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+      const { code, language, timeElapsedSec } = req.body;
+      const dailyChallengeRepository = new JsonDailyChallengeRepository(jsonStorage);
+      const problemRepository = isPgEnabled ? new PgProblemRepository() : new JsonProblemRepository(jsonStorage);
+      const today = new Date().toISOString().split('T')[0];
+      const tier = user.rating < 1000 ? 'BEGINNER' : user.rating < 2000 ? 'INTERMEDIATE' : 'ADVANCED';
+      const challenge = await dailyChallengeRepository.getCurrent(tier, today);
+      if (!challenge) return res.status(404).json({ success: false, message: 'Challenge not found' });
+      const problem = await problemRepository.findById(challenge.problemId);
+      if (!problem) return res.status(404).json({ success: false, message: 'Problem not found' });
+
+      const facts = await judgeService.execute(code, language || 'python', problem.testCases || []);
+      const passed = facts.verdict === 'ACCEPTED';
+
+      let xpEarned = 0;
+      let cpEarned = 0;
+      let newStreak = user.streak || 0;
+
+      if (passed) {
+        const solvedKey = `daily_solved:${today}:${user.id}`;
+        const alreadySolved = await redisCache.get(solvedKey);
+
+        if (!alreadySolved) {
+          xpEarned = 500;
+          cpEarned = 50;
+          newStreak = (user.streak || 0) + 1;
+
+          await userRepository.update(user.id, {
+            dailyChallengeWins: (user.dailyChallengeWins || 0) + 1,
+            xp: (user.xp || 0) + xpEarned,
+            rating: (user.rating || 0) + cpEarned,
+            streak: newStreak,
+            highestStreak: Math.max(user.highestStreak || 0, newStreak),
+          });
+
+          const resultRecord = {
+            timeElapsedSec: timeElapsedSec || 60,
+            completedAt: new Date().toISOString(),
+          };
+          await redisCache.set(solvedKey, JSON.stringify(resultRecord), 'EX', 86400 * 2);
+
+          const leaderboardKey = `daily_leaderboard:${today}`;
+          const leaderboardRaw = await redisCache.get(leaderboardKey);
+          const leaderboard = leaderboardRaw ? JSON.parse(leaderboardRaw) : [];
+          leaderboard.push({
+            userId: user.id,
+            username: user.username,
+            timeElapsedSec: timeElapsedSec || 60,
+            completedAt: new Date().toISOString(),
+          });
+          leaderboard.sort((a: any, b: any) => a.timeElapsedSec - b.timeElapsedSec);
+          await redisCache.set(leaderboardKey, JSON.stringify(leaderboard), 'EX', 86400 * 2);
+        }
+      }
+
+      res.json({
+        success: true,
+        data: {
+          passed,
+          verdict: facts.verdict,
+          results: facts.testResults,
+          executionTimeMs: facts.executionTimeMs,
+          xpEarned,
+          cpEarned,
+          streak: newStreak,
+          timeElapsedSec: timeElapsedSec || 60,
+        },
       });
     } catch (error) {
       next(error);

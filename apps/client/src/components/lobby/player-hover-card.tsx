@@ -4,6 +4,7 @@ import { SocketEvents } from '@code-duel/shared';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Flame, UserPlus, UserMinus, Award } from 'lucide-react';
 import { clsx } from 'clsx';
+import { apiClient } from '@/api/api-client';
 
 interface PlayerSummary {
   id: string;
@@ -43,12 +44,11 @@ export const PlayerHoverCard: React.FC<{
     }
 
     setLoading(true);
-    fetch(`/api/v1/social/summary/${userId}`)
-      .then((res) => res.json())
-      .then((json) => {
-        if (json.success && json.data) {
-          summaryCache.set(userId, json.data);
-          setSummary(json.data);
+    apiClient.get(`/social/summary/${userId}`)
+      .then((res) => {
+        if (res.data?.success && res.data?.data) {
+          summaryCache.set(userId, res.data.data);
+          setSummary(res.data.data);
         }
       })
       .catch((err) => console.error('Error fetching user summary:', err))
@@ -209,7 +209,7 @@ export const PlayerHoverCard: React.FC<{
                 </div>
               ) : (
                 <div className="text-center py-6">
-                  <span className="text-caption font-bold text-accent-rose uppercase tracking-widest">Failed to decrypt data</span>
+                  <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Player details unavailable</span>
                 </div>
               )}
             </div>

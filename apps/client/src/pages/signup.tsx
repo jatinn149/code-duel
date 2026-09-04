@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth-store';
+import { apiClient } from '@/api/api-client';
 import {
   Sword,
   Loader2,
@@ -11,6 +12,8 @@ import {
   ChevronLeft,
   Eye,
   EyeOff,
+  CheckCircle2,
+  Sparkles,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -35,15 +38,63 @@ export const SignupPage = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [skillRating, setSkillRating] = useState(5);
   const [showPassword, setShowPassword] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  // Username validation state
+  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
+  const [usernameSuggestions, setUsernameSuggestions] = useState<string[]>([]);
+
   const { signup, isLoading, error, setError } = useAuthStore();
   const navigate = useNavigate();
 
+  // Debounced username check
+  useEffect(() => {
+    const trimmed = username.trim();
+    if (trimmed.length < 3) {
+      setUsernameStatus('idle');
+      setUsernameSuggestions([]);
+      return;
+    }
+
+    setUsernameStatus('checking');
+    const timer = setTimeout(async () => {
+      try {
+        const res = await apiClient.get(`/auth/check-username?username=${encodeURIComponent(trimmed)}`);
+        if (res.data?.available) {
+          setUsernameStatus('available');
+          setUsernameSuggestions([]);
+        } else {
+          setUsernameStatus('taken');
+          setUsernameSuggestions(res.data?.suggestions || []);
+        }
+      } catch {
+        setUsernameStatus('idle');
+      }
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [username]);
+
+  const getSkillLabel = (val: number) => {
+    if (val <= 3) return { label: 'Beginner', rank: 'Initiate / Apprentice', cp: `${val * 120 + 40} CP`, color: 'text-zinc-400' };
+    if (val <= 5) return { label: 'Intermediate', rank: 'Coder', cp: `${val * 150} CP`, color: 'text-emerald-400' };
+    if (val <= 7) return { label: 'Proficient', rank: 'Specialist', cp: `${val * 160} CP`, color: 'text-cyan-400' };
+    if (val <= 9) return { label: 'Advanced', rank: 'Expert', cp: `${val * 180} CP`, color: 'text-indigo-400' };
+    return { label: 'Competitive Master', rank: 'Elite', cp: '2100 CP', color: 'text-amber-400' };
+  };
+
+  const skillInfo = getSkillLabel(skillRating);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (usernameStatus === 'taken') {
+      setError('Please choose an available username.');
+      return;
+    }
     try {
-      await signup({ username, email, password });
+      await signup({ username: username.trim(), email: email.trim(), password, skillRating: Number(skillRating) });
       setIsSuccess(true);
       setTimeout(() => navigate('/'), 1500);
     } catch {
@@ -123,6 +174,42 @@ export const SignupPage = () => {
                       <Target className="w-4 h-4 text-zinc-600 group-focus-within:text-emerald-400 transition-colors duration-200" />
                     </div>
                   </div>
+
+                  {usernameStatus === 'checking' && (
+                    <span className="text-[10px] font-mono text-zinc-500 flex items-center gap-1 mt-1">
+                      <Loader2 className="w-3 h-3 animate-spin text-emerald-400" />
+                      Checking availability...
+                    </span>
+                  )}
+                  {usernameStatus === 'available' && (
+                    <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1 mt-1">
+                      <CheckCircle2 className="w-3 h-3" />
+                      @{username} is available
+                    </span>
+                  )}
+                  {usernameStatus === 'taken' && (
+                    <div className="mt-1 space-y-1">
+                      <span className="text-[10px] font-mono text-rose-400 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        Username already taken
+                      </span>
+                      {usernameSuggestions.length > 0 && (
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-[9px] text-zinc-500 font-mono">Suggestions:</span>
+                          {usernameSuggestions.map((sug) => (
+                            <button
+                              key={sug}
+                              type="button"
+                              onClick={() => setUsername(sug)}
+                              className="text-[9px] font-mono bg-zinc-800 hover:bg-zinc-700 text-emerald-400 px-1.5 py-0.5 rounded border border-zinc-700/60 transition-colors"
+                            >
+                              {sug}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </motion.div>
 
                 <motion.div variants={itemVariants} className="space-y-1.5">
@@ -170,6 +257,35 @@ export const SignupPage = () => {
                         <Eye className="w-4 h-4" />
                       )}
                     </button>
+                  </div>
+                </motion.div>
+
+                {/* Skill Rating Slider (1 to 10) */}
+                <motion.div variants={itemVariants} className="space-y-2 p-3.5 bg-zinc-950/60 rounded-xl border border-zinc-800/80 mt-1">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                      Rate Your Coding Skill: <span className="text-emerald-400 font-bold font-mono">{skillRating}/10</span>
+                    </label>
+                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 font-bold">
+                      Base: {skillInfo.cp}
+                    </span>
+                  </div>
+
+                  <input
+                    type="range"
+                    min="1"
+                    max="10"
+                    step="1"
+                    value={skillRating}
+                    onChange={(e) => setSkillRating(Number(e.target.value))}
+                    className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                  />
+
+                  <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500 pt-0.5">
+                    <span>1 (Beginner)</span>
+                    <span className={skillInfo.color + " font-bold font-mono"}>{skillInfo.label} ({skillInfo.rank})</span>
+                    <span>10 (Master)</span>
                   </div>
                 </motion.div>
 

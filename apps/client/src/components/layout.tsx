@@ -1,14 +1,23 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth-store';
-import { LogOut, Sword, Bell, User, Trophy } from 'lucide-react';
+import { useSocialStore } from '@/store/social-store';
+import { FriendSidebar } from '@/components/social/friend-sidebar';
+import { LogOut, Sword, Bell, User, Trophy, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useMemo } from 'react';
+import { clsx } from 'clsx';
 
 export const Layout = () => {
   const { user, logout } = useAuthStore();
+  const { friends } = useSocialStore();
   const navigate = useNavigate();
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [friendsOpen, setFriendsOpen] = useState(false);
+
+  const onlineFriendsCount = useMemo(() => {
+    return friends.filter(f => (f.status as any) === 'ONLINE' || (f.status as any) === 'IN_GAME').length;
+  }, [friends]);
 
   const handleLogout = async () => {
     await logout();
@@ -90,10 +99,28 @@ export const Layout = () => {
 
               <div className="h-4 w-px bg-neutral-800 hidden md:block" />
 
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
                 <button className="p-2 text-neutral-500 hover:text-white transition-colors relative rounded-lg hover:bg-neutral-900">
                   <Bell className="w-4.5 h-4.5" />
                   <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-neutral-400 rounded-full border border-black" />
+                </button>
+
+                <button
+                  onClick={() => setFriendsOpen(!friendsOpen)}
+                  title="Operatives & Friends"
+                  className={clsx(
+                    "p-2 transition-colors relative rounded-lg",
+                    friendsOpen
+                      ? "text-indigo-400 bg-neutral-900 border border-indigo-500/30"
+                      : "text-neutral-500 hover:text-white hover:bg-neutral-900"
+                  )}
+                >
+                  <Users className="w-4.5 h-4.5" />
+                  {onlineFriendsCount > 0 && (
+                    <span className="absolute top-1 right-1 px-1 min-w-[14px] h-[14px] bg-emerald-500 text-black text-[8px] font-black rounded-full flex items-center justify-center border border-black shadow-[0_0_8px_rgba(16,185,129,0.5)]">
+                      {onlineFriendsCount}
+                    </span>
+                  )}
                 </button>
 
                 <div className="flex items-center space-x-3 pl-4 border-l border-neutral-800 relative">
@@ -189,6 +216,30 @@ export const Layout = () => {
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#0c0c0c_1px,transparent_1px),linear-gradient(to_bottom,#0c0c0c_1px,transparent_1px)] bg-[size:3rem_3rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30" />
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[60%] h-[40%] bg-neutral-500/5 rounded-full blur-[100px]" />
         </div>
+
+        {/* Friend / Operatives Slide-out Drawer */}
+        <AnimatePresence>
+          {friendsOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setFriendsOpen(false)}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+              />
+              <motion.div
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 280 }}
+                className="fixed top-0 right-0 h-full z-50 shadow-2xl"
+              >
+                <FriendSidebar onClose={() => setFriendsOpen(false)} />
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </main>
     </div>
   );

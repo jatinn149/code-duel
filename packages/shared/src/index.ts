@@ -34,6 +34,23 @@ export const calculateCpRank = (cp: number): string => {
   return matched ? matched.rank : 'Initiate';
 };
 
+export const calculateStartingCp = (skillRating?: number): number => {
+  const rating = Math.max(1, Math.min(10, Math.round(skillRating || 5)));
+  switch (rating) {
+    case 1: return 100; // Initiate
+    case 2: return 250; // Apprentice
+    case 3: return 400; // Apprentice
+    case 4: return 600; // Coder
+    case 5: return 750; // Coder
+    case 6: return 950; // Specialist
+    case 7: return 1150; // Specialist
+    case 8: return 1450; // Expert
+    case 9: return 1750; // Expert
+    case 10: return 2100; // Elite
+    default: return 750;
+  }
+};
+
 export const getCpKFactor = (cp: number, placementMatchesPlayed: number): number => {
   if (placementMatchesPlayed < CP_CONFIG.PLACEMENT_MATCHES) {
     return CP_CONFIG.K_PLACEMENT;

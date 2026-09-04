@@ -17,6 +17,7 @@ export const signupSchema = z.object({
       .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
     email: z.string().email('Invalid email address').max(255, 'Email cannot exceed 255 characters'),
     password: z.string().min(8, 'Password must be at least 8 characters').max(100, 'Password cannot exceed 100 characters'),
+    skillRating: z.number().min(1).max(10).optional().default(5),
   }),
 });
 

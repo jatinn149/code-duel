@@ -22,19 +22,19 @@ export const createSocialRouter = (
 
   router.get('/search', requireAuth(userRepository), searchLimiter, async (req, res, next) => {
     try {
-      const { playerId } = req.query;
-      if (!playerId || typeof playerId !== 'string') {
-        throw new ValidationError('Player ID is required');
+      const rawQuery = (req.query.username || req.query.playerId || req.query.q) as string | undefined;
+      if (!rawQuery || typeof rawQuery !== 'string' || !rawQuery.trim()) {
+        throw new ValidationError('Username or Player ID is required');
       }
 
-      // Format validation: CD-XXXX-YYYY where X and Y are uppercase alphanumeric
-      const playerIdRegex = /^CD-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
-      if (!playerIdRegex.test(playerId)) {
-        throw new ValidationError('Invalid Player ID format (expected CD-XXXX-YYYY)');
-      }
-
+      const cleanQuery = rawQuery.trim().replace(/^@/, '');
       const currentUserId = req.user!.id;
-      const targetUser = await userRepository.findByPlayerId(playerId);
+
+      // Try finding by username first, then by Player ID
+      let targetUser = await userRepository.findByUsername(cleanQuery);
+      if (!targetUser) {
+        targetUser = await userRepository.findByPlayerId(cleanQuery.toUpperCase());
+      }
       if (!targetUser) {
         throw new NotFoundError('Player not found');
       }

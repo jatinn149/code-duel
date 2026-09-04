@@ -466,10 +466,11 @@ export const DashboardPage = () => {
               </div>
               
               <button
-                onClick={() => { setSelectedMode('QUICKODE'); setShowCreateDuelModal(true); }}
-                className="w-full md:w-auto px-5 py-2.5 bg-white text-zinc-950 font-semibold text-xs uppercase tracking-wider rounded-lg hover:bg-indigo-500 hover:text-white transition-all transform active:scale-95 shadow-md shadow-white/5 flex items-center justify-center gap-2"
+                onClick={() => navigate('/daily-challenge')}
+                className="w-full md:w-auto px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold text-xs uppercase tracking-wider rounded-lg hover:from-amber-400 hover:to-orange-400 transition-all transform active:scale-95 shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 border border-amber-400/30"
               >
-                <span>Deploy to Challenge</span>
+                <Zap className="w-3.5 h-3.5 fill-current" />
+                <span>Enter Daily Cipher</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>

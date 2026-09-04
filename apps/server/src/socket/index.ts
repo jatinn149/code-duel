@@ -1657,11 +1657,15 @@ export const initSocket = (
       io.emit(SocketEvents.PRESENCE_UPDATED, { userId: user.id, status: 'OFFLINE' });
     });
 
-    socket.on(SocketEvents.FRIEND_REQUEST_SEND, async (data: { toUserId?: string; toPlayerId?: string }) => {
+    socket.on(SocketEvents.FRIEND_REQUEST_SEND, async (data: { toUserId?: string; toPlayerId?: string; toUsername?: string }) => {
       try {
         let targetUserId = data.toUserId;
-        if (data.toPlayerId) {
-          const targetUser = await userRepository.findByPlayerId(data.toPlayerId);
+        if (data.toUsername) {
+          const targetUser = await userRepository.findByUsername(data.toUsername.trim().replace(/^@/, ''));
+          if (!targetUser) throw new Error('User not found by username');
+          targetUserId = targetUser.id;
+        } else if (data.toPlayerId) {
+          const targetUser = await userRepository.findByPlayerId(data.toPlayerId.trim());
           if (!targetUser) throw new Error('User not found by Player ID');
           targetUserId = targetUser.id;
         }
@@ -1802,6 +1806,28 @@ export const initSocket = (
         }
       } catch (err: any) {
         socket.emit(SocketEvents.ROOM_ERROR, err.message || 'Failed to respond to duel invite');
+      }
+    });
+
+    socket.on('social:direct_message_send' as any, async (data: { toUserId: string; text: string }) => {
+      try {
+        if (!data.toUserId || !data.text?.trim()) return;
+        const payload = {
+          id: `msg-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+          fromUserId: user.id,
+          fromUsername: user.username,
+          toUserId: data.toUserId,
+          text: data.text.trim(),
+          timestamp: new Date().toISOString(),
+        };
+        const targetSockets = userActiveSockets.get(data.toUserId);
+        if (targetSockets) {
+          targetSockets.forEach(sid => (io as any).to(sid).emit('social:direct_message_receive', payload));
+        }
+        // Echo back to sender so sender UI updates immediately
+        (socket as any).emit('social:direct_message_receive', payload);
+      } catch (err: any) {
+        logger.error({ err }, 'Error sending direct message');
       }
     });
 
