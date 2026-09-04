@@ -2,7 +2,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth-store';
 import { useSocialStore } from '@/store/social-store';
 import { FriendSidebar } from '@/components/social/friend-sidebar';
-import { LogOut, Sword, Bell, User, Trophy, Users, ShieldAlert } from 'lucide-react';
+import { LogOut, Sword, Bell, User, Trophy, Users, ShieldAlert, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useMemo } from 'react';
 import { clsx } from 'clsx';
@@ -53,7 +53,7 @@ export const Layout = () => {
     <div className="flex flex-col min-h-screen w-full bg-black text-neutral-200 selection:bg-neutral-800">
       {!isLobbyOrBattle && (
         <header className="sticky top-0 z-40 w-full bg-black/80 backdrop-blur-md border-b border-neutral-900">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between">
           <div
             className="flex items-center space-x-3 cursor-pointer group"
             onClick={() => navigate('/')}
@@ -134,8 +134,8 @@ export const Layout = () => {
                   )}
                 </button>
 
-                <div className="flex items-center space-x-3 pl-4 border-l border-neutral-800 relative">
-                  <div className="flex flex-col items-end mr-1.5">
+                <div className="flex items-center space-x-2 sm:space-x-3 pl-2 sm:pl-4 border-l border-neutral-800 relative">
+                  <div className="hidden sm:flex flex-col items-end mr-1.5">
                     <span className="text-xs font-semibold text-white tracking-tight leading-none">
                       {user.username}
                     </span>
@@ -209,7 +209,7 @@ export const Layout = () => {
       </header>
       )}
 
-      <main className="flex-1 flex flex-col overflow-hidden relative">
+      <main className={clsx("flex-1 flex flex-col overflow-hidden relative", !isLobbyOrBattle && user && "pb-16 md:pb-0")}>
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
@@ -244,7 +244,7 @@ export const Layout = () => {
                 animate={{ x: 0 }}
                 exit={{ x: '100%' }}
                 transition={{ type: 'spring', damping: 25, stiffness: 280 }}
-                className="fixed top-0 right-0 h-full z-50 shadow-2xl"
+                className="fixed top-0 right-0 h-full w-full sm:w-96 max-w-full z-50 shadow-2xl"
               >
                 <FriendSidebar onClose={() => setFriendsOpen(false)} />
               </motion.div>
@@ -252,6 +252,66 @@ export const Layout = () => {
           )}
         </AnimatePresence>
       </main>
+
+      {/* Mobile Bottom Navigation Bar (< md) */}
+      {!isLobbyOrBattle && user && (
+        <nav className="fixed bottom-0 left-0 right-0 z-40 bg-zinc-950/95 backdrop-blur-xl border-t border-zinc-850 md:hidden px-2 py-2 flex items-center justify-around shadow-2xl safe-area-bottom">
+          <button
+            onClick={() => navigate('/')}
+            className={clsx(
+              "flex flex-col items-center gap-1 transition-colors py-1 px-2.5 rounded-xl",
+              location.pathname === '/' ? "text-indigo-400 font-bold" : "text-zinc-400 hover:text-zinc-200"
+            )}
+          >
+            <Sword className="w-4.5 h-4.5" />
+            <span className="text-[10px] font-mono tracking-tight">Arena</span>
+          </button>
+
+          <button
+            onClick={() => navigate('/daily-challenge')}
+            className={clsx(
+              "flex flex-col items-center gap-1 transition-colors py-1 px-2.5 rounded-xl",
+              location.pathname === '/daily-challenge' ? "text-amber-400 font-bold" : "text-zinc-400 hover:text-zinc-200"
+            )}
+          >
+            <Zap className="w-4.5 h-4.5" />
+            <span className="text-[10px] font-mono tracking-tight">Daily</span>
+          </button>
+
+          <button
+            onClick={() => navigate('/leaderboard')}
+            className={clsx(
+              "flex flex-col items-center gap-1 transition-colors py-1 px-2.5 rounded-xl",
+              location.pathname === '/leaderboard' ? "text-indigo-400 font-bold" : "text-zinc-400 hover:text-zinc-200"
+            )}
+          >
+            <Trophy className="w-4.5 h-4.5" />
+            <span className="text-[10px] font-mono tracking-tight">Rankings</span>
+          </button>
+
+          <button
+            onClick={() => setFriendsOpen(true)}
+            className="flex flex-col items-center gap-1 transition-colors py-1 px-2.5 rounded-xl relative text-zinc-400 hover:text-zinc-200"
+          >
+            <Users className="w-4.5 h-4.5" />
+            {onlineFriendsCount > 0 && (
+              <span className="absolute top-0.5 right-2 w-2 h-2 bg-emerald-500 rounded-full border border-black animate-pulse" />
+            )}
+            <span className="text-[10px] font-mono tracking-tight">Friends</span>
+          </button>
+
+          <button
+            onClick={() => navigate('/profile')}
+            className={clsx(
+              "flex flex-col items-center gap-1 transition-colors py-1 px-2.5 rounded-xl",
+              location.pathname === '/profile' ? "text-indigo-400 font-bold" : "text-zinc-400 hover:text-zinc-200"
+            )}
+          >
+            <User className="w-4.5 h-4.5" />
+            <span className="text-[10px] font-mono tracking-tight">Profile</span>
+          </button>
+        </nav>
+      )}
     </div>
   );
 };

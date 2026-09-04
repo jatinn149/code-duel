@@ -166,7 +166,7 @@ export const ProfilePage = () => {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="flex-1 p-6 md:p-10 max-w-5xl mx-auto w-full flex flex-col space-y-8 bg-black"
+      className="flex-1 p-4 sm:p-6 md:p-10 max-w-5xl mx-auto w-full flex flex-col space-y-6 sm:space-y-8 bg-black"
     >
       <motion.div variants={itemVariants} className="flex justify-between items-center">
         <button
@@ -185,7 +185,7 @@ export const ProfilePage = () => {
         </div>
       </motion.div>
 
-      <motion.div variants={itemVariants} className="relative w-full rounded-xl border border-neutral-900 bg-[#0a0a0a] p-8 overflow-hidden">
+      <motion.div variants={itemVariants} className="relative w-full rounded-xl border border-neutral-900 bg-[#0a0a0a] p-5 sm:p-8 overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#111_1px,transparent_1px),linear-gradient(to_bottom,#111_1px,transparent_1px)] bg-[size:1.5rem_1.5rem] opacity-25 pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">

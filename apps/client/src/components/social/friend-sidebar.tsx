@@ -127,7 +127,7 @@ export const FriendSidebar: React.FC<{ onClose?: () => void }> = ({ onClose }) =
   };
 
   return (
-    <div className="w-84 sm:w-96 h-full bg-zinc-950 border-l border-zinc-800/80 flex flex-col relative z-50 shadow-2xl">
+    <div className="w-full sm:w-96 max-w-full h-full bg-zinc-950 border-l border-zinc-800/80 flex flex-col relative z-50 shadow-2xl">
       {/* Header */}
       <div className="p-4 border-b border-zinc-800/80 flex items-center justify-between bg-zinc-900/40">
         <div className="flex items-center gap-2 text-white">

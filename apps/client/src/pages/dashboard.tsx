@@ -242,7 +242,7 @@ export const DashboardPage = () => {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full flex flex-col space-y-8 min-h-screen text-zinc-100 selection:bg-indigo-500/30 selection:text-white"
+      className="flex-1 p-4 sm:p-6 md:p-10 max-w-7xl mx-auto w-full flex flex-col space-y-6 sm:space-y-8 min-h-screen text-zinc-100 selection:bg-indigo-500/30 selection:text-white"
     >
       {/* Header Section */}
       <motion.div
@@ -250,7 +250,7 @@ export const DashboardPage = () => {
         className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-6 border-b border-zinc-900"
       >
         <div>
-          <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight flex items-center gap-2">
             Coding <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Duel Terminal</span>
           </h1>
           <div className="flex items-center space-x-2 mt-2">
@@ -292,9 +292,9 @@ export const DashboardPage = () => {
         </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1">
-        {/* Left Column: Player Identity & Streaks */}
-        <motion.div variants={itemVariants} className="lg:col-span-3 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 flex-1">
+        {/* Left Column: Player Identity & Streaks (ordered after play area on mobile) */}
+        <motion.div variants={itemVariants} className="order-2 lg:order-1 lg:col-span-3 space-y-6">
           {/* User Identity Block */}
           <div className="relative overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-950/40 backdrop-blur-md p-6 group transition-all duration-300 hover:border-zinc-700/60">
             {/* Subtle glow effect */}
@@ -436,8 +436,7 @@ export const DashboardPage = () => {
           </div>
         </motion.div>
 
-        {/* Center Column: Daily Challenge & Game Selection */}
-        <motion.div variants={itemVariants} className="lg:col-span-6 space-y-6">
+        <motion.div variants={itemVariants} className="order-1 lg:order-2 lg:col-span-6 space-y-6">
           {/* Daily Challenge Card */}
           <div className="relative overflow-hidden rounded-xl border border-zinc-800/80 bg-gradient-to-b from-zinc-900 to-zinc-950 p-6 group hover:border-zinc-700 transition-all duration-300">
             {/* Grid pattern overlay */}
@@ -521,8 +520,7 @@ export const DashboardPage = () => {
           </div>
         </motion.div>
 
-        {/* Right Column: Directives, Live Feed, Season Progress */}
-        <motion.div variants={itemVariants} className="lg:col-span-3 space-y-6">
+        <motion.div variants={itemVariants} className="order-3 lg:order-3 lg:col-span-3 space-y-6">
           {/* Directives Tracker */}
           <div className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 backdrop-blur-md p-5 space-y-4 hover:border-zinc-700/60 transition-all duration-300">
             <h3 className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.15em] flex items-center">

@@ -60,10 +60,10 @@ export const LoginPage = () => {
             initial="hidden"
             animate="visible"
             exit={{ opacity: 0, scale: 0.98, filter: 'blur(8px)', transition: { duration: 0.2 } }}
-            className="w-full max-w-[420px] px-6 relative z-10"
+            className="w-full max-w-[420px] px-4 sm:px-6 relative z-10"
           >
             {/* Elegant glassmorphic card */}
-            <div className="relative bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/80 rounded-2xl p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden transition-colors duration-300 hover:border-zinc-700/80 group/card">
+            <div className="relative bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/80 rounded-2xl p-6 sm:p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden transition-colors duration-300 hover:border-zinc-700/80 group/card">
               {/* Subtle top edge glowing line */}
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent" />
               

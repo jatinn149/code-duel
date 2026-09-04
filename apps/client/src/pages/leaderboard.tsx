@@ -87,7 +87,7 @@ export const LeaderboardPage = () => {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="flex-1 p-6 md:p-10 max-w-5xl mx-auto w-full flex flex-col space-y-8 bg-black text-zinc-100"
+      className="flex-1 p-4 sm:p-6 md:p-10 max-w-5xl mx-auto w-full flex flex-col space-y-6 sm:space-y-8 bg-black text-zinc-100"
     >
       {/* Top Header */}
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -108,12 +108,12 @@ export const LeaderboardPage = () => {
       </motion.div>
 
       {/* Main Title Section */}
-      <motion.div variants={itemVariants} className="relative w-full rounded-xl border border-zinc-900 bg-[#0a0a0a] p-8 overflow-hidden">
+      <motion.div variants={itemVariants} className="relative w-full rounded-xl border border-zinc-900 bg-[#0a0a0a] p-5 sm:p-8 overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#111_1px,transparent_1px),linear-gradient(to_bottom,#111_1px,transparent_1px)] bg-[size:1.5rem_1.5rem] opacity-20 pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex flex-col items-center md:items-start text-center md:text-left space-y-2">
-            <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
               Arena <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Leaderboard</span>
             </h1>
             <p className="text-zinc-500 font-medium text-xs tracking-wider uppercase">
@@ -179,12 +179,12 @@ export const LeaderboardPage = () => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-zinc-900/80 bg-zinc-950/40 text-[9px] font-bold text-zinc-500 uppercase tracking-widest font-mono">
-                  <th className="py-4 px-6 text-center w-16">Rank</th>
-                  <th className="py-4 px-6">Player</th>
-                  <th className="py-4 px-6 text-right w-36">Coder Points</th>
-                  <th className="py-4 px-6 text-center w-24">Level</th>
-                  <th className="py-4 px-6 text-center w-36">Tier</th>
-                  <th className="py-4 px-6 text-right w-44">Win Rate / Ratio</th>
+                  <th className="py-3 sm:py-4 px-3 sm:px-6 text-center w-16">Rank</th>
+                  <th className="py-3 sm:py-4 px-3 sm:px-6">Player</th>
+                  <th className="py-3 sm:py-4 px-3 sm:px-6 text-right w-36">Coder Points</th>
+                  <th className="py-3 sm:py-4 px-3 sm:px-6 text-center w-24">Level</th>
+                  <th className="py-3 sm:py-4 px-3 sm:px-6 text-center w-36">Tier</th>
+                  <th className="py-3 sm:py-4 px-3 sm:px-6 text-right w-44">Win Rate / Ratio</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-900/30 text-xs">
@@ -200,14 +200,14 @@ export const LeaderboardPage = () => {
                       }`}
                     >
                       {/* Rank Column */}
-                      <td className="py-4.5 px-6 text-center font-mono font-black">
+                      <td className="py-3.5 sm:py-4.5 px-3 sm:px-6 text-center font-mono font-black">
                         <span className={`inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs ${getRankBadgeClass(rank)}`}>
                           {rank}
                         </span>
                       </td>
 
                       {/* Operator Name */}
-                      <td className="py-4.5 px-6 font-bold text-white tracking-tight">
+                      <td className="py-3.5 sm:py-4.5 px-3 sm:px-6 font-bold text-white tracking-tight">
                         <div className="flex items-center space-x-2">
                           <span className="group-hover:text-indigo-400 transition-colors">
                             {player.username}
@@ -217,7 +217,7 @@ export const LeaderboardPage = () => {
                       </td>
 
                       {/* Coder Points */}
-                      <td className="py-4.5 px-6 text-right font-mono font-black text-white">
+                      <td className="py-3.5 sm:py-4.5 px-3 sm:px-6 text-right font-mono font-black text-white">
                         <div className="flex flex-col items-end">
                           <span>{player.rating} CP</span>
                           <span className={`text-[8px] font-semibold uppercase tracking-wider ${getRankColorClass(player.rating)}`}>
@@ -227,7 +227,7 @@ export const LeaderboardPage = () => {
                       </td>
 
                       {/* Level */}
-                      <td className="py-4.5 px-6 text-center">
+                      <td className="py-3.5 sm:py-4.5 px-3 sm:px-6 text-center">
                         <span className="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded bg-zinc-900 text-[10px] font-mono font-bold text-zinc-400 border border-zinc-800">
                           <Shield className="w-3 h-3 text-indigo-400" />
                           <span>Lvl {player.level ?? 1}</span>
@@ -235,14 +235,14 @@ export const LeaderboardPage = () => {
                       </td>
 
                       {/* Seasonal Tier */}
-                      <td className="py-4.5 px-6 text-center font-mono">
+                      <td className="py-3.5 sm:py-4.5 px-3 sm:px-6 text-center font-mono">
                         <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest px-2 py-0.5 bg-indigo-500/5 border border-indigo-500/10 rounded">
                           {player.seasonalTier || 'UNRANKED'}
                         </span>
                       </td>
 
                       {/* Win/Loss */}
-                      <td className="py-4.5 px-6 text-right font-mono text-zinc-400">
+                      <td className="py-3.5 sm:py-4.5 px-3 sm:px-6 text-right font-mono text-zinc-400">
                         <div className="flex flex-col items-end">
                           <span className="font-bold text-zinc-300">{winRate}% WR</span>
                           <span className="text-[8px] text-zinc-600 font-semibold uppercase mt-0.5">
