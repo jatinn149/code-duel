@@ -553,7 +553,7 @@ export const DailyChallengePage: React.FC = () => {
           {/* Terminal / Test Case Output Drawer */}
           <div className={clsx(
             "border-t border-zinc-850 bg-zinc-950 p-4 font-mono text-xs overflow-y-auto shrink-0 space-y-2",
-            mobileView === 'output' ? "flex-1 block" : terminalOutput ? "h-44 block" : "hidden md:hidden"
+            mobileView === 'output' ? "flex-1 block" : terminalOutput ? "h-44 hidden md:block" : "hidden"
           )}>
             <div className="flex items-center justify-between pb-2 border-b border-zinc-900">
               <span className="text-zinc-400 font-bold uppercase flex items-center gap-2">

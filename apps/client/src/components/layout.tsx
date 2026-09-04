@@ -47,7 +47,7 @@ export const Layout = () => {
     return 'bg-neutral-600 text-white';
   }, [userLevel]);
 
-  const isLobbyOrBattle = location.pathname.includes('/lobby/') || location.pathname.includes('/battle/') || location.pathname.includes('/results/');
+  const isLobbyOrBattle = location.pathname.includes('/lobby/') || location.pathname.includes('/battle/') || location.pathname.includes('/results/') || location.pathname.includes('/daily-challenge');
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-black text-neutral-200 selection:bg-neutral-800">
@@ -255,60 +255,60 @@ export const Layout = () => {
 
       {/* Mobile Bottom Navigation Bar (< md) */}
       {!isLobbyOrBattle && user && (
-        <nav className="fixed bottom-0 left-0 right-0 z-40 bg-zinc-950/95 backdrop-blur-xl border-t border-zinc-850 md:hidden px-2 py-2 flex items-center justify-around shadow-2xl safe-area-bottom">
+        <nav className="fixed bottom-0 left-0 right-0 z-40 bg-zinc-950/95 backdrop-blur-xl border-t border-zinc-850 md:hidden px-2 py-1 flex items-center justify-around shadow-2xl safe-area-bottom h-16">
           <button
             onClick={() => navigate('/')}
             className={clsx(
-              "flex flex-col items-center gap-1 transition-colors py-1 px-2.5 rounded-xl",
+              "flex flex-col items-center gap-1 transition-all py-1 px-3 rounded-xl active:scale-90",
               location.pathname === '/' ? "text-indigo-400 font-bold" : "text-zinc-400 hover:text-zinc-200"
             )}
           >
-            <Sword className="w-4.5 h-4.5" />
-            <span className="text-[10px] font-mono tracking-tight">Arena</span>
+            <Sword className="w-5 h-5" />
+            <span className="text-[11px] font-sans font-semibold tracking-tight">Arena</span>
           </button>
 
           <button
             onClick={() => navigate('/daily-challenge')}
             className={clsx(
-              "flex flex-col items-center gap-1 transition-colors py-1 px-2.5 rounded-xl",
+              "flex flex-col items-center gap-1 transition-all py-1 px-3 rounded-xl active:scale-90",
               location.pathname === '/daily-challenge' ? "text-amber-400 font-bold" : "text-zinc-400 hover:text-zinc-200"
             )}
           >
-            <Zap className="w-4.5 h-4.5" />
-            <span className="text-[10px] font-mono tracking-tight">Daily</span>
+            <Zap className="w-5 h-5" />
+            <span className="text-[11px] font-sans font-semibold tracking-tight">Daily</span>
           </button>
 
           <button
             onClick={() => navigate('/leaderboard')}
             className={clsx(
-              "flex flex-col items-center gap-1 transition-colors py-1 px-2.5 rounded-xl",
+              "flex flex-col items-center gap-1 transition-all py-1 px-3 rounded-xl active:scale-90",
               location.pathname === '/leaderboard' ? "text-indigo-400 font-bold" : "text-zinc-400 hover:text-zinc-200"
             )}
           >
-            <Trophy className="w-4.5 h-4.5" />
-            <span className="text-[10px] font-mono tracking-tight">Rankings</span>
+            <Trophy className="w-5 h-5" />
+            <span className="text-[11px] font-sans font-semibold tracking-tight">Rankings</span>
           </button>
 
           <button
             onClick={() => setFriendsOpen(true)}
-            className="flex flex-col items-center gap-1 transition-colors py-1 px-2.5 rounded-xl relative text-zinc-400 hover:text-zinc-200"
+            className="flex flex-col items-center gap-1 transition-all py-1 px-3 rounded-xl relative text-zinc-400 hover:text-zinc-200 active:scale-90"
           >
-            <Users className="w-4.5 h-4.5" />
+            <Users className="w-5 h-5" />
             {onlineFriendsCount > 0 && (
-              <span className="absolute top-0.5 right-2 w-2 h-2 bg-emerald-500 rounded-full border border-black animate-pulse" />
+              <span className="absolute top-0.5 right-2.5 w-2 h-2 bg-emerald-500 rounded-full border border-black animate-pulse" />
             )}
-            <span className="text-[10px] font-mono tracking-tight">Friends</span>
+            <span className="text-[11px] font-sans font-semibold tracking-tight">Friends</span>
           </button>
 
           <button
             onClick={() => navigate('/profile')}
             className={clsx(
-              "flex flex-col items-center gap-1 transition-colors py-1 px-2.5 rounded-xl",
+              "flex flex-col items-center gap-1 transition-all py-1 px-3 rounded-xl active:scale-90",
               location.pathname === '/profile' ? "text-indigo-400 font-bold" : "text-zinc-400 hover:text-zinc-200"
             )}
           >
-            <User className="w-4.5 h-4.5" />
-            <span className="text-[10px] font-mono tracking-tight">Profile</span>
+            <User className="w-5 h-5" />
+            <span className="text-[11px] font-sans font-semibold tracking-tight">Profile</span>
           </button>
         </nav>
       )}

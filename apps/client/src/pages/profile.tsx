@@ -166,7 +166,7 @@ export const ProfilePage = () => {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="flex-1 p-4 sm:p-6 md:p-10 max-w-5xl mx-auto w-full flex flex-col space-y-6 sm:space-y-8 bg-black"
+      className="flex-1 p-4 sm:p-6 md:p-10 pb-28 md:pb-10 max-w-5xl mx-auto w-full flex flex-col space-y-6 sm:space-y-8 bg-black text-zinc-100"
     >
       <motion.div variants={itemVariants} className="flex justify-between items-center">
         <button
@@ -177,9 +177,9 @@ export const ProfilePage = () => {
           <span>Dashboard</span>
         </button>
 
-        <div className="flex items-center space-x-2 border border-neutral-900 bg-neutral-950 px-2.5 py-1 rounded-full">
+        <div className="flex items-center space-x-2 border border-neutral-900 bg-neutral-950 px-3 py-1 rounded-full">
           <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-          <span className="text-[9px] font-mono text-emerald-400 font-bold tracking-widest uppercase">
+          <span className="text-[11px] font-mono text-emerald-400 font-bold tracking-widest uppercase">
             SECURE SESSION
           </span>
         </div>
@@ -203,19 +203,19 @@ export const ProfilePage = () => {
                 <h1 className="text-2xl font-bold tracking-tight text-white">
                   {username}
                 </h1>
-                <span className="inline-flex self-center px-2 py-0.5 rounded text-[9px] font-mono bg-neutral-900 text-neutral-400 border border-neutral-800 uppercase tracking-wider">
+                <span className="inline-flex self-center px-2.5 py-0.5 rounded text-xs font-mono bg-neutral-900 text-neutral-300 border border-neutral-800 uppercase tracking-wider">
                   verified_operator
                 </span>
               </div>
               
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-1 text-xs text-neutral-500 font-medium font-mono">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-1 text-xs text-neutral-400 font-medium font-mono">
                 <span className="flex items-center space-x-1.5 font-sans">
-                  <Mail className="w-3.5 h-3.5 text-neutral-600" />
+                  <Mail className="w-3.5 h-3.5 text-neutral-500" />
                   <span>{email}</span>
                 </span>
                 <span className="w-1.5 h-1.5 bg-neutral-800 rounded-full hidden md:block" />
                 <span className="flex items-center space-x-1.5 flex-nowrap font-sans">
-                  <Calendar className="w-3.5 h-3.5 text-neutral-600" />
+                  <Calendar className="w-3.5 h-3.5 text-neutral-500" />
                   <span>{joinDate}</span>
                 </span>
               </div>
@@ -225,7 +225,7 @@ export const ProfilePage = () => {
           <div className="flex flex-col items-center md:items-end w-full md:w-65 space-y-2 bg-black border border-neutral-900 p-4.5 rounded-xl">
             <div className="flex items-center justify-between w-full">
               <div className="flex flex-col">
-                <span className="text-[8px] font-bold text-neutral-550 uppercase tracking-widest leading-none">
+                <span className="text-xs font-bold text-neutral-400 uppercase tracking-widest leading-none">
                   CODER POINTS · {currentRankInfo.rank.toUpperCase()}
                 </span>
                 <span className="text-lg font-bold font-mono text-white mt-1.5">{rating} CP</span>
@@ -237,20 +237,20 @@ export const ProfilePage = () => {
             </div>
 
             <div className="w-full">
-              <div className="w-full h-1 bg-neutral-900 rounded-full overflow-hidden">
+              <div className="w-full h-1.5 bg-neutral-900 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-white transition-all duration-1000"
                   style={{ width: `${currentRankInfo.progress}%` }}
                 />
               </div>
-              <div className="flex justify-between text-[8px] font-medium text-neutral-550 font-mono mt-1 leading-none">
+              <div className="flex justify-between text-[10px] font-medium text-neutral-400 font-mono mt-1 leading-none">
                 <span>LVL {level}</span>
                 <span>{currentRankInfo.progressText}</span>
               </div>
             </div>
 
-            <div className="w-full pt-2 mt-2 border-t border-neutral-900 flex justify-between items-center text-[8px] font-mono font-bold tracking-wider leading-none">
-              <span className="text-neutral-500 uppercase">CURRENT SEASON TIER</span>
+            <div className="w-full pt-2 mt-2 border-t border-neutral-900 flex justify-between items-center text-[10px] font-mono font-bold tracking-wider leading-none">
+              <span className="text-neutral-400 uppercase">CURRENT SEASON TIER</span>
               <span className="text-indigo-400 uppercase">{user?.seasonalTier || 'UNRANKED'}</span>
             </div>
           </div>
@@ -260,56 +260,56 @@ export const ProfilePage = () => {
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
         <div className="md:col-span-7 space-y-8">
           <motion.div variants={itemVariants} className="space-y-3">
-            <span className="text-[9px] font-bold text-neutral-500 uppercase tracking-widest block font-mono">
+            <span className="text-xs font-bold text-neutral-400 uppercase tracking-wider block font-mono">
               // performance_matrix
             </span>
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-[#0a0a0a] border border-neutral-900 rounded-xl p-5 hover:border-neutral-800 transition-colors group">
-                <span className="text-[9px] font-semibold text-neutral-550 uppercase tracking-widest leading-none block mb-1">
+                <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider leading-none block mb-1">
                   Win Rate
                 </span>
                 <span className="text-2xl font-bold text-white tracking-tight leading-none block mt-1.5 font-mono">
                   {winRate}%
                 </span>
-                <span className="text-[9px] font-mono text-neutral-600 block mt-3 uppercase font-semibold">Standard Matches</span>
+                <span className="text-[11px] font-mono text-neutral-500 block mt-3 uppercase font-semibold">Standard Matches</span>
               </div>
 
               <div className="bg-[#0a0a0a] border border-neutral-900 rounded-xl p-5 hover:border-neutral-800 transition-colors group">
-                <span className="text-[9px] font-semibold text-neutral-550 uppercase tracking-widest leading-none block mb-1">
+                <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider leading-none block mb-1">
                   Total Matches
                 </span>
                 <span className="text-2xl font-bold text-white tracking-tight leading-none block mt-1.5 font-mono">
                   {matchesPlayed}
                 </span>
-                <span className="text-[9px] font-mono text-neutral-600 block mt-3 uppercase font-semibold">
+                <span className="text-[11px] font-mono text-neutral-500 block mt-3 uppercase font-semibold">
                   {wins} Wins / {losses} Losses
                 </span>
               </div>
 
               <div className="bg-[#0a0a0a] border border-neutral-900 rounded-xl p-5 hover:border-neutral-800 transition-colors group">
-                <span className="text-[9px] font-semibold text-neutral-550 uppercase tracking-widest leading-none block mb-1">
+                <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider leading-none block mb-1">
                   Coding Streak (Current / Best)
                 </span>
                 <span className="text-2xl font-bold text-white tracking-tight leading-none block mt-1.5 font-mono">
                   {Math.max(0, user?.streak ?? 0)} / {Math.max(0, user?.highestStreak ?? 0)}
                 </span>
-                <span className="text-[9px] font-mono text-neutral-600 block mt-3 uppercase font-semibold">Consecutive wins</span>
+                <span className="text-[11px] font-mono text-neutral-500 block mt-3 uppercase font-semibold">Consecutive wins</span>
               </div>
 
               <div className="bg-[#0a0a0a] border border-neutral-900 rounded-xl p-5 hover:border-neutral-800 transition-colors group">
-                <span className="text-[9px] font-semibold text-neutral-550 uppercase tracking-widest leading-none block mb-1">
+                <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider leading-none block mb-1">
                   Compiler Parse Accuracy
                 </span>
                 <span className="text-2xl font-bold text-white tracking-tight leading-none block mt-1.5 font-mono">
                   —
                 </span>
-                <span className="text-[9px] font-mono text-neutral-600 block mt-3 uppercase font-semibold">Compiler verified stats unavailable</span>
+                <span className="text-[11px] font-mono text-neutral-500 block mt-3 uppercase font-semibold">Compiler verified stats unavailable</span>
               </div>
             </div>
           </motion.div>
 
           <motion.div variants={itemVariants} className="space-y-3">
-            <span className="text-[9px] font-bold text-neutral-500 uppercase tracking-widest block font-mono">
+            <span className="text-xs font-bold text-neutral-400 uppercase tracking-wider block font-mono">
               // trophy_room_acquisitions
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -336,19 +336,19 @@ export const ProfilePage = () => {
                         {trophy.name}
                       </span>
                       {trophy.unlocked && (
-                        <span className="text-[8px] font-mono text-emerald-500 font-bold uppercase tracking-wider">
+                        <span className="text-[11px] font-mono text-emerald-400 font-bold uppercase tracking-wider">
                           Unlocked
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-neutral-500 leading-snug mt-1 font-medium">
+                    <p className="text-[11px] text-neutral-400 leading-snug mt-1 font-medium">
                       {trophy.desc}
                     </p>
                     <div className="flex items-center space-x-1.5 mt-2.5">
-                      <span className="text-[8px] font-mono text-neutral-600 uppercase font-semibold">
+                      <span className="text-[11px] font-mono text-neutral-400 uppercase font-semibold">
                         Progress:
                       </span>
-                      <span className={`text-[8px] font-mono font-bold ${trophy.unlocked ? 'text-neutral-400' : 'text-neutral-800'}`}>
+                      <span className={`text-[11px] font-mono font-bold ${trophy.unlocked ? 'text-neutral-300' : 'text-neutral-700'}`}>
                         {trophy.metric}
                       </span>
                     </div>
@@ -361,7 +361,7 @@ export const ProfilePage = () => {
 
         <div className="md:col-span-5">
           <motion.div variants={itemVariants} className="space-y-3 h-full flex flex-col">
-            <span className="text-[9px] font-bold text-neutral-500 uppercase tracking-widest block font-mono">
+            <span className="text-xs font-bold text-neutral-400 uppercase tracking-wider block font-mono">
               // match_history_logs
             </span>
 
@@ -369,7 +369,7 @@ export const ProfilePage = () => {
               {loading ? (
                 <div className="flex flex-col items-center justify-center p-8 min-h-[200px] space-y-3">
                   <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-                  <span className="text-[10px] font-mono text-neutral-550 uppercase tracking-widest">
+                  <span className="text-xs font-mono text-neutral-400 uppercase tracking-widest">
                     Loading match history...
                   </span>
                 </div>
@@ -378,7 +378,7 @@ export const ProfilePage = () => {
                   <span className="font-mono text-xs uppercase tracking-wider text-red-400 font-bold">
                     Error Loading History
                   </span>
-                  <p className="text-[10px] text-neutral-550 mt-1 font-mono">
+                  <p className="text-xs text-neutral-400 mt-1 font-mono">
                     {error}
                   </p>
                   <button
@@ -390,17 +390,17 @@ export const ProfilePage = () => {
                         .catch(() => setError('Failed to load match history'))
                         .finally(() => setLoading(false));
                     }}
-                    className="mt-4 px-3 py-1.5 bg-neutral-900 border border-neutral-800 rounded text-[9px] font-mono hover:text-white uppercase tracking-wider transition-all"
+                    className="mt-4 px-3 py-1.5 bg-neutral-900 border border-neutral-800 rounded text-xs font-mono hover:text-white uppercase tracking-wider transition-all"
                   >
                     Retry Link
                   </button>
                 </div>
               ) : matchHistory.length === 0 ? (
                 <div className="bg-[#0a0a0a] border border-neutral-900 border-dashed rounded-xl p-8 text-center flex flex-col items-center justify-center min-h-[200px]">
-                  <span className="font-mono text-xs uppercase tracking-wider text-neutral-600 font-bold">
+                  <span className="font-mono text-xs uppercase tracking-wider text-neutral-500 font-bold">
                     No matches played yet
                   </span>
-                  <p className="text-[10px] text-neutral-700 mt-1 font-mono">
+                  <p className="text-xs text-neutral-600 mt-1 font-mono">
                     Play matches in the arena to see your history here
                   </p>
                 </div>
@@ -471,7 +471,7 @@ export const ProfilePage = () => {
                       className="bg-[#0a0a0a] border border-neutral-900 rounded-xl p-4.5 flex items-center justify-between hover:border-neutral-800 transition-colors group"
                     >
                       <div className="flex items-center space-x-3.5">
-                        <span className={`w-1.5 h-1.5 rounded-full ${
+                        <span className={`w-2 h-2 rounded-full ${
                           outcome === 'victory' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : outcome === 'defeat' ? 'bg-red-500' : 'bg-neutral-500'
                         }`} />
 
@@ -482,8 +482,8 @@ export const ProfilePage = () => {
                             </span>
                           </div>
                           
-                          <div className="flex items-center space-x-2 text-[10px] text-neutral-500 mt-1 font-mono">
-                            <span>vs {opponentDisplay}</span>
+                          <div className="flex items-center space-x-2 text-xs text-neutral-400 mt-1 font-mono">
+                            <span className="truncate max-w-[120px] sm:max-w-none">vs {opponentDisplay}</span>
                             <span className="text-neutral-700">•</span>
                             <span>{formatDuration(match.durationMs)}</span>
                           </div>
@@ -496,7 +496,7 @@ export const ProfilePage = () => {
                         }`}>
                           {changeText}
                         </span>
-                        <span className="text-[8px] font-semibold text-neutral-600 uppercase mt-1">
+                        <span className="text-[10px] font-semibold text-neutral-500 uppercase mt-1">
                           {formatDate(match.endedAt)}
                         </span>
                       </div>
@@ -507,8 +507,8 @@ export const ProfilePage = () => {
             </div>
 
             <div className="bg-[#050505] border border-neutral-950 rounded-xl p-4 text-center mt-4">
-              <p className="text-[9px] font-mono text-neutral-600 font-semibold uppercase tracking-wider flex items-center justify-center gap-1.5">
-                <Activity className="w-3.5 h-3.5 text-neutral-700" />
+              <p className="text-xs font-mono text-neutral-500 font-semibold uppercase tracking-wider flex items-center justify-center gap-1.5">
+                <Activity className="w-3.5 h-3.5 text-neutral-600" />
                 Recalibrating ratings on queue closure.
               </p>
             </div>

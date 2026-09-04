@@ -242,7 +242,7 @@ export const DashboardPage = () => {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="flex-1 p-4 sm:p-6 md:p-10 max-w-7xl mx-auto w-full flex flex-col space-y-6 sm:space-y-8 min-h-screen text-zinc-100 selection:bg-indigo-500/30 selection:text-white"
+      className="flex-1 p-4 sm:p-6 md:p-10 pb-28 md:pb-10 max-w-7xl mx-auto w-full flex flex-col space-y-6 sm:space-y-8 min-h-screen text-zinc-100 selection:bg-indigo-500/30 selection:text-white"
     >
       {/* Header Section */}
       <motion.div
@@ -269,7 +269,7 @@ export const DashboardPage = () => {
             whileHover={{ scale: 1.01, backgroundColor: 'rgba(39, 39, 42, 0.8)' }}
             whileTap={{ scale: 0.99 }}
             onClick={() => setShowJoinModal(true)}
-            className="flex-1 md:flex-none py-2.5 px-5 bg-zinc-900/60 border border-zinc-800 hover:border-zinc-700 text-zinc-300 font-medium rounded-lg transition-all flex items-center justify-center space-x-2.5 text-xs uppercase tracking-wider"
+            className="flex-1 md:flex-none h-11 md:h-auto py-2.5 px-5 bg-zinc-900/60 border border-zinc-800 hover:border-zinc-700 text-zinc-300 font-semibold rounded-xl transition-all flex items-center justify-center space-x-2.5 text-xs uppercase tracking-wider active:scale-95"
           >
             <LogIn className="w-4 h-4 text-indigo-400" />
             <span>Join Room</span>
@@ -280,7 +280,7 @@ export const DashboardPage = () => {
             whileTap={{ scale: 0.99 }}
             onClick={() => setShowCreateDuelModal(true)}
             disabled={isLoading}
-            className="flex-1 md:flex-none py-2.5 px-5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg transition-all flex items-center justify-center space-x-2.5 text-xs uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 md:flex-none h-11 md:h-auto py-2.5 px-5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition-all flex items-center justify-center space-x-2.5 text-xs uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
           >
             {isLoading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -292,11 +292,118 @@ export const DashboardPage = () => {
         </div>
       </motion.div>
 
+      {/* Mobile Operator Quick Bar (< lg) */}
+      <motion.div variants={itemVariants} className="block lg:hidden">
+        <div className="relative overflow-hidden rounded-2xl border border-zinc-800/80 bg-gradient-to-r from-zinc-950 via-zinc-900/90 to-zinc-950 p-4 shadow-xl">
+          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent" />
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="relative shrink-0">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500/30 to-purple-500/10 border border-indigo-500/40 flex items-center justify-center shadow-md">
+                  <Sword className="w-6 h-6 text-indigo-400" />
+                </div>
+                <div className="absolute -bottom-1 -right-1 bg-zinc-950 border border-zinc-800 rounded-md px-1.5 py-0.2 flex items-center space-x-0.5 shadow-sm">
+                  <Shield className="w-2.5 h-2.5 text-indigo-400" />
+                  <span className="text-[10px] font-bold text-zinc-300">L{level}</span>
+                </div>
+              </div>
+
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <h2 className="text-base font-bold text-white tracking-tight truncate">
+                    {currentUser?.username}
+                  </h2>
+                  <Sparkles className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                </div>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-indigo-400 text-xs font-mono font-bold uppercase tracking-wider">
+                    {calculateCpRank(rating)}
+                  </span>
+                  <span className="text-zinc-600">•</span>
+                  <span className="text-zinc-300 text-xs font-mono font-bold">
+                    {rating} CP
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Streak pill */}
+            <div className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-xl shrink-0">
+              <Flame className="w-4 h-4 text-amber-500 fill-amber-500/20" />
+              <div className="text-right font-mono leading-none">
+                <span className="text-sm font-black text-amber-400">{streak}</span>
+                <span className="text-[9px] text-amber-500/80 block uppercase font-bold">Streak</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Stats Line */}
+          <div className="mt-3 pt-2.5 border-t border-zinc-900 flex items-center justify-between text-xs font-mono text-zinc-400">
+            <span className="text-zinc-400 font-medium">Tier: <strong className="text-indigo-400 uppercase">{seasonalTier}</strong></span>
+            <span className="text-zinc-400 font-medium">Win Rate: <strong className="text-emerald-400">{winRate}%</strong></span>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Mobile Battle Arenas Quick Launch (< lg) */}
+      <motion.div variants={itemVariants} className="block lg:hidden space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <span className="text-xs font-bold font-mono text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+            <Sword className="w-3.5 h-3.5 text-indigo-400" /> Duel Arenas
+          </span>
+          <span className="text-[11px] font-mono text-zinc-500">Fast Matchmaking</span>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2.5">
+          {/* Multi Round */}
+          <button
+            onClick={() => handleCreateRoom('MULTI_ROUND')}
+            disabled={isLoading}
+            className="flex flex-col items-center justify-center p-3 rounded-xl border border-zinc-800/80 bg-zinc-950/60 active:scale-95 transition-all text-center group hover:border-amber-500/40"
+          >
+            <div className="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-2">
+              <Trophy className="w-4 h-4" />
+            </div>
+            <span className="text-xs font-bold text-white tracking-tight">Multi-Round</span>
+            <span className="text-[10px] text-zinc-500 mt-0.5 font-mono">Best of 3</span>
+          </button>
+
+          {/* Quickode */}
+          <button
+            onClick={() => {
+              setSelectedMode('QUICKODE');
+              setShowCreateDuelModal(true);
+            }}
+            disabled={isLoading}
+            className="flex flex-col items-center justify-center p-3 rounded-xl border border-zinc-800/80 bg-zinc-950/60 active:scale-95 transition-all text-center group hover:border-indigo-500/40"
+          >
+            <div className="w-9 h-9 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-2">
+              <Zap className="w-4 h-4 fill-current" />
+            </div>
+            <span className="text-xs font-bold text-white tracking-tight">Quickode</span>
+            <span className="text-[10px] text-zinc-500 mt-0.5 font-mono">Speed Sprint</span>
+          </button>
+
+          {/* Chaos Arena */}
+          <button
+            onClick={() => handleCreateRoom('CHAOS_ARENA')}
+            disabled={isLoading}
+            className="flex flex-col items-center justify-center p-3 rounded-xl border border-zinc-800/80 bg-zinc-950/60 active:scale-95 transition-all text-center group hover:border-rose-500/40"
+          >
+            <div className="w-9 h-9 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 mb-2">
+              <Activity className="w-4 h-4" />
+            </div>
+            <span className="text-xs font-bold text-white tracking-tight">Chaos</span>
+            <span className="text-[10px] text-zinc-500 mt-0.5 font-mono">Modifiers</span>
+          </button>
+        </div>
+      </motion.div>
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 flex-1">
         {/* Left Column: Player Identity & Streaks (ordered after play area on mobile) */}
         <motion.div variants={itemVariants} className="order-2 lg:order-1 lg:col-span-3 space-y-6">
-          {/* User Identity Block */}
-          <div className="relative overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-950/40 backdrop-blur-md p-6 group transition-all duration-300 hover:border-zinc-700/60">
+          {/* User Identity Block (Desktop only since mobile has quick bar) */}
+          <div className="hidden lg:block relative overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-950/40 backdrop-blur-md p-6 group transition-all duration-300 hover:border-zinc-700/60">
             {/* Subtle glow effect */}
             <div className="absolute -top-12 -right-12 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/15 transition-all duration-500" />
             
@@ -374,18 +481,18 @@ export const DashboardPage = () => {
           {/* Streak Indicator */}
           <div className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 backdrop-blur-md p-5 space-y-4 hover:border-zinc-700/60 transition-all duration-300">
             <div className="flex items-center justify-between">
-              <h3 className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.15em] flex items-center">
+              <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-[0.15em] flex items-center">
                 <Flame className="w-3.5 h-3.5 mr-1.5 text-amber-500 fill-amber-500/20" />
                 Active Streak
               </h3>
-              <span className="text-[10px] text-zinc-500 font-mono">🔥 {streak} {streak === 1 ? 'Day' : 'Days'}</span>
+              <span className="text-xs text-zinc-400 font-mono">🔥 {streak} {streak === 1 ? 'Day' : 'Days'}</span>
             </div>
             
             <div className="flex items-center space-x-3">
               <span className="text-3xl font-extrabold text-white tracking-tighter">{streak}</span>
               <div className="flex flex-col">
-                <span className="text-xs font-semibold text-zinc-300">Daily Coding Streak</span>
-                <span className="text-[9px] text-zinc-500">Solve a challenge daily to extend your streak</span>
+                <span className="text-xs font-semibold text-zinc-200">Daily Coding Streak</span>
+                <span className="text-[11px] text-zinc-400">Solve a challenge daily to extend your streak</span>
               </div>
             </div>
 
@@ -394,7 +501,7 @@ export const DashboardPage = () => {
               {weekdays.map((day, idx) => (
                 <div key={idx} className="flex flex-col items-center space-y-1">
                   <div
-                    className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold transition-all ${
+                    className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold transition-all ${
                       day.active
                         ? 'bg-amber-500/10 border border-amber-500/30 text-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.2)]'
                         : 'bg-zinc-900 border border-zinc-800 text-zinc-500'
@@ -402,7 +509,7 @@ export const DashboardPage = () => {
                   >
                     {day.active ? '🔥' : day.label}
                   </div>
-                  <span className="text-[9px] font-medium text-zinc-500">{day.label}</span>
+                  <span className="text-[10px] font-medium text-zinc-400">{day.label}</span>
                 </div>
               ))}
             </div>
@@ -410,28 +517,28 @@ export const DashboardPage = () => {
 
           {/* Battle Statistics */}
           <div className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 backdrop-blur-md p-5 space-y-4 hover:border-zinc-700/60 transition-all duration-300">
-            <h3 className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.15em] flex items-center">
+            <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-[0.15em] flex items-center">
               <Activity className="w-3.5 h-3.5 mr-1.5 text-indigo-400" />
               Combat Statistics
             </h3>
             <div className="grid grid-cols-2 gap-3.5">
-              <div className="bg-zinc-900/40 p-3 rounded-lg border border-zinc-800/80">
-                <p className="text-[9px] font-semibold text-zinc-500 uppercase tracking-wider">
+              <div className="bg-zinc-900/40 p-3.5 rounded-lg border border-zinc-800/80">
+                <p className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
                   Win Rate
                 </p>
                 <p className="text-xl font-bold text-emerald-400 mt-1">{winRate}%</p>
               </div>
-              <div className="bg-zinc-900/40 p-3 rounded-lg border border-zinc-800/80">
-                <p className="text-[9px] font-semibold text-zinc-500 uppercase tracking-wider">
+              <div className="bg-zinc-900/40 p-3.5 rounded-lg border border-zinc-800/80">
+                <p className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
                   Win Streak
                 </p>
                 <p className="text-xl font-bold text-indigo-400 mt-1">{highestStreak}</p>
               </div>
             </div>
             
-            <div className="flex justify-between text-[10px] text-zinc-500 border-t border-zinc-900 pt-3">
-              <span>Total Matches: <strong className="text-zinc-300">{matchesPlayed}</strong></span>
-              <span>Matches Won: <strong className="text-zinc-300">{wins}</strong></span>
+            <div className="flex justify-between text-xs text-zinc-400 border-t border-zinc-900 pt-3 font-mono">
+              <span>Total Matches: <strong className="text-zinc-200">{matchesPlayed}</strong></span>
+              <span>Matches Won: <strong className="text-emerald-400">{wins}</strong></span>
             </div>
           </div>
         </motion.div>
@@ -446,10 +553,10 @@ export const DashboardPage = () => {
             <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[9px] font-bold uppercase tracking-wider rounded-md flex items-center gap-1">
-                    <Clock className="w-2.5 h-2.5" /> Daily Code Challenge
+                  <span className="px-2.5 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold uppercase tracking-wider rounded-md flex items-center gap-1.5">
+                    <Clock className="w-3 h-3" /> Daily Code Challenge
                   </span>
-                  <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[9px] font-bold uppercase tracking-wider rounded-md">
+                  <span className="px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold uppercase tracking-wider rounded-md">
                     {dashboardData?.dailyChallenge?.difficulty || 'Medium'}
                   </span>
                 </div>
@@ -457,20 +564,20 @@ export const DashboardPage = () => {
                 <p className="text-zinc-400 text-xs leading-relaxed max-w-md">
                   {dashboardData?.dailyChallenge?.description || "Implement a sliding window solution to locate the minimal contiguous subarray with a degree equal to the array's degree."}
                 </p>
-                <div className="flex items-center gap-4 pt-1.5 text-[11px] text-zinc-500">
-                  <span className="flex items-center gap-1 text-zinc-400"><Zap className="w-3 h-3 text-indigo-400" /> +{dashboardData?.dailyChallenge?.points || 50} CP Reward</span>
+                <div className="flex items-center gap-4 pt-1.5 text-xs text-zinc-400">
+                  <span className="flex items-center gap-1.5 text-zinc-300 font-medium"><Zap className="w-3.5 h-3.5 text-indigo-400" /> +{dashboardData?.dailyChallenge?.points || 50} CP Reward</span>
                   <span>•</span>
-                  <span>Ends in: <strong className="text-zinc-300 font-mono">{timeLeftStr}</strong></span>
+                  <span>Ends in: <strong className="text-zinc-200 font-mono">{timeLeftStr}</strong></span>
                 </div>
               </div>
               
               <button
                 onClick={() => navigate('/daily-challenge')}
-                className="w-full md:w-auto px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold text-xs uppercase tracking-wider rounded-lg hover:from-amber-400 hover:to-orange-400 transition-all transform active:scale-95 shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 border border-amber-400/30"
+                className="w-full md:w-auto h-12 md:h-auto px-5 py-3 md:py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl hover:from-amber-400 hover:to-orange-400 transition-all transform active:scale-95 shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 border border-amber-400/30 shrink-0"
               >
-                <Zap className="w-3.5 h-3.5 fill-current" />
+                <Zap className="w-4 h-4 fill-current" />
                 <span>Enter Daily Cipher</span>
-                <ChevronRight className="w-3.5 h-3.5" />
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -523,7 +630,7 @@ export const DashboardPage = () => {
         <motion.div variants={itemVariants} className="order-3 lg:order-3 lg:col-span-3 space-y-6">
           {/* Directives Tracker */}
           <div className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 backdrop-blur-md p-5 space-y-4 hover:border-zinc-700/60 transition-all duration-300">
-            <h3 className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.15em] flex items-center">
+            <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-[0.15em] flex items-center">
               <Target className="w-3.5 h-3.5 mr-1.5 text-indigo-400" />
               Active Quests
             </h3>
@@ -535,13 +642,13 @@ export const DashboardPage = () => {
                     <span className={`font-semibold ${mission.status === 'completed' ? 'text-zinc-400 line-through' : 'text-zinc-200'}`}>
                       {mission.title}
                     </span>
-                    <span className="text-[10px] font-mono text-zinc-400">
+                    <span className="text-xs font-mono text-zinc-400">
                       {mission.progress}/{mission.total}
                     </span>
                   </div>
                   
                   {/* Progress track */}
-                  <div className="h-1 w-full bg-zinc-900 rounded-full overflow-hidden p-[1px]">
+                  <div className="h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden p-[1px]">
                     <div
                       className={`h-full rounded-full ${
                         mission.status === 'completed'
@@ -552,9 +659,9 @@ export const DashboardPage = () => {
                     />
                   </div>
                   
-                  <div className="flex justify-between text-[9px]">
-                    <span className="text-zinc-500">{mission.desc}</span>
-                    <span className={mission.status === 'completed' ? 'text-emerald-400' : 'text-indigo-400'}>
+                  <div className="flex justify-between text-[11px]">
+                    <span className="text-zinc-400">{mission.desc}</span>
+                    <span className={`font-semibold ${mission.status === 'completed' ? 'text-emerald-400' : 'text-indigo-400'}`}>
                       {mission.xp}
                     </span>
                   </div>
@@ -566,7 +673,7 @@ export const DashboardPage = () => {
           {/* Live Feed / Activity */}
           <div className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 backdrop-blur-md overflow-hidden hover:border-zinc-700/60 transition-all duration-300">
             <div className="p-5 border-b border-zinc-900 bg-zinc-900/20">
-               <h3 className="text-[10px] font-bold text-white uppercase tracking-[0.15em] flex items-center">
+               <h3 className="text-xs font-bold text-white uppercase tracking-[0.15em] flex items-center">
                 <Users className="w-3.5 h-3.5 mr-1.5 text-indigo-400" />
                 Live in Arena
               </h3>
@@ -574,10 +681,10 @@ export const DashboardPage = () => {
             <div className="p-5 space-y-4">
               {liveArenaMatches.length === 0 ? (
                 <div className="flex flex-col items-center justify-center p-6 text-center">
-                  <span className="text-[10px] font-mono text-zinc-500 uppercase font-semibold">
+                  <span className="text-xs font-mono text-zinc-400 uppercase font-semibold">
                     No active duels
                   </span>
-                  <p className="text-[9px] text-zinc-650 mt-1">
+                  <p className="text-[11px] text-zinc-500 mt-1">
                     Create a room to start a live coding duel
                   </p>
                 </div>
@@ -592,20 +699,20 @@ export const DashboardPage = () => {
                       className="flex items-center justify-between group cursor-pointer"
                     >
                       <div className="flex items-center space-x-3">
-                        <div className="w-7 h-7 rounded bg-zinc-900 border border-zinc-800 flex items-center justify-center text-[10px] font-mono font-bold text-zinc-500">
+                        <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-xs font-mono font-bold text-zinc-400">
                           {match.roomId.substring(0, 4)}
                         </div>
                         <div className="flex flex-col text-left">
-                          <span className="text-[11px] font-bold text-zinc-300 group-hover:text-white transition-colors uppercase tracking-tight">
+                          <span className="text-xs font-bold text-zinc-200 group-hover:text-white transition-colors uppercase tracking-tight">
                             {pNames}
                           </span>
-                          <span className="text-[9px] text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1 mt-0.5">
+                          <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1 mt-0.5">
                             <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
                             {modeText} · {match.state}
                           </span>
                         </div>
                       </div>
-                      <Play className="w-3 h-3 text-zinc-500 group-hover:text-indigo-400 transition-colors" />
+                      <Play className="w-3.5 h-3.5 text-zinc-500 group-hover:text-indigo-400 transition-colors" />
                     </div>
                   );
                 })
@@ -615,19 +722,19 @@ export const DashboardPage = () => {
 
           {/* Season Progress */}
           <div className="rounded-xl border border-zinc-800/80 bg-zinc-950/40 backdrop-blur-md p-5 space-y-4 hover:border-zinc-700/60 transition-all duration-300">
-            <h3 className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.15em]">
+            <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-[0.15em]">
               Season Progress
             </h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-medium text-zinc-400 uppercase">Current Tier</span>
-                <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/20 rounded">
+                <span className="text-xs font-medium text-zinc-400 uppercase">Current Tier</span>
+                <span className="text-[11px] font-bold text-indigo-400 uppercase tracking-widest px-2.5 py-0.5 bg-indigo-500/10 border border-indigo-500/20 rounded-md">
                   {seasonalTier}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-medium text-zinc-400 uppercase">Season Ends</span>
-                <span className="text-[10px] font-mono text-zinc-300 italic font-semibold">{(() => {
+                <span className="text-xs font-medium text-zinc-400 uppercase">Season Ends</span>
+                <span className="text-xs font-mono text-zinc-300 italic font-semibold">{(() => {
                   const now = new Date();
                   const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
                   const diffMs = end.getTime() - now.getTime();
@@ -668,21 +775,21 @@ export const DashboardPage = () => {
                   <h2 className="text-xl font-bold text-white tracking-tight">
                     Enter the Arena
                   </h2>
-                  <p className="text-zinc-500 text-[10px] font-bold tracking-wider uppercase mt-1">
+                  <p className="text-zinc-400 text-xs font-semibold tracking-wider uppercase mt-1">
                     Secure Room Deployment
                   </p>
                 </div>
                 <button
                   onClick={() => setShowJoinModal(false)}
-                  className="p-1.5 hover:bg-zinc-900 rounded-lg text-zinc-400 hover:text-white transition-colors border border-transparent hover:border-zinc-800"
+                  className="p-2 hover:bg-zinc-900 rounded-lg text-zinc-400 hover:text-white transition-colors border border-transparent hover:border-zinc-800"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
               
               <form onSubmit={handleJoinRoom}>
                 <div className="mb-6">
-                  <label className="block text-[9px] font-bold text-zinc-400 uppercase tracking-[0.15em] mb-2.5">
+                  <label className="block text-xs font-bold text-zinc-300 uppercase tracking-wider mb-2.5">
                     Room Deployment Code
                   </label>
                   <div className="relative">
@@ -691,10 +798,10 @@ export const DashboardPage = () => {
                       value={joinRoomId}
                       onChange={(e) => setJoinRoomId(e.target.value)}
                       placeholder="XXXX-XXXX-XXXX"
-                      className="w-full bg-zinc-900/60 border border-zinc-800 rounded-lg px-4 py-3 text-white font-mono text-sm tracking-wider focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all placeholder:text-zinc-700"
+                      className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl px-4 py-3.5 text-white font-mono text-base tracking-wider focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all placeholder:text-zinc-600"
                       autoFocus
                     />
-                    <Target className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+                    <Target className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                   </div>
                 </div>
                 
@@ -703,7 +810,7 @@ export const DashboardPage = () => {
                   whileTap={{ scale: 0.99 }}
                   type="submit"
                   disabled={isLoading || !joinRoomId.trim()}
-                  className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold uppercase tracking-wider text-xs rounded-lg shadow-lg shadow-indigo-500/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 transition-all"
+                  className="w-full h-12 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-indigo-500/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 transition-all"
                 >
                   {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
                   <span>Initiate Deployment</span>
@@ -741,15 +848,15 @@ export const DashboardPage = () => {
                   <h2 className="text-xl font-bold text-white tracking-tight">
                     Initialize Duel Protocol
                   </h2>
-                  <p className="text-zinc-500 text-[10px] font-bold tracking-wider uppercase mt-1">
+                  <p className="text-zinc-400 text-xs font-semibold tracking-wider uppercase mt-1">
                     Select Match Configuration Mode
                   </p>
                 </div>
                 <button
                   onClick={() => setShowCreateDuelModal(false)}
-                  className="p-1.5 hover:bg-zinc-900 rounded-lg text-zinc-400 hover:text-white transition-colors border border-transparent hover:border-zinc-800"
+                  className="p-2 hover:bg-zinc-900 rounded-lg text-zinc-400 hover:text-white transition-colors border border-transparent hover:border-zinc-800"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
@@ -799,7 +906,7 @@ export const DashboardPage = () => {
                               {mode.name}
                             </span>
                             {isSelected && (
-                              <span className="text-[9px] font-mono text-indigo-400 font-bold uppercase tracking-wider">
+                              <span className="text-xs font-mono text-indigo-400 font-bold uppercase tracking-wider">
                                 Selected
                               </span>
                             )}
@@ -823,7 +930,7 @@ export const DashboardPage = () => {
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                               {/* Match Type */}
                               <div className="space-y-1.5">
-                                <span className="block text-[9px] font-bold text-zinc-400 uppercase tracking-wider">
+                                <span className="block text-xs font-bold text-zinc-300 uppercase tracking-wider">
                                   Match Type
                                 </span>
                                 <div className="grid grid-cols-2 gap-1.5">
@@ -837,9 +944,9 @@ export const DashboardPage = () => {
                                         key={opt.value}
                                         type="button"
                                         onClick={() => setQuickodeType(opt.value as 'RANKED' | 'CASUAL')}
-                                        className={`py-1.5 px-2 text-[10px] font-bold uppercase tracking-wider rounded-lg border transition-all ${
+                                        className={`py-2 px-2.5 text-xs font-bold uppercase tracking-wider rounded-lg border transition-all ${
                                           isOptSelected
-                                            ? 'bg-indigo-600 border-indigo-550 text-white shadow-[0_0_8px_rgba(99,102,241,0.2)]'
+                                            ? 'bg-indigo-600 border-indigo-500 text-white shadow-[0_0_8px_rgba(99,102,241,0.2)]'
                                             : 'bg-zinc-950/40 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700'
                                         }`}
                                       >
@@ -852,7 +959,7 @@ export const DashboardPage = () => {
 
                               {/* Player Count */}
                               <div className="space-y-1.5">
-                                <span className="block text-[9px] font-bold text-zinc-400 uppercase tracking-wider">
+                                <span className="block text-xs font-bold text-zinc-300 uppercase tracking-wider">
                                   Player Count
                                 </span>
                                 <div className="grid grid-cols-2 gap-1.5">
@@ -866,9 +973,9 @@ export const DashboardPage = () => {
                                         key={opt.value}
                                         type="button"
                                         onClick={() => setQuickodePlayers(opt.value)}
-                                        className={`py-1.5 px-2 text-[10px] font-bold uppercase tracking-wider rounded-lg border transition-all ${
+                                        className={`py-2 px-2.5 text-xs font-bold uppercase tracking-wider rounded-lg border transition-all ${
                                           isOptSelected
-                                            ? 'bg-indigo-600 border-indigo-550 text-white shadow-[0_0_8px_rgba(99,102,241,0.2)]'
+                                            ? 'bg-indigo-600 border-indigo-500 text-white shadow-[0_0_8px_rgba(99,102,241,0.2)]'
                                             : 'bg-zinc-950/40 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700'
                                         }`}
                                       >
@@ -881,7 +988,7 @@ export const DashboardPage = () => {
 
                               {/* Time Limit */}
                               <div className="space-y-1.5">
-                                <span className="block text-[9px] font-bold text-zinc-400 uppercase tracking-wider">
+                                <span className="block text-xs font-bold text-zinc-300 uppercase tracking-wider">
                                   Time Limit
                                 </span>
                                 <div className="grid grid-cols-2 gap-1.5">
@@ -895,9 +1002,9 @@ export const DashboardPage = () => {
                                         key={opt.seconds}
                                         type="button"
                                         onClick={() => setQuickodeDuration(opt.seconds)}
-                                        className={`py-1.5 px-2 text-[10px] font-bold uppercase tracking-wider rounded-lg border transition-all ${
+                                        className={`py-2 px-2.5 text-xs font-bold uppercase tracking-wider rounded-lg border transition-all ${
                                           isTimeSelected
-                                            ? 'bg-indigo-600 border-indigo-550 text-white shadow-[0_0_8px_rgba(99,102,241,0.2)]'
+                                            ? 'bg-indigo-600 border-indigo-500 text-white shadow-[0_0_8px_rgba(99,102,241,0.2)]'
                                             : 'bg-zinc-950/40 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700'
                                         }`}
                                       >
@@ -921,7 +1028,7 @@ export const DashboardPage = () => {
                 whileTap={{ scale: 0.99 }}
                 onClick={() => handleCreateRoom(selectedMode)}
                 disabled={isLoading}
-                className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold uppercase tracking-wider text-xs rounded-lg shadow-lg shadow-indigo-500/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 transition-all"
+                className="w-full h-12 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold uppercase tracking-wider text-xs rounded-xl shadow-lg shadow-indigo-500/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 transition-all"
               >
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -959,7 +1066,7 @@ export const DashboardPage = () => {
               
               <div className="flex justify-between items-start mb-6">
                 <div>
-                  <div className="flex items-center space-x-2 text-[10px] font-bold text-rose-500 uppercase tracking-widest">
+                  <div className="flex items-center space-x-2 text-xs font-bold text-rose-500 uppercase tracking-widest">
                     <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
                     <span>SYSTEM ALERT: PROTOCOL RESTRICTED</span>
                   </div>
@@ -969,9 +1076,9 @@ export const DashboardPage = () => {
                 </div>
                 <button
                   onClick={() => setShowTournamentModal(false)}
-                  className="p-1.5 hover:bg-zinc-900 rounded-lg text-zinc-400 hover:text-white transition-colors border border-transparent hover:border-zinc-800"
+                  className="p-2 hover:bg-zinc-900 rounded-lg text-zinc-400 hover:text-white transition-colors border border-transparent hover:border-zinc-800"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
@@ -988,7 +1095,7 @@ export const DashboardPage = () => {
               <div className="mt-6 flex justify-end">
                 <button
                   onClick={() => setShowTournamentModal(false)}
-                  className="px-4 py-2 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-300 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all"
+                  className="h-11 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-300 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all active:scale-95"
                 >
                   Acknowledge & Close
                 </button>

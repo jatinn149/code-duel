@@ -24,11 +24,24 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
     @apply bg-black text-neutral-200 antialiased overflow-x-hidden font-sans;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: none;
+  }
+
+  button, a, input, select, textarea, [role="button"] {
+    touch-action: manipulation;
+  }
+
+  @media screen and (max-width: 767px) {
+    input, select, textarea {
+      font-size: 16px;
+    }
   }
 
   ::selection {
