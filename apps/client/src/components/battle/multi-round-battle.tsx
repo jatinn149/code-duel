@@ -161,16 +161,19 @@ export const MultiRoundBattle: React.FC<BattleComponentProps> = ({
     return currentRoom.roundResults?.reduce((sum, res) => sum + (res.scores[playerId] || 0), 0) || 0;
   };
 
-  const getRoundsWon = (playerId: string) => {
-    return currentRoom.roundResults?.filter(res => res.winner === playerId).length || 0;
-  };
-
   const isPlaying = currentRoom.state === MatchState.PLAYING;
   const isJudging = currentRoom.state === MatchState.JUDGING || isSubmitting;
 
   // Real-time ticking countdown timer state
   const [timeLeftStr, setTimeLeftStr] = useState('05:00');
   const [timeLeftSecs, setTimeLeftSecs] = useState<number>(300);
+  const [mobileTab, setMobileTab] = useState<'problem' | 'editor' | 'output'>('editor');
+
+  useEffect(() => {
+    if ((dryRunResult || lastJudgeResult) && typeof window !== 'undefined' && window.innerWidth < 1024) {
+      setMobileTab('output');
+    }
+  }, [dryRunResult, lastJudgeResult]);
 
   useEffect(() => {
     if (currentRoom.state !== MatchState.PLAYING && currentRoom.state !== MatchState.SUBMITTED_WAITING) {
@@ -256,11 +259,57 @@ export const MultiRoundBattle: React.FC<BattleComponentProps> = ({
         )}
       </AnimatePresence>
 
+      {/* Mobile Workspace Switcher Tabs (< lg) */}
+      <div className="flex lg:hidden border-b border-indigo-950/20 bg-black shrink-0 px-2 py-1.5 items-center justify-around text-xs font-mono safe-area-top">
+        <button
+          onClick={() => setMobileTab('problem')}
+          className={clsx(
+            "px-3 py-1 rounded-lg font-bold flex items-center gap-1.5 transition-all text-xs",
+            mobileTab === 'problem'
+              ? "bg-indigo-950/60 text-indigo-400 border border-indigo-800/40 shadow-sm"
+              : "text-neutral-400 hover:text-neutral-200"
+          )}
+        >
+          <Target className="w-3.5 h-3.5 text-indigo-400" />
+          <span>Problem</span>
+        </button>
+        <button
+          onClick={() => setMobileTab('editor')}
+          className={clsx(
+            "px-3 py-1 rounded-lg font-bold flex items-center gap-1.5 transition-all text-xs",
+            mobileTab === 'editor'
+              ? "bg-indigo-950/60 text-indigo-400 border border-indigo-800/40 shadow-sm"
+              : "text-neutral-400 hover:text-neutral-200"
+          )}
+        >
+          <Code2 className="w-3.5 h-3.5 text-indigo-400" />
+          <span>Editor</span>
+        </button>
+        <button
+          onClick={() => setMobileTab('output')}
+          className={clsx(
+            "px-3 py-1 rounded-lg font-bold flex items-center gap-1.5 transition-all relative text-xs",
+            mobileTab === 'output'
+              ? "bg-indigo-950/60 text-indigo-400 border border-indigo-800/40 shadow-sm"
+              : "text-neutral-400 hover:text-neutral-200"
+          )}
+        >
+          <Terminal className="w-3.5 h-3.5 text-indigo-400" />
+          <span>Console</span>
+          {(dryRunResult || lastJudgeResult) && (
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse ml-0.5" />
+          )}
+        </button>
+      </div>
+
       {/* Main Competitive Workspace Split Layout */}
       <div className="flex-1 flex overflow-hidden relative z-10">
         
-        {/* ==================== LEFT SIDEBAR (Expanded Problem Box, w-[440px]) ==================== */}
-        <div className="w-[440px] flex flex-col bg-[#050505] border-r border-indigo-950/15 flex-shrink-0 h-full overflow-hidden">
+        {/* ==================== LEFT SIDEBAR (Expanded Problem Box) ==================== */}
+        <div className={clsx(
+          "w-full lg:w-[420px] xl:w-[440px] flex flex-col bg-[#050505] border-r border-indigo-950/15 shrink-0 h-full overflow-hidden",
+          mobileTab !== 'problem' && "hidden lg:flex"
+        )}>
           <div className="flex-1 flex flex-col p-5 space-y-5 min-h-0">
             
             {/* Header Brand */}
@@ -349,61 +398,64 @@ export const MultiRoundBattle: React.FC<BattleComponentProps> = ({
         </div>
 
         {/* ==================== MIDDLE EDITOR BLOCK (Narrower coding workspace) ==================== */}
-        <div className="flex-1 flex flex-col bg-black">
+        <div className={clsx(
+          "flex-1 flex flex-col bg-black overflow-hidden",
+          mobileTab === 'problem' && "hidden lg:flex"
+        )}>
           
           {/* Top Head-to-Head HUD (Glow Card) */}
-          <div className="p-4 border-b border-indigo-950/15 bg-gradient-to-b from-[#02020a] to-black">
+          <div className="p-3 sm:p-4 border-b border-indigo-950/15 bg-gradient-to-b from-[#02020a] to-black shrink-0">
             <div className="flex items-center justify-between max-w-4xl mx-auto w-full">
               
               {/* Host / Self User */}
-              <div className="flex items-center space-x-3 w-2/5">
-                <div className="w-10 h-10 rounded-full bg-neutral-900 border-2 border-indigo-900/30 flex items-center justify-center relative shadow-inner">
-                  <span className="text-sm font-black text-white font-mono">
+              <div className="flex items-center space-x-2 sm:space-x-3 w-2/5">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-neutral-900 border-2 border-indigo-900/30 flex items-center justify-center relative shadow-inner shrink-0">
+                  <span className="text-xs sm:text-sm font-black text-white font-mono">
                     {(user?.username?.charAt(0) || 'U').toUpperCase()}
                   </span>
-                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border border-black" />
+                  <div className="absolute -bottom-0.5 -right-0.5 w-2 sm:w-3 h-2 sm:h-3 bg-emerald-500 rounded-full border border-black" />
                 </div>
-                <div className="flex flex-col">
-                  <div className="flex items-center space-x-1.5">
-                    <span className="text-xs font-bold text-white tracking-tight leading-none">
+                <div className="flex flex-col min-w-0">
+                  <div className="flex items-center space-x-1 sm:space-x-1.5">
+                    <span className="text-xs font-bold text-white tracking-tight leading-none truncate max-w-[70px] sm:max-w-none">
                       {user?.username}
                     </span>
-                    <span className="text-[8px] font-mono bg-indigo-500/10 text-indigo-400 px-1 py-0.2 rounded border border-indigo-500/25">YOU</span>
+                    <span className="text-[7.5px] sm:text-[8px] font-mono bg-indigo-500/10 text-indigo-400 px-1 py-0.2 rounded border border-indigo-500/25 shrink-0">YOU</span>
                   </div>
-                  <span className="text-[10px] text-neutral-550 font-mono font-semibold mt-1">
-                    {user?.rating} CP • Score: {currentPlayer ? getCumulativeScore(currentPlayer.id) : 0} ({currentPlayer ? getRoundsWon(currentPlayer.id) : 0} Wins)
+                  <span className="text-[9px] sm:text-[10px] text-neutral-550 font-mono font-semibold mt-1 truncate">
+                    {user?.rating} CP • Score: {currentPlayer ? getCumulativeScore(currentPlayer.id) : 0}
                   </span>
                 </div>
               </div>
 
               {/* Countdown Digital Timer & Round info */}
-              <div className="flex flex-col items-center justify-center w-1/5">
-                <div className="text-[9px] font-mono text-indigo-400 uppercase tracking-widest font-black mb-1 animate-pulse h-3.5 leading-none">
-                  ROUND {currentRoundIndex} / {currentRoom.totalRounds || 3}
+              <div className="flex flex-col items-center justify-center shrink-0 px-1.5 sm:px-2">
+                <div className="text-[8px] sm:text-[9px] font-mono text-indigo-400 uppercase tracking-widest font-black mb-0.5 sm:mb-1 animate-pulse h-3 sm:h-3.5 leading-none">
+                  R{currentRoundIndex}/{currentRoom.totalRounds || 3}
                 </div>
-                <div className={`text-3xl font-black font-mono tracking-wider leading-none px-4 py-1.5 rounded-lg select-all border transition-all duration-300 ${timerColorClass}`}>
+                <div className={`text-xl sm:text-3xl font-black font-mono tracking-wider leading-none px-2 sm:px-4 py-1 sm:py-1.5 rounded-lg select-all border transition-all duration-300 ${timerColorClass}`}>
                   {timeLeftStr}
                 </div>
               </div>
 
               {/* Guest / Opponent User */}
-              <div className="flex items-center justify-end space-x-3 w-2/5 text-right">
-                <div className="flex flex-col items-end">
-                  <div className="flex items-center space-x-1.5">
-                    <span className="text-[8px] font-mono bg-indigo-500/10 text-indigo-400 px-1 py-0.2 rounded border border-indigo-500/25">OPPONENT</span>
-                    <span className="text-xs font-bold text-white tracking-tight leading-none">
+              <div className="flex items-center justify-end space-x-2 sm:space-x-3 w-2/5 text-right">
+                <div className="flex flex-col items-end min-w-0">
+                  <div className="flex items-center space-x-1 sm:space-x-1.5">
+                    <span className="text-[7.5px] sm:text-[8px] font-mono bg-indigo-500/10 text-indigo-400 px-1 py-0.2 rounded border border-indigo-500/25 shrink-0">OPP</span>
+                    <span className="text-xs font-bold text-white tracking-tight leading-none truncate max-w-[70px] sm:max-w-none">
                       {opponent?.username || 'FINDING...'}
                     </span>
                   </div>
-                  <span className="text-[10px] text-neutral-555 font-mono font-semibold mt-1">
-                    {opponent?.rating || '----'} CP • Score: {opponent ? getCumulativeScore(opponent.id) : 0} ({opponent ? getRoundsWon(opponent.id) : 0} Wins)
+                  <span className="text-[9px] sm:text-[10px] text-neutral-555 font-mono font-semibold mt-1 truncate">
+                    {opponent?.rating || '----'} CP • Score: {opponent ? getCumulativeScore(opponent.id) : 0}
                   </span>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-neutral-900 border-2 border-indigo-900/30 flex items-center justify-center relative shadow-inner">
-                  <span className="text-sm font-black text-white font-mono">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-neutral-900 border-2 border-indigo-900/30 flex items-center justify-center relative shadow-inner shrink-0">
+                  <span className="text-xs sm:text-sm font-black text-white font-mono">
                     {(opponent?.username?.charAt(0) || '?').toUpperCase()}
                   </span>
-                  <div className={`absolute -bottom-0.5 -left-0.5 w-3 h-3 rounded-full border border-black ${
+                  <div className={`absolute -bottom-0.5 -left-0.5 w-2 sm:w-3 h-2 sm:h-3 rounded-full border border-black ${
                     opponent?.connected ? 'bg-emerald-500' : 'bg-neutral-800'
                   }`} />
                 </div>
@@ -413,27 +465,27 @@ export const MultiRoundBattle: React.FC<BattleComponentProps> = ({
           </div>
 
           {/* Monaco Editor Header Toolbar */}
-          <div className="h-11 bg-[#050505] border-b border-indigo-950/15 flex items-center justify-between px-6">
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-2 text-indigo-400 border-b border-indigo-500 pb-3 pt-2.5 text-xs font-bold font-mono">
+          <div className="h-10 sm:h-11 bg-[#050505] border-b border-indigo-950/15 flex items-center justify-between px-3 sm:px-6 shrink-0">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <div className="flex items-center space-x-1.5 sm:space-x-2 text-indigo-400 border-b border-indigo-500 pb-2.5 sm:pb-3 pt-1.5 sm:pt-2.5 text-xs font-bold font-mono">
                 <Code2 className="w-3.5 h-3.5" />
                 <span>solution.py</span>
               </div>
-              <span className="text-[9px] text-neutral-650 font-bold font-mono tracking-widest uppercase">
+              <span className="text-[9px] text-neutral-650 font-bold font-mono tracking-widest uppercase hidden xs:block">
                 Python 3
               </span>
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1.5 sm:space-x-2">
               <button
                 onClick={handleRunCode}
                 disabled={isPredictOutput || isRunningCode || isJudging || !isPlaying}
                 title={isPredictOutput ? 'Dry-Run is disabled for Trace / Predict Output rounds' : undefined}
                 className={clsx(
-                  "flex items-center space-x-1.5 px-3 py-1.5 text-[10px] font-black uppercase rounded border transition-all font-mono",
+                  "flex items-center space-x-1 sm:space-x-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 text-[10px] font-black uppercase rounded border transition-all font-mono active:scale-95",
                   isPredictOutput
                     ? "bg-neutral-900/40 border-neutral-800/40 text-neutral-600 cursor-not-allowed opacity-40"
-                    : "bg-neutral-900 hover:bg-neutral-850 hover:text-white disabled:opacity-30 text-neutral-350 border-neutral-800 active:scale-95"
+                    : "bg-neutral-900 hover:bg-neutral-850 hover:text-white disabled:opacity-30 text-neutral-350 border-neutral-800"
                 )}
               >
                 {isRunningCode ? (
@@ -441,25 +493,28 @@ export const MultiRoundBattle: React.FC<BattleComponentProps> = ({
                 ) : (
                   <Play className="w-2.5 h-2.5 fill-current text-indigo-500" />
                 )}
-                <span>{isPredictOutput ? 'Dry-Run Disabled' : 'Run Dry-Run'}</span>
+                <span>{isPredictOutput ? 'Disabled' : 'Run'}</span>
               </button>
               <button
                 onClick={handleSubmitCode}
                 disabled={isRunningCode || isJudging || !isPlaying}
-                className="flex items-center space-x-1.5 px-4 py-1.5 bg-gradient-to-r from-indigo-700 to-indigo-650 hover:from-indigo-650 hover:to-indigo-550 text-white text-[10px] font-black uppercase rounded transition-all active:scale-95 disabled:opacity-30 font-mono shadow-[0_0_15px_rgba(99,102,241,0.2)] border border-indigo-500/20"
+                className="flex items-center space-x-1 sm:space-x-1.5 px-3 sm:px-4 py-1 sm:py-1.5 bg-gradient-to-r from-indigo-700 to-indigo-650 hover:from-indigo-650 hover:to-indigo-550 text-white text-[10px] font-black uppercase rounded transition-all active:scale-95 disabled:opacity-30 font-mono shadow-[0_0_15px_rgba(99,102,241,0.2)] border border-indigo-500/20"
               >
                 {isJudging ? (
                   <Loader2 className="w-3 h-3 animate-spin" />
                 ) : (
                   <Zap className="w-3 h-3 fill-current" />
                 )}
-                <span>Final Submission</span>
+                <span>Submit</span>
               </button>
             </div>
           </div>
 
           {/* Monaco Editor Container */}
-          <div className="flex-1 relative border-b border-indigo-950/15">
+          <div className={clsx(
+            "flex-1 relative border-b border-indigo-950/15 min-h-0",
+            mobileTab === 'output' && "hidden lg:block"
+          )}>
             <Editor
               height="100%"
               defaultLanguage="python"
@@ -484,7 +539,10 @@ export const MultiRoundBattle: React.FC<BattleComponentProps> = ({
           </div>
 
           {/* Console / Output Terminal Tabs (Bottom Panel) */}
-          <div className="h-56 bg-[#050505] flex flex-col font-mono">
+          <div className={clsx(
+            "bg-[#050505] flex flex-col font-mono overflow-hidden",
+            mobileTab === 'output' ? "flex-1" : "h-56 hidden lg:flex"
+          )}>
             <div className="h-10 px-6 border-b border-indigo-950/15 flex items-center justify-between">
               <div className="flex items-center space-x-6">
                 <span className="text-neutral-550 mr-2 flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider">
@@ -670,7 +728,7 @@ export const MultiRoundBattle: React.FC<BattleComponentProps> = ({
         </div>
 
         {/* ==================== RIGHT SIDEBAR (Telemetry & Stats, w-72) ==================== */}
-        <div className="w-72 flex flex-col bg-[#050505] border-l border-indigo-950/15 flex-shrink-0">
+        <div className="w-72 hidden xl:flex flex-col bg-[#050505] border-l border-indigo-950/15 flex-shrink-0">
           <div className="flex-1 overflow-y-auto p-5 space-y-6 scrollbar-hide text-xs">
             
             {/* Round info and settled scores breakdown */}

@@ -2,6 +2,7 @@ import React from 'react';
 import { Room, Player, User, MatchState } from '@code-duel/types';
 import Editor from '@monaco-editor/react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { clsx } from 'clsx';
 import {
   Play,
   CheckCircle2,
@@ -76,6 +77,13 @@ export const QuickodeBattle: React.FC<BattleComponentProps> = ({
 
   const [timeLeftStr, setTimeLeftStr] = React.useState('00:00');
   const [timeLeftSecs, setTimeLeftSecs] = React.useState<number>(0);
+  const [mobileTab, setMobileTab] = React.useState<'problem' | 'editor' | 'output'>('editor');
+
+  React.useEffect(() => {
+    if ((dryRunResult || lastJudgeResult) && typeof window !== 'undefined' && window.innerWidth < 768) {
+      setMobileTab('output');
+    }
+  }, [dryRunResult, lastJudgeResult]);
 
   React.useEffect(() => {
     if (currentRoom.state !== MatchState.PLAYING && currentRoom.state !== MatchState.SUBMITTED_WAITING) {
@@ -146,27 +154,27 @@ export const QuickodeBattle: React.FC<BattleComponentProps> = ({
       </AnimatePresence>
 
       {/* Sleek Vercel HUD Header */}
-      <div className="h-16 flex items-center justify-between px-6 bg-[#000000] border-b border-neutral-900 backdrop-blur-xl relative z-40">
+      <div className="h-14 sm:h-16 flex items-center justify-between px-3 sm:px-6 bg-[#000000] border-b border-neutral-900 backdrop-blur-xl relative z-40">
         {/* Left HUD: Current Player Profile */}
-        <div className="flex items-center space-x-4 w-1/3">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center relative">
-              <span className="text-xs font-semibold text-neutral-450 font-mono">
+        <div className="flex items-center space-x-2 sm:space-x-4 w-2/5 sm:w-1/3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center relative shrink-0">
+              <span className="text-[11px] sm:text-xs font-semibold text-neutral-450 font-mono">
                 {(user?.username?.charAt(0) || 'U').toUpperCase()}
               </span>
-              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border border-[#000000]" />
+              <div className="absolute -bottom-0.5 -right-0.5 w-2 sm:w-2.5 h-2 sm:h-2.5 bg-emerald-500 rounded-full border border-[#000000]" />
             </div>
-            <div className="flex flex-col">
-              <span className="text-xs font-semibold text-white tracking-tight leading-none font-bold">
+            <div className="flex flex-col min-w-0">
+              <span className="text-xs font-semibold text-white tracking-tight leading-none font-bold truncate max-w-[75px] sm:max-w-[120px]">
                 {user?.username}
               </span>
-              <span className="text-[10px] text-neutral-555 font-mono font-medium mt-1">
+              <span className="text-[9px] sm:text-[10px] text-neutral-555 font-mono font-medium mt-0.5 sm:mt-1">
                 {user?.rating} CP
               </span>
             </div>
           </div>
-          <div className="h-6 w-px bg-neutral-900" />
-          <div className="flex items-center space-x-2 bg-neutral-900/40 px-2 py-1 rounded border border-neutral-900">
+          <div className="hidden md:block h-6 w-px bg-neutral-900" />
+          <div className="hidden md:flex items-center space-x-2 bg-neutral-900/40 px-2 py-1 rounded border border-neutral-900">
             <Sword className="w-3.5 h-3.5 text-neutral-400" />
             <span className="text-[10px] font-mono font-bold text-neutral-400 uppercase tracking-widest">
               QUICKODE
@@ -175,41 +183,41 @@ export const QuickodeBattle: React.FC<BattleComponentProps> = ({
         </div>
 
         {/* Center: Live Round Timer */}
-        <div className="flex flex-col items-center">
-          <div className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest font-black mb-1">
+        <div className="flex flex-col items-center shrink-0">
+          <div className="text-[8px] sm:text-[9px] font-mono text-neutral-500 uppercase tracking-widest font-black mb-0.5 sm:mb-1">
             SPEED DUEL
           </div>
-          <div className={`text-2xl font-black font-mono tracking-wider px-4 py-1 rounded-lg border transition-colors ${timerColorClass}`}>
+          <div className={`text-lg sm:text-2xl font-black font-mono tracking-wider px-2.5 sm:px-4 py-0.5 sm:py-1 rounded-lg border transition-colors ${timerColorClass}`}>
             {timeLeftStr}
           </div>
         </div>
 
         {/* Right HUD: Opponents */}
-        <div className="flex items-center justify-end space-x-4 w-1/3">
+        <div className="flex items-center justify-end space-x-2 sm:space-x-4 w-2/5 sm:w-1/3">
           {activeOpponents.map((opp) => (
-            <div key={opp.id} className="flex items-center space-x-3 text-right">
-              <div className="flex flex-col">
-                <span className="text-xs font-semibold text-white tracking-tight leading-none font-bold">
+            <div key={opp.id} className="flex items-center space-x-2 sm:space-x-3 text-right">
+              <div className="flex flex-col min-w-0 items-end">
+                <span className="text-xs font-semibold text-white tracking-tight leading-none font-bold truncate max-w-[75px] sm:max-w-[120px]">
                   {opp.username}
                 </span>
-                <span className="text-[10px] text-neutral-555 font-mono font-medium mt-1">
+                <span className="text-[9px] sm:text-[10px] text-neutral-555 font-mono font-medium mt-0.5 sm:mt-1">
                   {opp.rating} CP
                 </span>
               </div>
-              <div className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center relative">
-                <span className="text-xs font-semibold text-neutral-450 font-mono">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center relative shrink-0">
+                <span className="text-[11px] sm:text-xs font-semibold text-neutral-450 font-mono">
                   {(opp?.username?.charAt(0) || 'O').toUpperCase()}
                 </span>
-                <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border border-[#000000] ${
+                <div className={`absolute -bottom-0.5 -right-0.5 w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full border border-[#000000] ${
                   opp.connected ? 'bg-emerald-500' : 'bg-rose-500'
                 }`} />
               </div>
             </div>
           ))}
-          <div className="h-6 w-px bg-neutral-900" />
+          <div className="h-5 sm:h-6 w-px bg-neutral-900" />
           <button
             onClick={handleLeaveRoom}
-            className="p-2 hover:bg-neutral-900 rounded-lg text-neutral-500 hover:text-white transition-colors"
+            className="p-1.5 sm:p-2 hover:bg-neutral-900 rounded-lg text-neutral-500 hover:text-white transition-colors shrink-0"
             title="Leave Sector"
           >
             <LogOut className="w-4 h-4" />
@@ -217,10 +225,56 @@ export const QuickodeBattle: React.FC<BattleComponentProps> = ({
         </div>
       </div>
 
+      {/* Mobile Workspace Switcher Tabs (< md) */}
+      <div className="flex md:hidden border-b border-neutral-900 bg-neutral-950 shrink-0 px-2 py-1.5 items-center justify-around text-xs font-mono">
+        <button
+          onClick={() => setMobileTab('problem')}
+          className={clsx(
+            "px-3 py-1 rounded-lg font-bold flex items-center gap-1.5 transition-all text-xs",
+            mobileTab === 'problem'
+              ? "bg-neutral-800 text-white border border-neutral-700 shadow-sm"
+              : "text-neutral-400 hover:text-neutral-200"
+          )}
+        >
+          <Target className="w-3.5 h-3.5 text-neutral-300" />
+          <span>Task</span>
+        </button>
+        <button
+          onClick={() => setMobileTab('editor')}
+          className={clsx(
+            "px-3 py-1 rounded-lg font-bold flex items-center gap-1.5 transition-all text-xs",
+            mobileTab === 'editor'
+              ? "bg-neutral-800 text-white border border-neutral-700 shadow-sm"
+              : "text-neutral-400 hover:text-neutral-200"
+          )}
+        >
+          <Code2 className="w-3.5 h-3.5 text-indigo-400" />
+          <span>Editor</span>
+        </button>
+        <button
+          onClick={() => setMobileTab('output')}
+          className={clsx(
+            "px-3 py-1 rounded-lg font-bold flex items-center gap-1.5 transition-all relative text-xs",
+            mobileTab === 'output'
+              ? "bg-neutral-800 text-white border border-neutral-700 shadow-sm"
+              : "text-neutral-400 hover:text-neutral-200"
+          )}
+        >
+          <Terminal className="w-3.5 h-3.5 text-amber-400" />
+          <span>Console</span>
+          {(dryRunResult || lastJudgeResult) && (
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse ml-0.5" />
+          )}
+        </button>
+      </div>
+
       {/* Main Duel Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar: Mission Details */}
-        <div className="w-72 flex flex-col bg-[#050505] border-r border-neutral-900">
+        <div className={clsx(
+          "w-full md:w-72 flex flex-col bg-[#050505] border-r border-neutral-900 shrink-0 overflow-hidden",
+          mobileTab !== 'problem' && "hidden md:flex"
+        )}>
           <div className="flex-1 overflow-y-auto p-5 space-y-6 scrollbar-hide text-xs">
             <div className="space-y-3">
               <div className="flex items-center space-x-2 text-neutral-500 uppercase tracking-widest text-[9px] font-bold">
@@ -322,15 +376,18 @@ export const QuickodeBattle: React.FC<BattleComponentProps> = ({
         </div>
 
         {/* Code Terminal Arena */}
-        <div className="flex-1 flex flex-col relative bg-[#0a0a0a]">
+        <div className={clsx(
+          "flex-1 flex flex-col relative bg-[#0a0a0a] overflow-hidden",
+          mobileTab === 'problem' && "hidden md:flex"
+        )}>
           {/* Editor Header */}
-          <div className="h-10 bg-[#000000] border-b border-neutral-900 flex items-center justify-between px-6">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 text-white border-b-2 border-white pb-2.5 pt-2 text-xs font-medium">
+          <div className="h-10 bg-[#000000] border-b border-neutral-900 flex items-center justify-between px-3 sm:px-6 shrink-0">
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <div className="flex items-center space-x-1.5 sm:space-x-2 text-white border-b-2 border-white pb-2.5 pt-2 text-xs font-medium">
                 <Code2 className="w-3.5 h-3.5" />
                 <span className="font-mono">main.py</span>
               </div>
-              <div className="text-[10px] text-neutral-600 font-medium font-mono uppercase tracking-wider">
+              <div className="text-[10px] text-neutral-600 font-medium font-mono uppercase tracking-wider hidden xs:block">
                 PYTHON 3
               </div>
             </div>
@@ -339,7 +396,7 @@ export const QuickodeBattle: React.FC<BattleComponentProps> = ({
               <button
                 onClick={handleRunCode}
                 disabled={isRunningCode || isJudging || !isPlaying}
-                className="flex items-center space-x-1.5 px-3 py-1 bg-neutral-900 hover:bg-neutral-850 hover:text-white disabled:opacity-30 text-neutral-350 text-[10px] font-bold uppercase rounded border border-neutral-800 transition-all active:scale-95"
+                className="flex items-center space-x-1 sm:space-x-1.5 px-2.5 sm:px-3 py-1 bg-neutral-900 hover:bg-neutral-850 hover:text-white disabled:opacity-30 text-neutral-350 text-[10px] font-bold uppercase rounded border border-neutral-800 transition-all active:scale-95"
               >
                 {isRunningCode ? (
                   <Loader2 className="w-2.5 h-2.5 animate-spin text-neutral-450" />
@@ -351,7 +408,7 @@ export const QuickodeBattle: React.FC<BattleComponentProps> = ({
               <button
                 onClick={handleSubmitCode}
                 disabled={isRunningCode || isJudging || !isPlaying}
-                className="flex items-center space-x-1.5 px-4 py-1 bg-white hover:bg-neutral-100 text-black text-[10px] font-bold uppercase rounded transition-all active:scale-95 disabled:opacity-30 relative overflow-hidden"
+                className="flex items-center space-x-1 sm:space-x-1.5 px-3 sm:px-4 py-1 bg-white hover:bg-neutral-100 text-black text-[10px] font-bold uppercase rounded transition-all active:scale-95 disabled:opacity-30 relative overflow-hidden shadow-sm"
               >
                 {isJudging ? (
                   <Loader2 className="w-2.5 h-2.5 animate-spin" />
@@ -364,7 +421,10 @@ export const QuickodeBattle: React.FC<BattleComponentProps> = ({
           </div>
 
           {/* Editor Container */}
-          <div className="flex-1 relative border-b border-neutral-900">
+          <div className={clsx(
+            "flex-1 relative border-b border-neutral-900 min-h-0",
+            mobileTab === 'output' && "hidden md:block"
+          )}>
             <Editor
               height="100%"
               defaultLanguage="python"
@@ -377,7 +437,7 @@ export const QuickodeBattle: React.FC<BattleComponentProps> = ({
                 lineNumbers: 'on',
                 scrollBeyondLastLine: false,
                 automaticLayout: true,
-                padding: { top: 20, bottom: 20 },
+                padding: { top: 16, bottom: 16 },
                 fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
                 cursorBlinking: 'smooth',
                 cursorSmoothCaretAnimation: 'on',
@@ -389,7 +449,10 @@ export const QuickodeBattle: React.FC<BattleComponentProps> = ({
           </div>
 
           {/* Console Output Terminal */}
-          <div className="h-52 bg-[#000000] border-t border-neutral-900 flex flex-col font-mono">
+          <div className={clsx(
+            "bg-[#000000] border-t border-neutral-900 flex flex-col font-mono overflow-hidden",
+            mobileTab === 'output' ? "flex-1" : "h-52 hidden md:flex"
+          )}>
             <div className="h-9 px-6 border-b border-neutral-900 flex items-center justify-between">
               <div className="flex items-center space-x-2 text-neutral-400">
                 <Terminal className="w-3.5 h-3.5" />
