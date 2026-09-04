@@ -12,6 +12,7 @@ import { LeaderboardPage } from '@/pages/leaderboard';
 import { LobbyPage } from '@/pages/lobby';
 import { ResultsPage } from '@/pages/results';
 import { DailyChallengePage } from '@/pages/daily-challenge';
+import { AdminPage } from '@/pages/admin';
 import { ErrorBoundary } from '@/components/error-boundary';
 
 const queryClient = new QueryClient({
@@ -65,6 +66,7 @@ export const App = () => {
               <Route path="profile" element={<ProfilePage />} />
               <Route path="leaderboard" element={<LeaderboardPage />} />
               <Route path="daily-challenge" element={<DailyChallengePage />} />
+              <Route path="admin" element={<AdminPage />} />
               <Route path="lobby/:roomId" element={<LobbyPage />} />
               <Route path="battle/:roomId" element={<BattlePage />} />
               <Route path="battle/multi-round/:roomId" element={<BattlePage />} />

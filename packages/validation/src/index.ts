@@ -3,7 +3,7 @@ import { ROOM_CODE_REGEX, normalizeRoomCode } from '@code-duel/shared';
 
 export const loginSchema = z.object({
   body: z.object({
-    email: z.string().email('Invalid email address').max(255, 'Email cannot exceed 255 characters'),
+    email: z.string().min(3, 'Email or username is required').max(255),
     password: z.string().min(8, 'Password must be at least 8 characters').max(100, 'Password cannot exceed 100 characters'),
   }),
 });

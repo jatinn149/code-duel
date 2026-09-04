@@ -21,6 +21,8 @@ import { JsonDuelInviteRepository } from './repositories/json-duel-invite-reposi
 import { PgMatchResultRepository } from './repositories/pg-match-result-repository';
 import { JsonMatchResultRepository } from './repositories/json-match-result-repository';
 import { createSocialRouter } from './routes/social-routes';
+import { createAdminRouter } from './routes/admin-routes';
+import { ensureAdminUser } from './services/admin-service';
 
 import { ProgressionService } from './services/progression-service';
 import { RetentionService } from './services/retention-service';
@@ -60,6 +62,9 @@ async function bootstrap() {
     }
 
     const userRepository = isPgEnabled ? new PgUserRepository() : new JsonUserRepository(jsonStorage);
+    // Ensure Super Admin account exists on startup
+    await ensureAdminUser(userRepository);
+
     const progressionService = new ProgressionService(userRepository);
     const dailyChallengeRepository = new JsonDailyChallengeRepository(jsonStorage);
     const dailyMissionRepository = new JsonDailyMissionRepository(jsonStorage);
@@ -83,6 +88,7 @@ async function bootstrap() {
       : new JsonMatchResultRepository(jsonStorage);
 
     app.use('/api/v1/social', createSocialRouter(userRepository, friendRepository));
+    app.use('/api/v1/admin', createAdminRouter(userRepository, dailyResetEngine));
 
     server = app.listen(env.PORT, () => {
       logger.info(`Server running on port ${env.PORT} in ${env.NODE_ENV} mode`);

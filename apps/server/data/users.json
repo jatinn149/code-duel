@@ -1,0 +1,31 @@
+[
+  {
+    "id": "dfc0d3e1-a711-4a2e-b8fb-f61ab166ef50",
+    "username": "admin",
+    "email": "admin@codeduel.io",
+    "playerId": "ADM-0001",
+    "passwordHash": "$2b$12$s8RRc0KvNIytdouuSmPp.eJmjUDlFWdc2C0I2NXqao47eqMDPxkRa",
+    "role": "ADMIN",
+    "tokenVersion": 0,
+    "matchesPlayed": 100,
+    "matchesWon": 100,
+    "rating": 2500,
+    "xp": 99999,
+    "level": 99,
+    "rank": "Grandmaster",
+    "wins": 100,
+    "losses": 0,
+    "streak": 99,
+    "highestStreak": 99,
+    "highestRating": 2500,
+    "dailyChallengeWins": 50,
+    "dailyChallengeBestRank": 1,
+    "dailyWins": 50,
+    "placementMatchesPlayed": 10,
+    "seasonalTier": "GRANDMASTER",
+    "streakGraceAvailable": 3,
+    "status": "OFFLINE",
+    "createdAt": "2026-09-04T10:06:00.267Z",
+    "updatedAt": "2026-09-04T10:06:00.267Z"
+  }
+]

@@ -12,6 +12,7 @@
     "test": "vitest run",
     "db:migrate": "prisma migrate deploy",
     "db:seed": "prisma db seed",
+    "db:clear-users": "node -r ./register-paths.js dist/scripts/clear-users.js",
     "postinstall": "prisma generate"
   },
   "prisma": {

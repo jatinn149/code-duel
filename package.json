@@ -19,7 +19,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "prepare": "husky install",
     "docker:prod": "docker compose -f docker-compose.prod.yml up --build -d",
-    "docker:stop": "docker compose -f docker-compose.prod.yml down"
+    "docker:stop": "docker compose -f docker-compose.prod.yml down",
+    "db:clear-users": "npm run --workspace=@code-duel/server db:clear-users"
   },
   "devDependencies": {
     "@types/pg": "^8.20.0",

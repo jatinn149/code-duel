@@ -97,7 +97,11 @@ export class AuthService {
     userAgent?: string,
     ipAddress?: string,
   ): Promise<AuthResponse & { refreshToken: string }> {
-    const user = await this.userRepository.findByEmail(input.email);
+    const identifier = input.email.trim();
+    let user = await this.userRepository.findByEmail(identifier);
+    if (!user) {
+      user = await this.userRepository.findByUsername(identifier);
+    }
     if (!user) {
       throw new UnauthorizedError('Invalid credentials');
     }

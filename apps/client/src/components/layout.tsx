@@ -2,7 +2,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth-store';
 import { useSocialStore } from '@/store/social-store';
 import { FriendSidebar } from '@/components/social/friend-sidebar';
-import { LogOut, Sword, Bell, User, Trophy, Users } from 'lucide-react';
+import { LogOut, Sword, Bell, User, Trophy, Users, ShieldAlert } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useMemo } from 'react';
 import { clsx } from 'clsx';
@@ -100,6 +100,17 @@ export const Layout = () => {
               <div className="h-4 w-px bg-neutral-800 hidden md:block" />
 
               <div className="flex items-center space-x-3">
+                {user?.role === 'ADMIN' && (
+                  <button
+                    onClick={() => navigate('/admin')}
+                    title="Super Admin Control Center"
+                    className="px-2.5 py-1.5 bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/40 text-rose-300 rounded-lg text-[10px] font-mono font-bold tracking-wider flex items-center gap-1.5 transition-all shadow-[0_0_12px_rgba(244,63,94,0.2)]"
+                  >
+                    <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
+                    <span className="hidden sm:inline">GOD MODE</span>
+                  </button>
+                )}
+
                 <button className="p-2 text-neutral-500 hover:text-white transition-colors relative rounded-lg hover:bg-neutral-900">
                   <Bell className="w-4.5 h-4.5" />
                   <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-neutral-400 rounded-full border border-black" />
