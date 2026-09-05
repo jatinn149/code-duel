@@ -13,6 +13,7 @@ import { LobbyPage } from '@/pages/lobby';
 import { ResultsPage } from '@/pages/results';
 import { DailyChallengePage } from '@/pages/daily-challenge';
 import { AdminPage } from '@/pages/admin';
+import { LandingPage } from '@/pages/landing';
 import { ErrorBoundary } from '@/components/error-boundary';
 
 const queryClient = new QueryClient({
@@ -56,18 +57,34 @@ export const App = () => {
       <ErrorBoundary>
         <BrowserRouter>
           <Routes>
+            <Route path="/landing" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
 
+            {/* Root index route: Landing page for visitors, Dashboard for logged-in operators */}
             <Route
               path="/"
+              element={
+                isAuthenticated ? (
+                  <ProtectedRoute>
+                    <Layout />
+                  </ProtectedRoute>
+                ) : (
+                  <LandingPage />
+                )
+              }
+            >
+              {isAuthenticated && <Route index element={<DashboardPage />} />}
+            </Route>
+
+            {/* Authenticated Inner Routes */}
+            <Route
               element={
                 <ProtectedRoute>
                   <Layout />
                 </ProtectedRoute>
               }
             >
-              <Route index element={<DashboardPage />} />
               <Route path="profile" element={<ProfilePage />} />
               <Route path="leaderboard" element={<LeaderboardPage />} />
               <Route path="daily-challenge" element={<DailyChallengePage />} />
