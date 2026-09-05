@@ -692,7 +692,7 @@ export const AdminPage: React.FC = () => {
                         <tr key={u.id} className="hover:bg-zinc-850/50 transition-colors">
                           <td className="p-3.5 font-bold text-white flex items-center gap-2.5">
                             <span className="w-8 h-8 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-xs text-indigo-400 font-black">
-                              {u.username.charAt(0).toUpperCase()}
+                              {(u.username?.charAt(0) || 'U').toUpperCase()}
                             </span>
                             <div className="min-w-0">
                               <div className="truncate">{u.username}</div>

@@ -178,17 +178,17 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
               onClick={handleClose}
             />
 
-            {/* Modal / Dropdown Box: Centered Drawer on Mobile, Popover on Desktop */}
+            {/* Modal / Dropdown Box: Cleanly Framed on Mobile, Popover on Desktop */}
             <motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ type: "spring", stiffness: 350, damping: 28 }}
               className={clsx(
                 "z-50 bg-neutral-950 border border-neutral-800 shadow-2xl overflow-hidden flex flex-col",
-                // Mobile layout: Fixed bottom sheet or centered card
-                "fixed inset-x-3 bottom-4 max-h-[85vh] rounded-2xl",
-                // Desktop layout: Positioned dropdown right below header
+                // Mobile layout: Framed safely below top header (top-16) and above bottom navigation (bottom-20)
+                "fixed inset-x-3 top-16 bottom-20 max-w-md mx-auto rounded-2xl",
+                // Desktop layout: Positioned dropdown right below header trigger
                 "sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:mt-2 sm:w-[400px] sm:max-h-[520px] sm:rounded-xl sm:border-neutral-800/90"
               )}
             >

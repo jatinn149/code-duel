@@ -27,7 +27,7 @@ export const Layout = () => {
 
   const userLevel = useMemo(() => {
     if (!user) return 1;
-    const rating = user.rating;
+    const rating = user.rating ?? 0;
     if (rating < 800) return 1;
     if (rating < 950) return 2;
     if (rating < 1100) return 3;
@@ -133,14 +133,14 @@ export const Layout = () => {
                 <div className="flex items-center space-x-2 sm:space-x-3 pl-2 sm:pl-4 border-l border-neutral-800 relative">
                   <div className="hidden sm:flex flex-col items-end mr-1.5">
                     <span className="text-xs font-semibold text-white tracking-tight leading-none">
-                      {user.username}
+                      {user?.username || 'Operator'}
                     </span>
                     <div className="flex items-center space-x-1.5 mt-1 leading-none">
                       <div className={`w-3.5 h-3.5 rounded text-[8px] flex items-center justify-center font-extrabold ${levelColorClass}`}>
                         {userLevel}
                       </div>
                       <span className="text-[9px] font-mono text-neutral-550 tracking-wider uppercase font-bold">
-                        {user.rating} CP
+                        {user?.rating ?? 0} CP
                       </span>
                     </div>
                   </div>
@@ -152,7 +152,7 @@ export const Layout = () => {
                   >
                     <div className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center overflow-hidden cursor-pointer hover:border-neutral-700 transition-colors">
                       <span className="text-xs font-bold text-neutral-400 uppercase">
-                        {user.username.charAt(0)}
+                        {(user?.username?.charAt(0) || 'U').toUpperCase()}
                       </span>
                     </div>
 

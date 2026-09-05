@@ -288,7 +288,7 @@ export const FriendSidebar: React.FC<{ onClose?: () => void }> = ({ onClose }) =
             <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl space-y-3 shadow-lg">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center font-bold text-white text-sm">
-                  {searchResult.username.charAt(0).toUpperCase()}
+                  {(searchResult.username?.charAt(0) || 'U').toUpperCase()}
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-white flex items-center gap-2">

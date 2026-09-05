@@ -216,7 +216,7 @@ export const ProfilePage = () => {
             <div className="w-20 h-20 rounded-full bg-neutral-950 border border-neutral-800 flex items-center justify-center p-1 relative shadow-lg">
               <div className="w-full h-full rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center">
                 <span className="text-2xl font-black text-white uppercase font-mono">
-                  {username.charAt(0)}
+                  {(username?.charAt(0) || 'O').toUpperCase()}
                 </span>
               </div>
             </div>
