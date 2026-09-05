@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useSocialStore } from '../../store/social-store';
 import { useSocial } from '../../hooks/use-social';
 import { Notification, NotificationType } from '@code-duel/types';
@@ -26,14 +27,17 @@ import { calculateCpRank } from '@code-duel/shared';
 interface NotificationDropdownProps {
   isOpenControlled?: boolean;
   onCloseControlled?: () => void;
+  onToggleControlled?: () => void;
   hideTriggerButton?: boolean;
 }
 
 export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   isOpenControlled,
   onCloseControlled,
+  onToggleControlled,
   hideTriggerButton = false,
 }) => {
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const { notifications, unreadNotificationsCount } = useSocialStore();
   const { markRead, markAllRead, respondToFriendRequest, respondToDuelInvite } = useSocial();
   const [internalOpen, setInternalOpen] = useState(false);
@@ -97,9 +101,28 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     }
   };
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        handleClose();
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isOpen]);
+
   const handleToggle = () => {
-    if (isControlled && onCloseControlled) {
-      onCloseControlled();
+    if (isControlled) {
+      if (onToggleControlled) {
+        onToggleControlled();
+      } else if (onCloseControlled) {
+        onCloseControlled();
+      }
     } else {
       setInternalOpen(!internalOpen);
     }
@@ -166,30 +189,31 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
         </button>
       )}
 
+      {/* Global Full-Screen Dimmer Backdrop via Portal (immune to any ancestor backdrop-filter/containment) */}
+      {isOpen && typeof document !== 'undefined' && createPortal(
+        <div
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-[2px]"
+          onClick={handleClose}
+        />,
+        document.body
+      )}
+
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Backdrop for closing */}
+            {/* Modal / Dropdown Box: Anchored to Header and Opening DOWNWARDS */}
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
-              onClick={handleClose}
-            />
-
-            {/* Modal / Dropdown Box: Cleanly Framed on Mobile, Popover on Desktop */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              transition={{ type: "spring", stiffness: 350, damping: 28 }}
+              ref={dropdownRef}
+              initial={{ opacity: 0, y: -16, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -16, scale: 0.96 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
               className={clsx(
-                "z-50 bg-neutral-950 border border-neutral-800 shadow-2xl overflow-hidden flex flex-col",
-                // Mobile layout: Framed safely below top header (top-16) and above bottom navigation (bottom-20)
-                "fixed inset-x-3 top-16 bottom-20 max-w-md mx-auto rounded-2xl",
-                // Desktop layout: Positioned dropdown right below header trigger
-                "sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:mt-2 sm:w-[400px] sm:max-h-[520px] sm:rounded-xl sm:border-neutral-800/90"
+                "z-50 bg-neutral-950 border border-neutral-800 shadow-2xl overflow-hidden flex flex-col origin-top-right",
+                // Mobile layout: Directly anchored right under header, opening DOWNWARDS!
+                "absolute right-[-10px] top-full mt-2 w-[calc(100vw-1.25rem)] max-w-[390px] max-h-[75vh] rounded-2xl",
+                // Desktop layout: Dropdown cleanly below header trigger
+                "sm:right-0 sm:w-[400px] sm:max-h-[520px] sm:rounded-xl sm:border-neutral-800/90"
               )}
             >
               {/* Header */}

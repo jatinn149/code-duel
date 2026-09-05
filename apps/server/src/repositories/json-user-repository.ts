@@ -81,6 +81,27 @@ export class JsonUserRepository implements IUserRepository {
       const index = users.findIndex((u) => u.id === id);
       if (index !== -1) users.splice(index, 1);
     });
+    try {
+      await this.storage.updateCollection<any>('sessions', (sessions) => {
+        for (let i = sessions.length - 1; i >= 0; i--) {
+          if (sessions[i].userId === id) sessions.splice(i, 1);
+        }
+      });
+    } catch {}
+    try {
+      await this.storage.updateCollection<any>('notifications', (notifs) => {
+        for (let i = notifs.length - 1; i >= 0; i--) {
+          if (notifs[i].userId === id) notifs.splice(i, 1);
+        }
+      });
+    } catch {}
+    try {
+      await this.storage.updateCollection<any>('friend-requests', (reqs) => {
+        for (let i = reqs.length - 1; i >= 0; i--) {
+          if (reqs[i].fromUserId === id || reqs[i].toUserId === id) reqs.splice(i, 1);
+        }
+      });
+    } catch {}
   }
 
   async search(query: string): Promise<User[]> {

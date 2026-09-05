@@ -18,7 +18,7 @@ export const Layout = () => {
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [friendsOpen, setFriendsOpen] = useState(false);
-  const [mobileMailOpen, setMobileMailOpen] = useState(false);
+  const [isMailOpen, setIsMailOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -112,7 +112,11 @@ export const Layout = () => {
                   </button>
                 )}
 
-                <NotificationDropdown />
+                <NotificationDropdown
+                  isOpenControlled={isMailOpen}
+                  onCloseControlled={() => setIsMailOpen(false)}
+                  onToggleControlled={() => setIsMailOpen((prev) => !prev)}
+                />
 
                 <button
                   onClick={() => setFriendsOpen(!friendsOpen)}
@@ -247,13 +251,6 @@ export const Layout = () => {
             </>
           )}
         </AnimatePresence>
-
-        {/* Mobile Mail Modal/Drawer Mount */}
-        <NotificationDropdown
-          isOpenControlled={mobileMailOpen}
-          onCloseControlled={() => setMobileMailOpen(false)}
-          hideTriggerButton={true}
-        />
       </main>
 
       {/* Mobile Bottom Navigation Bar (< lg) */}
@@ -293,7 +290,10 @@ export const Layout = () => {
           </button>
 
           <button
-            onClick={() => setMobileMailOpen(true)}
+            onClick={() => {
+              setIsMailOpen((prev) => !prev);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
             className="flex flex-col items-center gap-1 transition-all py-1 px-2.5 rounded-xl relative text-zinc-400 hover:text-zinc-200 active:scale-90"
           >
             <Mail className="w-4.5 h-4.5" />

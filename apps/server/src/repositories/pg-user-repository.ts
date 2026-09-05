@@ -90,6 +90,39 @@ export class PgUserRepository implements IUserRepository {
   }
 
   async delete(id: string): Promise<void> {
+    try {
+      await prisma.matchPlayerResult.deleteMany({ where: { userId: id } });
+    } catch {
+      // ignore
+    }
+    try {
+      await prisma.problemHistory.deleteMany({ where: { userId: id } });
+    } catch {
+      // ignore
+    }
+    try {
+      await prisma.friendRequest.deleteMany({
+        where: {
+          OR: [{ fromUserId: id }, { toUserId: id }],
+        },
+      });
+    } catch {
+      // ignore
+    }
+    try {
+      await prisma.friendship.deleteMany({
+        where: {
+          OR: [{ userId1: id }, { userId2: id }],
+        },
+      });
+    } catch {
+      // ignore
+    }
+    try {
+      await prisma.session.deleteMany({ where: { userId: id } });
+    } catch {
+      // ignore
+    }
     await prisma.user.delete({ where: { id } });
   }
 

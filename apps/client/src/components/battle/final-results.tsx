@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import { Trophy, LogOut, RefreshCw, Code2, Award, Zap, Cpu, Terminal, AlertTriangle, ShieldAlert, TrendingUp, TrendingDown, Flame, Sparkles } from 'lucide-react';
 import { clsx } from 'clsx';
 import { GameMode } from '@code-duel/types';
+import { TierPromotionModal } from './tier-promotion-modal';
 
 function useAnimatedCounter(target: number, duration: number = 1000) {
   const [count, setCount] = useState(0);
@@ -60,10 +61,20 @@ export const FinalResults = () => {
 
   const cpChange = myResult?.ratingChange ?? 0;
   const currentCp = myResult?.newRating ?? (user?.rating ? user.rating + cpChange : 0);
-  const xpGained = myResult?.xpGain ?? (isMeWinner ? 100 : (matchResult?.isDraw ? 50 : 30));
+  const previousCp = (myResult?.newRating !== undefined && myResult?.ratingChange !== undefined)
+    ? Math.max(0, myResult.newRating - myResult.ratingChange)
+    : (user?.rating ?? 0);
+
+  const previousTier = calculateCpRank(previousCp);
+  const newTier = calculateCpRank(currentCp);
+  const isTierPromotion = newTier !== previousTier && currentCp > previousCp;
+  const previousLevel = user?.level ?? 1;
   const newLevel = myResult?.newLevel ?? user?.level ?? 1;
+  const isLevelUp = newLevel > previousLevel;
+  const xpGained = myResult?.xpGain ?? (isMeWinner ? 100 : (matchResult?.isDraw ? 50 : 30));
   const newXp = myResult?.newXp ?? user?.xp ?? 0;
-  const isLevelUp = newLevel > (user?.level ?? 1);
+
+  const [showPromotionModal, setShowPromotionModal] = useState(false);
 
   const displayCpChange = useAnimatedCounter(cpChange, 1000);
   const displayXp = useAnimatedCounter(xpGained, 1000);
@@ -76,16 +87,25 @@ export const FinalResults = () => {
       lastProcessedMatchIdRef.current = matchResult.roomId;
       const currentUser = useAuthStore.getState().user;
       if (currentUser) {
+        const updatedRating = myResult.newRating ?? currentUser.rating;
+        const updatedRank = calculateCpRank(updatedRating);
         useAuthStore.getState().setUser({
           ...currentUser,
-          rating: myResult.newRating ?? currentUser.rating,
+          rating: updatedRating,
+          rank: updatedRank as any,
+          seasonalTier: updatedRank,
           xp: myResult.newXp ?? currentUser.xp,
           level: myResult.newLevel ?? currentUser.level,
           streak: currentUser.streak ? Math.max(1, currentUser.streak) : 1,
         });
+
+        // Trigger full-screen animation if tier promoted or leveled up!
+        if (isTierPromotion || isLevelUp) {
+          setShowPromotionModal(true);
+        }
       }
     }
-  }, [matchResult?.roomId, myResult?.newRating, myResult?.newXp, myResult?.newLevel]);
+  }, [matchResult?.roomId, myResult?.newRating, myResult?.newXp, myResult?.newLevel, isTierPromotion, isLevelUp]);
 
   const getCumulativeScore = (playerId: string) => {
     return currentRoom?.roundResults?.reduce((sum, res) => sum + (res.scores[playerId] || 0), 0) || 0;
@@ -567,6 +587,22 @@ export const FinalResults = () => {
           </button>
         </div>
       </motion.div>
+
+      {/* Full-Screen Level Up / Tier Promotion Celebration Overlay */}
+      <TierPromotionModal
+        isOpen={showPromotionModal}
+        onClose={() => setShowPromotionModal(false)}
+        previousTier={previousTier}
+        newTier={newTier}
+        previousCp={previousCp}
+        newCp={currentCp}
+        cpChange={cpChange}
+        previousLevel={previousLevel}
+        newLevel={newLevel}
+        isTierPromotion={isTierPromotion}
+        isLevelUp={isLevelUp}
+        username={user?.username || 'Operator'}
+      />
     </div>
   );
 };

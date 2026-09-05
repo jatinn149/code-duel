@@ -87,6 +87,10 @@ export const AdminPage: React.FC = () => {
   });
   const [isBroadcasting, setIsBroadcasting] = useState(false);
 
+  // Delete User Confirmation Modal State
+  const [deletingUser, setDeletingUser] = useState<AdminUser | null>(null);
+  const [isDeletingUser, setIsDeletingUser] = useState(false);
+
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
 
   // Security Guard: Only ADMIN allowed
@@ -228,14 +232,23 @@ export const AdminPage: React.FC = () => {
   };
 
   // 5. Delete User
-  const handleDeleteUser = async (u: AdminUser) => {
-    if (!window.confirm(`Permanently delete @${u.username}? This cannot be undone.`)) return;
+  const handleDeleteUser = (u: AdminUser) => {
+    setDeletingUser(u);
+  };
+
+  const handleConfirmDeleteUser = async () => {
+    if (!deletingUser) return;
     try {
-      await adminApi.deleteUser(u.id);
-      showFeedback(`✅ Deleted user @${u.username}`);
+      setIsDeletingUser(true);
+      await adminApi.deleteUser(deletingUser.id);
+      showFeedback(`✅ Permanently purged operative @${deletingUser.username}`);
+      setUsers((prev) => prev.filter((u) => u.id !== deletingUser.id));
+      setDeletingUser(null);
       await loadAllData();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Delete failed');
+      alert(err.response?.data?.message || err?.message || 'Delete user failed');
+    } finally {
+      setIsDeletingUser(false);
     }
   };
 
@@ -1453,6 +1466,73 @@ export const AdminPage: React.FC = () => {
                 >
                   <Radio size={14} />
                   <span>{isBroadcasting ? 'Broadcasting...' : 'Execute Broadcast'}</span>
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL: CONFIRM PERMANENT DELETE OPERATIVE */}
+      <AnimatePresence>
+        {deletingUser && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-zinc-900 border border-rose-500/50 rounded-2xl w-full max-w-md p-6 space-y-5 shadow-2xl shadow-rose-950/40 relative overflow-hidden"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                  <Trash2 size={20} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white tracking-wide uppercase">
+                    Permanently Delete Operative
+                  </h3>
+                  <p className="text-[11px] font-mono text-zinc-400">
+                    Irreversible Admin Purge Action
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-3.5 bg-rose-950/20 border border-rose-500/20 rounded-xl text-xs text-zinc-300 space-y-2">
+                <p>
+                  Are you sure you want to permanently delete{' '}
+                  <span className="font-bold text-rose-400 font-mono">@{deletingUser.username}</span> ({deletingUser.email})?
+                </p>
+                <p className="text-[11px] text-zinc-400">
+                  This will purge their account credentials, match records, problem history, and friendships from both PostgreSQL and JSON databases.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setDeletingUser(null)}
+                  disabled={isDeletingUser}
+                  className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-mono text-xs font-bold rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmDeleteUser}
+                  disabled={isDeletingUser}
+                  className="px-4 py-2 bg-rose-600 hover:bg-rose-500 disabled:bg-rose-900 text-white font-mono text-xs font-bold rounded-xl transition-all active:scale-95 shadow-lg shadow-rose-900/40 flex items-center gap-2"
+                >
+                  {isDeletingUser ? (
+                    <>
+                      <RefreshCw size={14} className="animate-spin" />
+                      <span>Purging...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 size={14} />
+                      <span>Confirm Purge</span>
+                    </>
+                  )}
                 </button>
               </div>
             </motion.div>

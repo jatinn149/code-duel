@@ -104,16 +104,50 @@ export const createAdminRouter = (
   });
 
   // 4. User Management: Delete User
-  router.delete('/users/:id', async (req, res, next) => {
+  router.delete('/users/:id', async (req, res, _next) => {
     try {
       const { id } = req.params;
       if (req.user?.id === id) {
         return res.status(400).json({ success: false, message: 'Cannot delete your own admin account' });
       }
+      const targetUser = await userRepository.findById(id);
+      if (!targetUser) {
+        return res.status(404).json({ success: false, message: 'User not found or already deleted' });
+      }
+
+      // 1. Clean notifications
+      if (notificationRepository) {
+        try {
+          const userNotifs = await notificationRepository.getByUserId(id);
+          for (const n of userNotifs) {
+            await notificationRepository.delete(n.id);
+          }
+        } catch (notifErr) {
+          logger.warn({ notifErr }, 'Warning: failed to clear notifications for deleted user');
+        }
+      }
+
+      // 2. Clean Redis keys
+      if (redisCache.status === 'ready') {
+        try {
+          await redisCache.del(
+            `username_taken:${targetUser.username.toLowerCase()}`,
+            `user_friends:${id}`,
+            `presence:${id}`,
+            `daily_solved:${id}`
+          );
+        } catch (redisErr) {
+          logger.warn({ redisErr }, 'Warning: failed to clear redis keys for deleted user');
+        }
+      }
+
+      // 3. Delete user & relations
       await userRepository.delete(id);
-      res.json({ success: true, message: 'User successfully deleted' });
-    } catch (error) {
-      next(error);
+      logger.info({ userId: id, username: targetUser.username }, 'Operative deleted by admin');
+      res.json({ success: true, message: `Operative @${targetUser.username} successfully deleted` });
+    } catch (error: any) {
+      logger.error({ error }, 'Failed to delete user in admin router');
+      res.status(500).json({ success: false, message: error?.message || 'Failed to delete user' });
     }
   });
 

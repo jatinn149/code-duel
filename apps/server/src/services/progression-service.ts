@@ -106,6 +106,7 @@ export class ProgressionService {
       level: newLevel,
       xp: newXp,
       rank: newRank,
+      seasonalTier: newRank,
       placementMatchesPlayed: newPlacementMatches,
       updatedAt: nowIso,
     });
