@@ -29,6 +29,8 @@ interface AuthState {
   setInitialized: (value: boolean) => void;
 }
 
+let activeRefreshPromise: Promise<void> | null = null;
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
@@ -85,19 +87,29 @@ export const useAuthStore = create<AuthState>()(
       },
 
       refresh: async () => {
-        set({ isLoading: true });
-        try {
-          const { user, accessToken } = await refreshApi();
-          set({ user, accessToken, isAuthenticated: true, isInitialized: true, isLoading: false });
-        } catch {
-          set({
-            user: null,
-            accessToken: null,
-            isAuthenticated: false,
-            isInitialized: true,
-            isLoading: false,
-          });
+        if (activeRefreshPromise) {
+          return activeRefreshPromise;
         }
+
+        activeRefreshPromise = (async () => {
+          set({ isLoading: true });
+          try {
+            const { user, accessToken } = await refreshApi();
+            set({ user, accessToken, isAuthenticated: true, isInitialized: true, isLoading: false });
+          } catch {
+            set({
+              user: null,
+              accessToken: null,
+              isAuthenticated: false,
+              isInitialized: true,
+              isLoading: false,
+            });
+          }
+        })().finally(() => {
+          activeRefreshPromise = null;
+        });
+
+        return activeRefreshPromise;
       },
 
       fetchCurrentUser: async () => {
@@ -117,7 +129,11 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
-      partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
+      partialize: (state) => ({
+        user: state.user,
+        accessToken: state.accessToken,
+        isAuthenticated: state.isAuthenticated,
+      }),
     },
   ),
 );

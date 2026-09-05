@@ -2,7 +2,7 @@ import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/store/auth-store';
 
 const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const API_URL = import.meta.env.VITE_API_URL || (isLocal ? 'http://localhost:3001' : window.location.origin);
+const API_URL = import.meta.env.VITE_API_URL || (isLocal ? `http://${window.location.hostname}:3001` : window.location.origin);
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL: `${API_URL}/api/v1`,

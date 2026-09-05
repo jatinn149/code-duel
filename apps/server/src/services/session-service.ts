@@ -45,7 +45,14 @@ export class SessionService {
     }
 
     if (session.revokedAt) {
-      // Token reuse detected! Revoke all sessions for this user.
+      const revokedTime = new Date(session.revokedAt).getTime();
+      const now = Date.now();
+      // Allow a 15-second grace window for in-flight concurrent requests during token rotation
+      if (now - revokedTime <= 15 * 1000) {
+        return this.createSession({ id: userId } as User, userAgent, ipAddress);
+      }
+
+      // Genuine token reuse detected outside grace window! Revoke all sessions for this user.
       await this.revokeAllUserSessions(session.userId);
       throw new Error('INVALID_REFRESH_TOKEN');
     }

@@ -34,17 +34,22 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 export const App = () => {
-  const { refresh, isInitialized, isAuthenticated, setInitialized } = useAuthStore();
+  const { refresh, isInitialized, isAuthenticated, accessToken, fetchCurrentUser, setInitialized } = useAuthStore();
 
   useEffect(() => {
     if (!isInitialized) {
       if (isAuthenticated) {
-        refresh();
+        if (accessToken) {
+          setInitialized(true);
+          fetchCurrentUser().catch(() => {});
+        } else {
+          refresh();
+        }
       } else {
         setInitialized(true);
       }
     }
-  }, [refresh, isInitialized, isAuthenticated, setInitialized]);
+  }, [refresh, isInitialized, isAuthenticated, accessToken, fetchCurrentUser, setInitialized]);
 
   return (
     <QueryClientProvider client={queryClient}>
