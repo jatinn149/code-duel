@@ -11,15 +11,6 @@ import {
 import { clsx } from 'clsx';
 import { apiClient } from '../../api/api-client';
 
-interface DirectMessage {
-  id: string;
-  fromUserId: string;
-  fromUsername: string;
-  toUserId: string;
-  text: string;
-  timestamp: string;
-}
-
 interface SearchResult {
   id: string;
   username: string;
@@ -33,7 +24,12 @@ interface SearchResult {
 }
 
 export const FriendSidebar: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
-  const { friends } = useSocialStore();
+  const { 
+    friends, 
+    unreadMessageFriendIds, 
+    chatMessages, 
+    setActiveChatFriendId 
+  } = useSocialStore();
   const { user } = useAuthStore();
   const socket = useSocket();
   const { sendDuelInvite, removeFriend } = useSocial();
@@ -46,26 +42,24 @@ export const FriendSidebar: React.FC<{ onClose?: () => void }> = ({ onClose }) =
 
   // Chat State
   const [activeChatFriend, setActiveChatFriend] = useState<any | null>(null);
-  const [chatMessages, setChatMessages] = useState<Record<string, DirectMessage[]>>({});
   const [messageInput, setMessageInput] = useState('');
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
-  // Listen for real-time direct messages
-  useEffect(() => {
-    if (!socket) return;
-    const handleReceiveMessage = (msg: DirectMessage) => {
-      const partnerId = msg.fromUserId === user?.id ? msg.toUserId : msg.fromUserId;
-      setChatMessages((prev) => ({
-        ...prev,
-        [partnerId]: [...(prev[partnerId] || []), msg],
-      }));
-    };
+  const handleOpenChat = (friend: any) => {
+    setActiveChatFriend(friend);
+    setActiveChatFriendId(friend.id || null);
+  };
 
-    socket.on('social:direct_message_receive' as any, handleReceiveMessage);
+  const handleCloseChat = () => {
+    setActiveChatFriend(null);
+    setActiveChatFriendId(null);
+  };
+
+  useEffect(() => {
     return () => {
-      socket.off('social:direct_message_receive' as any, handleReceiveMessage);
+      setActiveChatFriendId(null);
     };
-  }, [socket, user?.id]);
+  }, [setActiveChatFriendId]);
 
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -133,7 +127,7 @@ export const FriendSidebar: React.FC<{ onClose?: () => void }> = ({ onClose }) =
         <div className="flex items-center gap-2 text-white">
           {activeChatFriend ? (
             <button 
-              onClick={() => setActiveChatFriend(null)}
+              onClick={handleCloseChat}
               className="p-1 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-lg transition-colors mr-1"
             >
               <ArrowLeft size={18} />
@@ -169,7 +163,10 @@ export const FriendSidebar: React.FC<{ onClose?: () => void }> = ({ onClose }) =
 
           {onClose && (
             <button
-              onClick={onClose}
+              onClick={() => {
+                handleCloseChat();
+                onClose();
+              }}
               className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors ml-1"
             >
               <X size={18} />
@@ -349,76 +346,103 @@ export const FriendSidebar: React.FC<{ onClose?: () => void }> = ({ onClose }) =
               </button>
             </div>
           ) : (
-            friends.map((friend) => (
-              <div
-                key={friend.id}
-                className="p-3 bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800/80 hover:border-zinc-700/80 rounded-xl transition-all flex items-center justify-between group"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="relative">
-                    <div className="w-9 h-9 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center font-bold text-white text-xs">
-                      {(friend.username?.[0] || 'U').toUpperCase()}
+            friends.map((friend) => {
+              const hasUnread = Boolean(friend.id && unreadMessageFriendIds.includes(friend.id));
+              return (
+                <div
+                  key={friend.id}
+                  className={clsx(
+                    "p-3 rounded-xl transition-all flex items-center justify-between group",
+                    hasUnread
+                      ? "bg-rose-950/25 hover:bg-rose-950/35 border border-rose-500/40 hover:border-rose-500/60 shadow-[0_0_12px_rgba(244,63,94,0.15)]"
+                      : "bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800/80 hover:border-zinc-700/80"
+                  )}
+                >
+                  <div
+                    onClick={() => handleOpenChat(friend)}
+                    className="flex items-center gap-3 min-w-0 cursor-pointer flex-1 mr-2"
+                  >
+                    <div className="relative">
+                      <div className="w-9 h-9 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center font-bold text-white text-xs">
+                        {(friend.username?.[0] || 'U').toUpperCase()}
+                      </div>
+                      <Circle
+                        size={10}
+                        className={clsx("absolute -bottom-0.5 -right-0.5 border border-zinc-950 rounded-full", getStatusClasses(friend.status))}
+                      />
                     </div>
-                    <Circle
-                      size={10}
-                      className={clsx("absolute -bottom-0.5 -right-0.5 border border-zinc-950 rounded-full", getStatusClasses(friend.status))}
-                    />
+
+                    <div className="min-w-0 flex-1">
+                      <div className="text-xs font-bold text-white truncate flex items-center gap-2">
+                        <span className="truncate">{friend.username}</span>
+                        {hasUnread && (
+                          <span className="inline-flex items-center gap-1.5 px-1.5 py-0.5 bg-rose-500/20 border border-rose-500/40 rounded-full shrink-0">
+                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse shadow-[0_0_6px_rgba(244,63,94,0.9)]" />
+                            <span className="text-[9px] font-mono text-rose-300 font-bold uppercase tracking-wider">New</span>
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[10px] font-mono text-zinc-400 flex items-center gap-2 mt-0.5">
+                        <span>{friend.rating || 1200} CP</span>
+                        <span className="text-zinc-600">•</span>
+                        <span className={clsx(
+                          "text-[9px] font-semibold",
+                          friend.status === PresenceStatus.ONLINE ? "text-emerald-400" :
+                          friend.status === PresenceStatus.IN_GAME ? "text-amber-400" :
+                          "text-zinc-500"
+                        )}>
+                          {getStatusLabel(friend.status)}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="min-w-0">
-                    <div className="text-xs font-bold text-white truncate flex items-center gap-1.5">
-                      <span>{friend.username}</span>
-                    </div>
-                    <div className="text-[10px] font-mono text-zinc-400 flex items-center gap-2 mt-0.5">
-                      <span>{friend.rating || 1200} CP</span>
-                      <span className="text-zinc-600">•</span>
-                      <span className={clsx(
-                        "text-[9px] font-semibold",
-                        friend.status === PresenceStatus.ONLINE ? "text-emerald-400" :
-                        friend.status === PresenceStatus.IN_GAME ? "text-amber-400" :
-                        "text-zinc-500"
-                      )}>
-                        {getStatusLabel(friend.status)}
-                      </span>
-                    </div>
+                  {/* Actions */}
+                  <div className="flex items-center gap-1 shrink-0">
+                    {/* Duel Invite */}
+                    <button
+                      onClick={() => friend.id && sendDuelInvite(friend.id)}
+                      title="Invite to Duel"
+                      className="p-1.5 text-zinc-400 hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-colors"
+                    >
+                      <Swords size={15} />
+                    </button>
+
+                    {/* Direct Chat */}
+                    <button
+                      onClick={() => handleOpenChat(friend)}
+                      title="Direct Message"
+                      className={clsx(
+                        "p-1.5 rounded-lg transition-colors relative",
+                        hasUnread
+                          ? "text-rose-400 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/30"
+                          : "text-zinc-400 hover:text-indigo-400 hover:bg-indigo-500/10"
+                      )}
+                    >
+                      <MessageSquare size={15} />
+                      {hasUnread && (
+                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border border-zinc-950 shadow-[0_0_6px_rgba(244,63,94,0.9)] animate-pulse" />
+                      )}
+                    </button>
+
+                    {/* Remove Friend */}
+                    <button
+                      onClick={() => {
+                        if (window.confirm(`Remove ${friend.username} from your operatives?`)) {
+                          if (friend.id) {
+                            removeFriend(friend.id);
+                          }
+                        }
+                      }}
+                      title="Remove Friend"
+                      className="p-1.5 text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                    >
+                      <UserMinus size={14} />
+                    </button>
                   </div>
                 </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-1">
-                  {/* Duel Invite */}
-                  <button
-                    onClick={() => friend.id && sendDuelInvite(friend.id)}
-                    title="Invite to Duel"
-                    className="p-1.5 text-zinc-400 hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-colors"
-                  >
-                    <Swords size={15} />
-                  </button>
-
-                  {/* Direct Chat */}
-                  <button
-                    onClick={() => setActiveChatFriend(friend)}
-                    title="Direct Message"
-                    className="p-1.5 text-zinc-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-colors"
-                  >
-                    <MessageSquare size={15} />
-                  </button>
-
-                  {/* Remove Friend */}
-                  <button
-                    onClick={() => {
-                      if (window.confirm(`Remove ${friend.username} from your operatives?`)) {
-                        friend.id && removeFriend(friend.id);
-                      }
-                    }}
-                    title="Remove Friend"
-                    className="p-1.5 text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                  >
-                    <UserMinus size={14} />
-                  </button>
-                </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       )}

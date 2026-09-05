@@ -58,11 +58,11 @@ export const AdminPage: React.FC = () => {
   // Gift Modal State
   const [giftModalUser, setGiftModalUser] = useState<AdminUser | null>(null);
   const [giftForm, setGiftForm] = useState({
-    xp: 500,
-    rating: 50,
-    level: 1,
+    xp: '' as string | number,
+    rating: '' as string | number,
+    level: '' as string | number,
     seasonalTier: '',
-    note: 'HQ Command Commendation',
+    note: '',
   });
   const [isGifting, setIsGifting] = useState(false);
 
@@ -71,8 +71,9 @@ export const AdminPage: React.FC = () => {
   const [mailForm, setMailForm] = useState({
     title: 'HQ Transmission to Operative',
     message: '',
-    giftXp: 0,
-    giftCp: 0,
+    giftXp: '' as string | number,
+    giftCp: '' as string | number,
+    tierUpgrade: '',
   });
   const [isSendingMail, setIsSendingMail] = useState(false);
 
@@ -81,8 +82,8 @@ export const AdminPage: React.FC = () => {
   const [broadcastForm, setBroadcastForm] = useState({
     title: 'CODE DUEL LEAGUE ANNOUNCEMENT',
     message: '',
-    giftXp: 0,
-    giftCp: 0,
+    giftXp: '' as string | number,
+    giftCp: '' as string | number,
   });
   const [isBroadcasting, setIsBroadcasting] = useState(false);
 
@@ -242,11 +243,11 @@ export const AdminPage: React.FC = () => {
   const handleOpenGift = (u: AdminUser) => {
     setGiftModalUser(u);
     setGiftForm({
-      xp: 500,
-      rating: 50,
-      level: u.level || 1,
-      seasonalTier: u.rank || 'Initiate',
-      note: 'HQ Command Commendation',
+      xp: '',
+      rating: '',
+      level: '',
+      seasonalTier: '',
+      note: '',
     });
   };
 
@@ -254,7 +255,13 @@ export const AdminPage: React.FC = () => {
     if (!giftModalUser) return;
     try {
       setIsGifting(true);
-      await adminApi.giftUser(giftModalUser.id, giftForm);
+      await adminApi.giftUser(giftModalUser.id, {
+        xp: giftForm.xp !== '' ? Number(giftForm.xp) : undefined,
+        rating: giftForm.rating !== '' ? Number(giftForm.rating) : undefined,
+        level: giftForm.level !== '' ? Number(giftForm.level) : undefined,
+        seasonalTier: giftForm.seasonalTier || undefined,
+        note: giftForm.note || undefined,
+      });
       showFeedback(`🎁 Granted rewards to @${giftModalUser.username}!`);
       setGiftModalUser(null);
       await loadAllData();
@@ -271,8 +278,9 @@ export const AdminPage: React.FC = () => {
     setMailForm({
       title: 'HQ Transmission to Operative',
       message: `Greetings @${u.username}, your tactical progression has been acknowledged by League Administration.`,
-      giftXp: 0,
-      giftCp: 0,
+      giftXp: '',
+      giftCp: '',
+      tierUpgrade: '',
     });
   };
 
@@ -284,7 +292,13 @@ export const AdminPage: React.FC = () => {
     }
     try {
       setIsSendingMail(true);
-      await adminApi.sendUserMail(mailModalUser.id, mailForm);
+      await adminApi.sendUserMail(mailModalUser.id, {
+        title: mailForm.title.trim(),
+        message: mailForm.message.trim(),
+        giftXp: mailForm.giftXp !== '' ? Number(mailForm.giftXp) : undefined,
+        giftCp: mailForm.giftCp !== '' ? Number(mailForm.giftCp) : undefined,
+        tierUpgrade: mailForm.tierUpgrade || undefined,
+      });
       showFeedback(`✉️ Mail dispatched to @${mailModalUser.username}!`);
       setMailModalUser(null);
       await loadAllData();
@@ -303,7 +317,12 @@ export const AdminPage: React.FC = () => {
     }
     try {
       setIsBroadcasting(true);
-      const res = await adminApi.broadcastMail(broadcastForm);
+      const res = await adminApi.broadcastMail({
+        title: broadcastForm.title.trim(),
+        message: broadcastForm.message.trim(),
+        giftXp: broadcastForm.giftXp !== '' ? Number(broadcastForm.giftXp) : undefined,
+        giftCp: broadcastForm.giftCp !== '' ? Number(broadcastForm.giftCp) : undefined,
+      });
       showFeedback(`📢 Broadcast delivered to ${res.recipientsCount} operative(s)!`);
       setBroadcastModalOpen(false);
       await loadAllData();
@@ -1151,9 +1170,9 @@ export const AdminPage: React.FC = () => {
                   <input
                     type="number"
                     value={giftForm.xp}
-                    onChange={(e) => setGiftForm({ ...giftForm, xp: Number(e.target.value) })}
+                    onChange={(e) => setGiftForm({ ...giftForm, xp: e.target.value })}
                     className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white focus:border-yellow-500 focus:outline-none"
-                    placeholder="e.g. 500"
+                    placeholder="e.g. 500 (optional)"
                   />
                 </div>
 
@@ -1162,9 +1181,9 @@ export const AdminPage: React.FC = () => {
                   <input
                     type="number"
                     value={giftForm.rating}
-                    onChange={(e) => setGiftForm({ ...giftForm, rating: Number(e.target.value) })}
+                    onChange={(e) => setGiftForm({ ...giftForm, rating: e.target.value })}
                     className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white focus:border-yellow-500 focus:outline-none"
-                    placeholder="e.g. 50"
+                    placeholder="e.g. 50 (optional)"
                   />
                 </div>
 
@@ -1174,8 +1193,9 @@ export const AdminPage: React.FC = () => {
                     <input
                       type="number"
                       value={giftForm.level}
-                      onChange={(e) => setGiftForm({ ...giftForm, level: Number(e.target.value) })}
+                      onChange={(e) => setGiftForm({ ...giftForm, level: e.target.value })}
                       className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white focus:border-yellow-500 focus:outline-none"
+                      placeholder="e.g. 5 (optional)"
                     />
                   </div>
                   <div>
@@ -1185,14 +1205,16 @@ export const AdminPage: React.FC = () => {
                       onChange={(e) => setGiftForm({ ...giftForm, seasonalTier: e.target.value })}
                       className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white focus:border-yellow-500 focus:outline-none"
                     >
-                      <option value="Initiate">Initiate</option>
-                      <option value="Coder">Coder</option>
-                      <option value="Specialist">Specialist</option>
-                      <option value="Expert">Expert</option>
-                      <option value="Elite">Elite</option>
-                      <option value="Master">Master</option>
-                      <option value="Grandmaster">Grandmaster</option>
-                      <option value="Apex Coder">Apex Coder</option>
+                      <option value="">No Tier Change</option>
+                      <option value="Initiate">Initiate (0+ CP baseline)</option>
+                      <option value="Coder">Coder (500+ CP baseline)</option>
+                      <option value="Specialist">Specialist (900+ CP baseline)</option>
+                      <option value="Expert">Expert (1400+ CP baseline)</option>
+                      <option value="Elite">Elite (2000+ CP baseline)</option>
+                      <option value="Master">Master (2700+ CP baseline)</option>
+                      <option value="Grandmaster">Grandmaster (3500+ CP baseline)</option>
+                      <option value="Codebreaker">Codebreaker (4500+ CP baseline)</option>
+                      <option value="Apex Coder">Apex Coder (6000+ CP baseline)</option>
                     </select>
                   </div>
                 </div>
@@ -1285,9 +1307,9 @@ export const AdminPage: React.FC = () => {
                     <input
                       type="number"
                       value={mailForm.giftXp}
-                      onChange={(e) => setMailForm({ ...mailForm, giftXp: Number(e.target.value) })}
+                      onChange={(e) => setMailForm({ ...mailForm, giftXp: e.target.value })}
                       className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white focus:border-indigo-500 focus:outline-none"
-                      placeholder="+XP"
+                      placeholder="e.g. 50"
                     />
                   </div>
                   <div>
@@ -1295,11 +1317,31 @@ export const AdminPage: React.FC = () => {
                     <input
                       type="number"
                       value={mailForm.giftCp}
-                      onChange={(e) => setMailForm({ ...mailForm, giftCp: Number(e.target.value) })}
+                      onChange={(e) => setMailForm({ ...mailForm, giftCp: e.target.value })}
                       className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white focus:border-indigo-500 focus:outline-none"
-                      placeholder="+CP"
+                      placeholder="e.g. 25"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-zinc-300 mb-1">Tier Promotion / Elevation (Optional)</label>
+                  <select
+                    value={mailForm.tierUpgrade}
+                    onChange={(e) => setMailForm({ ...mailForm, tierUpgrade: e.target.value })}
+                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-white focus:border-indigo-500 focus:outline-none"
+                  >
+                    <option value="">No Tier Change</option>
+                    <option value="Initiate">Initiate (0+ CP baseline)</option>
+                    <option value="Coder">Coder (500+ CP baseline)</option>
+                    <option value="Specialist">Specialist (900+ CP baseline)</option>
+                    <option value="Expert">Expert (1400+ CP baseline)</option>
+                    <option value="Elite">Elite (2000+ CP baseline)</option>
+                    <option value="Master">Master (2700+ CP baseline)</option>
+                    <option value="Grandmaster">Grandmaster (3500+ CP baseline)</option>
+                    <option value="Codebreaker">Codebreaker (4500+ CP baseline)</option>
+                    <option value="Apex Coder">Apex Coder (6000+ CP baseline)</option>
+                  </select>
                 </div>
               </div>
 
@@ -1379,9 +1421,9 @@ export const AdminPage: React.FC = () => {
                     <input
                       type="number"
                       value={broadcastForm.giftXp}
-                      onChange={(e) => setBroadcastForm({ ...broadcastForm, giftXp: Number(e.target.value) })}
+                      onChange={(e) => setBroadcastForm({ ...broadcastForm, giftXp: e.target.value })}
                       className="w-full px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded-lg text-white focus:border-rose-500 focus:outline-none"
-                      placeholder="0"
+                      placeholder="e.g. 50"
                     />
                   </div>
                   <div>
@@ -1389,9 +1431,9 @@ export const AdminPage: React.FC = () => {
                     <input
                       type="number"
                       value={broadcastForm.giftCp}
-                      onChange={(e) => setBroadcastForm({ ...broadcastForm, giftCp: Number(e.target.value) })}
+                      onChange={(e) => setBroadcastForm({ ...broadcastForm, giftCp: e.target.value })}
                       className="w-full px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded-lg text-white focus:border-rose-500 focus:outline-none"
-                      placeholder="0"
+                      placeholder="e.g. 25"
                     />
                   </div>
                 </div>

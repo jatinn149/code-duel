@@ -6,6 +6,7 @@ import {
   signup as signupApi,
   logout as logoutApi,
   refresh as refreshApi,
+  getMe as getMeApi,
 } from '@/api/auth-api';
 import { SignupInput, LoginInput } from '@code-duel/validation';
 import axios from 'axios';
@@ -22,6 +23,7 @@ interface AuthState {
   login: (data: LoginInput) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
+  fetchCurrentUser: () => Promise<void>;
   setUser: (user: Omit<User, 'passwordHash'> | null) => void;
   setError: (error: string | null) => void;
   setInitialized: (value: boolean) => void;
@@ -95,6 +97,17 @@ export const useAuthStore = create<AuthState>()(
             isInitialized: true,
             isLoading: false,
           });
+        }
+      },
+
+      fetchCurrentUser: async () => {
+        try {
+          const user = await getMeApi();
+          if (user) {
+            set({ user });
+          }
+        } catch {
+          // Never log out on background profile sync
         }
       },
 

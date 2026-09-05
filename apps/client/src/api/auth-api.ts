@@ -26,12 +26,29 @@ export const getMe = async (): Promise<Omit<User, 'passwordHash'>> => {
   return response.data.data;
 };
 
+export interface CpHistoryItem {
+  id: string;
+  type: 'MATCH' | 'ADMIN_GRANT' | 'TIER_PROMOTION';
+  source: string;
+  reason: string;
+  change: number;
+  newCp?: number;
+  timestamp: string;
+  note?: string;
+}
+
 export interface ProfileData {
   matchHistory: any[];
+  cpHistory: CpHistoryItem[];
 }
 
 export const getProfile = async (): Promise<ProfileData> => {
   const response = await apiClient.get('/auth/profile');
+  return response.data.data;
+};
+
+export const claimDirectiveReward = async (directiveId: string): Promise<{ user: any; mission: any }> => {
+  const response = await apiClient.post(`/auth/missions/${directiveId}/claim`);
   return response.data.data;
 };
 

@@ -11,6 +11,7 @@ import { PgMatchResultRepository } from '@/repositories/pg-match-result-reposito
 import { JsonMatchResultRepository } from '@/repositories/json-match-result-repository';
 import { JsonDailyChallengeRepository } from '@/repositories/json-daily-challenge-repository';
 import { JsonDailyMissionRepository } from '@/repositories/json-daily-mission-repository';
+import { JsonNotificationRepository } from '@/repositories/json-notification-repository';
 import { PgProblemRepository } from '@/repositories/pg-problem-repository';
 import { JsonProblemRepository } from '@/repositories/json-problem-repository';
 import { ProgressionService } from '@/services/progression-service';
@@ -23,6 +24,7 @@ import { validateRequest } from '@/middleware/validate-request';
 import { signupSchema, loginSchema, refreshTokenSchema } from '@code-duel/validation';
 import { requireAuth } from '@/middleware/auth-middleware';
 import { UserRole } from '@code-duel/types';
+import { calculateCpRank } from '@code-duel/shared';
 
 const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -97,6 +99,7 @@ export const createAuthRouter = () => {
         return res.status(404).json({ success: false, message: 'User not found' });
       }
       const { passwordHash, ...safeUser } = userDetails;
+      (safeUser as any).seasonalTier = calculateCpRank(userDetails.rating);
       res.json({
         success: true,
         data: { user: safeUser },
@@ -111,11 +114,49 @@ export const createAuthRouter = () => {
       const userId = req.user!.id;
       const matchResultRepository = isPgEnabled ? new PgMatchResultRepository() : new JsonMatchResultRepository(jsonStorage);
       const matches = await matchResultRepository.findByUserId(userId);
-      
+      const notificationRepository = new JsonNotificationRepository(jsonStorage);
+      const notifications = await notificationRepository.getByUserId(userId);
+
+      const cpHistory: any[] = [];
+
+      for (const m of matches) {
+        const myResult = m.results?.find((r: any) => r.userId === userId);
+        if (myResult && myResult.ratingChange !== undefined) {
+          const opponent = m.results?.find((r: any) => r.userId !== userId);
+          cpHistory.push({
+            id: `match-${m.roomId}`,
+            type: 'MATCH',
+            source: `${m.mode} Duel`,
+            reason: myResult.ratingChange >= 0 ? `Victory vs @${opponent?.username || 'Opponent'}` : `Defeat vs @${opponent?.username || 'Opponent'}`,
+            change: myResult.ratingChange,
+            newCp: myResult.newRating,
+            timestamp: m.endedAt,
+          });
+        }
+      }
+
+      for (const n of notifications) {
+        const data = n.data as any;
+        if (data && (data.giftCp || data.tierUpgrade)) {
+          cpHistory.push({
+            id: `notif-${n.id}`,
+            type: data.tierUpgrade ? 'TIER_PROMOTION' : 'ADMIN_GRANT',
+            source: data.tierUpgrade ? `Tier Promotion: ${data.tierUpgrade}` : 'Administration Grant',
+            reason: n.title || 'League Commendation',
+            change: Number(data.giftCp || 0),
+            timestamp: n.createdAt,
+            note: n.message,
+          });
+        }
+      }
+
+      cpHistory.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
       res.json({
         success: true,
         data: {
           matchHistory: matches,
+          cpHistory,
         }
       });
     } catch (error) {
@@ -234,6 +275,8 @@ export const createAuthRouter = () => {
         }
       }
 
+      userDetails.seasonalTier = calculateCpRank(userDetails.rating);
+
       res.json({
         success: true,
         data: {
@@ -245,6 +288,35 @@ export const createAuthRouter = () => {
       });
     } catch (error) {
       next(error);
+    }
+  });
+
+  router.post('/missions/:id/claim', authMiddleware, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const missionId = req.params.id;
+
+      const dailyMissionRepository = new JsonDailyMissionRepository(jsonStorage);
+      const progressionService = new ProgressionService(userRepository);
+      const retentionService = new RetentionService(userRepository, dailyMissionRepository, progressionService);
+
+      const result = await retentionService.claimMissionReward(userId, missionId);
+
+      const { passwordHash, ...safeUser } = result.user as any;
+      safeUser.seasonalTier = calculateCpRank(safeUser.rating);
+
+      res.json({
+        success: true,
+        data: {
+          user: safeUser,
+          mission: result.mission,
+        },
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        message: error.message || 'Failed to claim directive reward',
+      });
     }
   });
 
@@ -261,7 +333,7 @@ export const createAuthRouter = () => {
           wins: u.wins,
           losses: u.losses,
           matchesPlayed: u.matchesPlayed,
-          seasonalTier: u.seasonalTier
+          seasonalTier: calculateCpRank(u.rating),
         }))
         .sort((a, b) => b.rating - a.rating)
         .slice(0, 50);

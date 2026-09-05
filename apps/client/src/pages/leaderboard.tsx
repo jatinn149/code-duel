@@ -76,7 +76,7 @@ export const LeaderboardPage = () => {
     if (rankName.includes('SPECIALIST') || rankName.includes('EXPERT')) {
       return 'text-amber-400 border-amber-900';
     }
-    if (rankName.includes('CODER') || rankName.includes('APPRENTICE')) {
+    if (rankName.includes('CODER')) {
       return 'text-emerald-400 border-emerald-900';
     }
     return 'text-zinc-500 border-zinc-800';
@@ -218,7 +218,7 @@ export const LeaderboardPage = () => {
                         <div className="flex sm:hidden items-center gap-2 mt-1 text-[11px] font-mono">
                           <span className="text-zinc-400 font-semibold">Lvl {player.level ?? 1}</span>
                           <span className="text-zinc-650">•</span>
-                          <span className="text-indigo-400 font-bold uppercase">{player.seasonalTier || 'UNRANKED'}</span>
+                          <span className="text-indigo-400 font-bold uppercase">{calculateCpRank(player.rating)}</span>
                         </div>
                       </td>
 
@@ -247,7 +247,7 @@ export const LeaderboardPage = () => {
                       {/* Seasonal Tier */}
                       <td className="hidden sm:table-cell py-3.5 sm:py-4.5 px-3 sm:px-6 text-center font-mono">
                         <span className="text-[11px] font-bold text-indigo-400 uppercase tracking-widest px-2.5 py-1 bg-indigo-500/5 border border-indigo-500/10 rounded-md">
-                          {player.seasonalTier || 'UNRANKED'}
+                          {calculateCpRank(player.rating)}
                         </span>
                       </td>
 

@@ -95,7 +95,7 @@ export const adminApi = {
 
   sendUserMail: async (
     id: string,
-    mail: { title: string; message: string; giftXp?: number; giftCp?: number }
+    mail: { title: string; message: string; giftXp?: number; giftCp?: number; tierUpgrade?: string }
   ): Promise<void> => {
     await apiClient.post(`/admin/users/${id}/mail`, mail);
   },

@@ -17,8 +17,7 @@ export const CP_CONFIG = {
 } as const;
 
 export const CP_RANKS = [
-  { rank: 'Initiate', min: 0, max: 199 },
-  { rank: 'Apprentice', min: 200, max: 499 },
+  { rank: 'Initiate', min: 0, max: 499 },
   { rank: 'Coder', min: 500, max: 899 },
   { rank: 'Specialist', min: 900, max: 1399 },
   { rank: 'Expert', min: 1400, max: 1999 },
@@ -38,8 +37,8 @@ export const calculateStartingCp = (skillRating?: number): number => {
   const rating = Math.max(1, Math.min(10, Math.round(skillRating || 5)));
   switch (rating) {
     case 1: return 100; // Initiate
-    case 2: return 250; // Apprentice
-    case 3: return 400; // Apprentice
+    case 2: return 250; // Initiate
+    case 3: return 400; // Initiate
     case 4: return 600; // Coder
     case 5: return 750; // Coder
     case 6: return 950; // Specialist
@@ -47,7 +46,7 @@ export const calculateStartingCp = (skillRating?: number): number => {
     case 8: return 1450; // Expert
     case 9: return 1750; // Expert
     case 10: return 2100; // Elite
-    default: return 750;
+    default: return 600;
   }
 };
 

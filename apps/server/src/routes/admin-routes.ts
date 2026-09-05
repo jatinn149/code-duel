@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { IUserRepository, INotificationRepository } from '@/repositories/interfaces';
 import { requireAuth, requireRole } from '@/middleware/auth-middleware';
 import { UserRole, NotificationType, Rank } from '@code-duel/types';
-import { calculateCpRank, SocketEvents } from '@code-duel/shared';
+import { calculateCpRank, SocketEvents, CP_RANKS } from '@code-duel/shared';
 import { clearUserDatabase, flushAllRedisCache } from '@/services/admin-service';
 import { redisCache } from '@/utils/redis-cache';
 import { DailyResetEngine } from '@/services/daily-reset-engine';
@@ -128,19 +128,41 @@ export const createAdminRouter = (
 
       const { xp, rating, level, seasonalTier, note } = req.body;
       const updates: any = {};
+      let cpAwarded = 0;
 
-      if (rating !== undefined && !isNaN(Number(rating))) {
-        updates.rating = Math.max(0, (targetUser.rating || 0) + Number(rating));
-        updates.rank = calculateCpRank(updates.rating);
+      if (rating !== undefined && rating !== '' && !isNaN(Number(rating))) {
+        cpAwarded = Number(rating);
+        updates.rating = Math.max(0, (targetUser.rating || 0) + cpAwarded);
       }
-      if (xp !== undefined && !isNaN(Number(xp))) {
+      if (xp !== undefined && xp !== '' && !isNaN(Number(xp))) {
         updates.xp = Math.max(0, (targetUser.xp || 0) + Number(xp));
       }
-      if (level !== undefined && !isNaN(Number(level))) {
+      if (level !== undefined && level !== '' && !isNaN(Number(level))) {
         updates.level = Math.max(1, Number(level));
       }
-      if (seasonalTier) {
-        updates.seasonalTier = String(seasonalTier);
+
+      let tierPromoted = '';
+      if (seasonalTier && String(seasonalTier).trim()) {
+        const tierName = String(seasonalTier).trim();
+        const matchedRank = CP_RANKS.find((r) => r.rank.toLowerCase() === tierName.toLowerCase());
+        if (matchedRank) {
+          const currentExpected = updates.rating !== undefined ? updates.rating : (targetUser.rating || 0);
+          if (currentExpected < matchedRank.min) {
+            const diff = matchedRank.min - (targetUser.rating || 0);
+            cpAwarded = Math.max(cpAwarded, diff);
+            updates.rating = matchedRank.min;
+          }
+          updates.rank = matchedRank.rank;
+          updates.seasonalTier = matchedRank.rank;
+          tierPromoted = matchedRank.rank;
+        } else {
+          updates.seasonalTier = tierName;
+        }
+      }
+
+      if (updates.rating !== undefined) {
+        updates.rank = calculateCpRank(updates.rating);
+        updates.seasonalTier = updates.rank;
       }
 
       const updatedUser = await userRepository.update(id, updates);
@@ -151,22 +173,23 @@ export const createAdminRouter = (
       if (notificationRepository) {
         const giftDesc = [
           xp ? `+${xp} XP` : null,
-          rating ? `+${rating} CP` : null,
-          level ? `Level ${level}` : null,
-          seasonalTier ? `Tier ${seasonalTier}` : null,
+          cpAwarded > 0 ? `+${cpAwarded} CP` : null,
+          updates.level ? `Level ${updates.level}` : null,
+          tierPromoted ? `Promoted to ${tierPromoted} (${updates.rating} CP baseline)` : null,
         ].filter(Boolean).join(' • ');
 
         const notif = await notificationRepository.create({
           id: `notif-${Date.now()}-${Math.random().toString(36).substring(7)}`,
           userId: id,
           type: NotificationType.ADMIN_REWARD,
-          title: 'HQ Command: Resources Granted!',
+          title: tierPromoted ? `HQ Promotion: Tier ${tierPromoted}` : 'HQ Command: Resources Granted!',
           message: note?.trim() || `The administration granted rewards to your account: ${giftDesc}`,
           data: {
             giftXp: xp ? Number(xp) : undefined,
-            giftCp: rating ? Number(rating) : undefined,
+            giftCp: cpAwarded > 0 ? cpAwarded : undefined,
             newLevel: updates.level,
             newTier: updates.seasonalTier,
+            tierUpgrade: tierPromoted || undefined,
             grantedBy: (req.user as any)?.username || 'HQ Admin',
           },
           isRead: false,
@@ -200,18 +223,42 @@ export const createAdminRouter = (
         return res.status(404).json({ success: false, message: 'User not found' });
       }
 
-      const { title, message, giftXp, giftCp } = req.body;
+      const { title, message, giftXp, giftCp, tierUpgrade } = req.body;
       if (!title?.trim() || !message?.trim()) {
         return res.status(400).json({ success: false, message: 'Title and message are required' });
       }
 
       const updates: any = {};
-      if (giftCp && !isNaN(Number(giftCp))) {
-        updates.rating = Math.max(0, (targetUser.rating || 0) + Number(giftCp));
-        updates.rank = calculateCpRank(updates.rating);
+      let cpAwarded = 0;
+
+      if (giftCp !== undefined && giftCp !== '' && !isNaN(Number(giftCp))) {
+        cpAwarded = Number(giftCp);
+        updates.rating = Math.max(0, (targetUser.rating || 0) + cpAwarded);
       }
-      if (giftXp && !isNaN(Number(giftXp))) {
+      if (giftXp !== undefined && giftXp !== '' && !isNaN(Number(giftXp))) {
         updates.xp = Math.max(0, (targetUser.xp || 0) + Number(giftXp));
+      }
+
+      let promotedTier = '';
+      if (tierUpgrade && String(tierUpgrade).trim()) {
+        const tierName = String(tierUpgrade).trim();
+        const matchedRank = CP_RANKS.find((r) => r.rank.toLowerCase() === tierName.toLowerCase());
+        if (matchedRank) {
+          const currentExpected = updates.rating !== undefined ? updates.rating : (targetUser.rating || 0);
+          if (currentExpected < matchedRank.min) {
+            const diff = matchedRank.min - (targetUser.rating || 0);
+            cpAwarded = Math.max(cpAwarded, diff);
+            updates.rating = matchedRank.min;
+          }
+          updates.rank = matchedRank.rank;
+          updates.seasonalTier = matchedRank.rank;
+          promotedTier = matchedRank.rank;
+        }
+      }
+
+      if (updates.rating !== undefined) {
+        updates.rank = calculateCpRank(updates.rating);
+        updates.seasonalTier = updates.rank;
       }
 
       if (Object.keys(updates).length > 0) {
@@ -222,12 +269,13 @@ export const createAdminRouter = (
         const notif = await notificationRepository.create({
           id: `notif-${Date.now()}-${Math.random().toString(36).substring(7)}`,
           userId: id,
-          type: (giftXp || giftCp) ? NotificationType.ADMIN_REWARD : NotificationType.SYSTEM_MAIL,
+          type: (giftXp || cpAwarded > 0 || promotedTier) ? NotificationType.ADMIN_REWARD : NotificationType.SYSTEM_MAIL,
           title: title.trim(),
           message: message.trim(),
           data: {
             giftXp: giftXp ? Number(giftXp) : undefined,
-            giftCp: giftCp ? Number(giftCp) : undefined,
+            giftCp: cpAwarded > 0 ? cpAwarded : undefined,
+            tierUpgrade: promotedTier || undefined,
             sender: (req.user as any)?.username || 'HQ Administration',
           },
           isRead: false,

@@ -77,7 +77,7 @@ export const SignupPage = () => {
   }, [username]);
 
   const getSkillLabel = (val: number) => {
-    if (val <= 3) return { label: 'Beginner', rank: 'Initiate / Apprentice', cp: `${val * 120 + 40} CP`, color: 'text-zinc-400' };
+    if (val <= 3) return { label: 'Beginner', rank: 'Initiate', cp: `${val * 120 + 40} CP`, color: 'text-zinc-400' };
     if (val <= 5) return { label: 'Intermediate', rank: 'Coder', cp: `${val * 150} CP`, color: 'text-emerald-400' };
     if (val <= 7) return { label: 'Proficient', rank: 'Specialist', cp: `${val * 160} CP`, color: 'text-cyan-400' };
     if (val <= 9) return { label: 'Advanced', rank: 'Expert', cp: `${val * 180} CP`, color: 'text-indigo-400' };

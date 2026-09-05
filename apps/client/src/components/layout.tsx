@@ -12,16 +12,13 @@ import { clsx } from 'clsx';
 export const Layout = () => {
   useSocialSubscription();
   const { user, logout } = useAuthStore();
-  const { friends, unreadNotificationsCount } = useSocialStore();
+  const { unreadNotificationsCount, unreadMessageFriendIds } = useSocialStore();
+  const hasUnreadFriendMessages = (unreadMessageFriendIds || []).length > 0;
   const navigate = useNavigate();
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [friendsOpen, setFriendsOpen] = useState(false);
   const [mobileMailOpen, setMobileMailOpen] = useState(false);
-
-  const onlineFriendsCount = useMemo(() => {
-    return friends.filter(f => (f.status as any) === 'ONLINE' || (f.status as any) === 'IN_GAME').length;
-  }, [friends]);
 
   const handleLogout = async () => {
     await logout();
@@ -128,10 +125,8 @@ export const Layout = () => {
                   )}
                 >
                   <Users className="w-4.5 h-4.5" />
-                  {onlineFriendsCount > 0 && (
-                    <span className="absolute top-1 right-1 px-1 min-w-[14px] h-[14px] bg-emerald-500 text-black text-[8px] font-black rounded-full flex items-center justify-center border border-black shadow-[0_0_8px_rgba(16,185,129,0.5)]">
-                      {onlineFriendsCount}
-                    </span>
+                  {hasUnreadFriendMessages && (
+                    <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 rounded-full border border-black shadow-[0_0_8px_rgba(244,63,94,0.9)] animate-pulse" />
                   )}
                 </button>
 
@@ -315,8 +310,8 @@ export const Layout = () => {
             className="flex flex-col items-center gap-1 transition-all py-1 px-2.5 rounded-xl relative text-zinc-400 hover:text-zinc-200 active:scale-90"
           >
             <Users className="w-4.5 h-4.5" />
-            {onlineFriendsCount > 0 && (
-              <span className="absolute top-0.5 right-1.5 w-2 h-2 bg-emerald-500 rounded-full border border-black animate-pulse" />
+            {hasUnreadFriendMessages && (
+              <span className="absolute top-1 right-2 w-2.5 h-2.5 bg-rose-500 rounded-full border border-black shadow-[0_0_8px_rgba(244,63,94,0.9)] animate-pulse" />
             )}
             <span className="text-[10px] font-sans font-semibold tracking-tight">Friends</span>
           </button>

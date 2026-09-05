@@ -74,7 +74,6 @@ export interface ActivityEvent {
 
 export enum Rank {
   INITIATE = 'Initiate',
-  APPRENTICE = 'Apprentice',
   CODER = 'Coder',
   SPECIALIST = 'Specialist',
   EXPERT = 'Expert',
@@ -83,7 +82,7 @@ export enum Rank {
   GRANDMASTER = 'Grandmaster',
   CODEBREAKER = 'Codebreaker',
   APEX_CODER = 'Apex Coder',
-  UNRANKED = 'Initiate',
+  UNRANKED = 'Unranked',
 }
 
 export interface ProblemHistoryEntry {

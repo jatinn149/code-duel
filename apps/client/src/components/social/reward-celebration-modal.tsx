@@ -7,6 +7,7 @@ interface RewardCelebrationModalProps {
   onClose: () => void;
   xp?: number;
   cp?: number;
+  tierUpgrade?: string;
   title?: string;
   message?: string;
 }
@@ -16,6 +17,7 @@ export const RewardCelebrationModal: React.FC<RewardCelebrationModalProps> = ({
   onClose,
   xp = 0,
   cp = 0,
+  tierUpgrade,
   title = 'HQ Resource Dispatch',
   message = 'Rewards successfully credited to your operative credentials.',
 }) => {
@@ -92,6 +94,17 @@ export const RewardCelebrationModal: React.FC<RewardCelebrationModalProps> = ({
             <ShieldCheck size={13} />
             <span>HQ RESOURCE DISPATCH SECURED</span>
           </div>
+
+          {tierUpgrade && (
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="mb-3 px-3.5 py-1.5 rounded-xl bg-indigo-950/60 border border-indigo-500/50 text-indigo-300 text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(99,102,241,0.3)]"
+            >
+              <Trophy size={15} className="text-amber-400" />
+              <span>TIER PROMOTION: {tierUpgrade}</span>
+            </motion.div>
+          )}
 
           <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight mb-2">
             {title}

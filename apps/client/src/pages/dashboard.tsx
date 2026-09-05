@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSocket } from '@/hooks/use-socket';
-import { SocketEvents, normalizeRoomCode, calculateCpRank } from '@code-duel/shared';
+import { SocketEvents, normalizeRoomCode, calculateCpRank, CP_RANKS } from '@code-duel/shared';
 import { useRoomStore } from '@/store/room-store';
 import { useAuthStore } from '@/store/auth-store';
 import { getDashboardData, DashboardData } from '@/api/auth-api';
+import { apiClient } from '@/api/api-client';
+import { RewardCelebrationModal } from '@/components/social/reward-celebration-modal';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Zap,
@@ -82,7 +84,20 @@ export const DashboardPage = () => {
   const streak = currentUser?.streak ?? 0;
   const highestStreak = currentUser?.highestStreak ?? 0;
   const level = currentUser?.level ?? 1;
-  const seasonalTier = currentUser?.seasonalTier || 'UNRANKED';
+  const seasonalTier = calculateCpRank(rating);
+
+  const [claimedMissionIds, setClaimedMissionIds] = useState<string[]>([]);
+  const [directiveCelebration, setDirectiveCelebration] = useState<{
+    isOpen: boolean;
+    xp: number;
+    title: string;
+    message: string;
+  }>({
+    isOpen: false,
+    xp: 0,
+    title: '',
+    message: '',
+  });
 
   const winRate = useMemo(() => {
     if (matchesPlayed === 0) return '0.0';
@@ -112,21 +127,18 @@ export const DashboardPage = () => {
     });
   }, [currentUser?.streak]);
 
-  const [timeLeftStr, setTimeLeftStr] = useState('04h 12m');
-  
+  // Daily Challenge countdown timer
+  const [timeLeftStr, setTimeLeftStr] = useState('24h 00m');
   useEffect(() => {
     const updateTimer = () => {
-      const expiresAt = dashboardData?.dailyChallenge?.expiresAt;
-      if (!expiresAt) {
-        setTimeLeftStr('04h 12m');
+      if (!dashboardData?.dailyChallenge?.expiresAt) return;
+      const exp = new Date(dashboardData.dailyChallenge.expiresAt).getTime();
+      const diff = exp - Date.now();
+      if (diff <= 0) {
+        setTimeLeftStr('00h 00m');
         return;
       }
-      const diffMs = new Date(expiresAt).getTime() - Date.now();
-      if (diffMs <= 0) {
-        setTimeLeftStr('Expired');
-        return;
-      }
-      const totalSec = Math.floor(diffMs / 1000);
+      const totalSec = Math.floor(diff / 1000);
       const hours = Math.floor(totalSec / 3600);
       const mins = Math.floor((totalSec % 3600) / 60);
       setTimeLeftStr(`${String(hours).padStart(2, '0')}h ${String(mins).padStart(2, '0')}m`);
@@ -140,9 +152,9 @@ export const DashboardPage = () => {
   const directives = useMemo(() => {
     if (!dashboardData?.activeDirectives || dashboardData.activeDirectives.length === 0) {
       return [
-        { title: 'Secure Victory', desc: 'Win 2 Ranked Matches', progress: 1, total: 2, xp: '+25 CP', status: 'active' },
-        { title: 'Speed Demon', desc: 'Solve medium in under 10m', progress: 0, total: 1, xp: '+15 CP', status: 'active' },
-        { title: 'System Warmup', desc: 'Complete 1 practice challenge', progress: 1, total: 1, xp: 'Completed', status: 'completed' }
+        { id: 'def-1', title: 'Secure Victory', desc: 'Win 2 Ranked Matches', progress: 1, total: 2, rawXp: 50, xp: '+50 XP', status: 'active', isReadyToClaim: false },
+        { id: 'def-2', title: 'Speed Demon', desc: 'Solve medium in under 10m', progress: 0, total: 1, rawXp: 35, xp: '+35 XP', status: 'active', isReadyToClaim: false },
+        { id: 'def-3', title: 'System Warmup', desc: 'Complete 1 practice challenge', progress: 1, total: 1, rawXp: 25, xp: 'Completed', status: 'completed', isReadyToClaim: false }
       ];
     }
     return dashboardData.activeDirectives.map((m: any) => {
@@ -157,16 +169,55 @@ export const DashboardPage = () => {
         title = 'System Warmup';
       }
       
+      const isClaimed = m.claimed || claimedMissionIds.includes(m.id);
+      const isCompleted = m.completed || m.progress >= m.target;
+      const isReadyToClaim = isCompleted && !isClaimed;
+
       return {
+        id: m.id,
         title,
         desc: m.description,
-        progress: m.progress,
+        progress: Math.min(m.progress, m.target),
         total: m.target,
-        xp: m.completed ? 'Completed' : `+${m.xpReward} CP`,
-        status: m.completed ? 'completed' : 'active'
+        rawXp: m.xpReward || 50,
+        xp: isClaimed ? 'Claimed' : `+${m.xpReward || 50} XP`,
+        status: isClaimed ? 'completed' : isCompleted ? 'ready' : 'active',
+        isReadyToClaim,
       };
     });
-  }, [dashboardData?.activeDirectives]);
+  }, [dashboardData?.activeDirectives, claimedMissionIds]);
+
+  const handleClaimDirective = async (mission: any) => {
+    const rawXp = mission.rawXp || 50;
+    const currentAuthUser = useAuthStore.getState().user;
+    if (currentAuthUser) {
+      const newXp = (currentAuthUser.xp || 0) + rawXp;
+      const newLevel = Math.max(currentAuthUser.level || 1, Math.floor(newXp / 500) + 1);
+      useAuthStore.getState().setUser({
+        ...currentAuthUser,
+        xp: newXp,
+        level: newLevel,
+      });
+    }
+
+    if (mission.id && !mission.id.startsWith('def-')) {
+      try {
+        await apiClient.post(`/auth/missions/${mission.id}/claim`);
+      } catch {
+        // Fallback gracefully
+      }
+    }
+
+    setClaimedMissionIds((prev) => [...prev, mission.id]);
+    useAuthStore.getState().fetchCurrentUser().catch(() => {});
+
+    setDirectiveCelebration({
+      isOpen: true,
+      xp: rawXp,
+      title: 'Quest Accomplished!',
+      message: `Directive "${mission.desc}" completed. Combat XP successfully awarded!`,
+    });
+  };
 
   const liveArenaMatches = useMemo(() => {
     if (!dashboardData?.liveArena || dashboardData.liveArena.length === 0) {
@@ -434,25 +485,13 @@ export const DashboardPage = () => {
                   <span className="text-white font-mono font-bold">{rating} CP</span>
                 </div>
                 {(() => {
-                  const cpRanks = [
-                    { rank: 'Initiate', min: 0, max: 199 },
-                    { rank: 'Apprentice', min: 200, max: 499 },
-                    { rank: 'Coder', min: 500, max: 899 },
-                    { rank: 'Specialist', min: 900, max: 1399 },
-                    { rank: 'Expert', min: 1400, max: 1999 },
-                    { rank: 'Elite', min: 2000, max: 2699 },
-                    { rank: 'Master', min: 2700, max: 3499 },
-                    { rank: 'Grandmaster', min: 3500, max: 4499 },
-                    { rank: 'Codebreaker', min: 4500, max: 5999 },
-                    { rank: 'Apex Coder', min: 6000, max: Infinity },
-                  ];
                   const currentCp = rating;
-                  const idx = cpRanks.findIndex(r => currentCp >= r.min && currentCp <= r.max);
-                  const matched = cpRanks[idx] || cpRanks[0];
-                  const nextRank = cpRanks[idx + 1] || null;
+                  const idx = CP_RANKS.findIndex(r => currentCp >= r.min && currentCp <= r.max);
+                  const matched = CP_RANKS[idx] || CP_RANKS[0];
+                  const nextRank = CP_RANKS[idx + 1] || null;
                   
                   let pct = 100;
-                  if (nextRank) {
+                  if (nextRank && matched.max !== Infinity) {
                     const range = matched.max - matched.min + 1;
                     pct = Math.round(((currentCp - matched.min) / range) * 100);
                   }
@@ -659,11 +698,22 @@ export const DashboardPage = () => {
                     />
                   </div>
                   
-                  <div className="flex justify-between text-[11px]">
+                  <div className="flex justify-between items-center text-[11px] pt-0.5">
                     <span className="text-zinc-400">{mission.desc}</span>
-                    <span className={`font-semibold ${mission.status === 'completed' ? 'text-emerald-400' : 'text-indigo-400'}`}>
-                      {mission.xp}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className={`font-semibold ${mission.status === 'completed' ? 'text-emerald-400' : 'text-indigo-400'}`}>
+                        {mission.xp}
+                      </span>
+                      {mission.isReadyToClaim && (
+                        <button
+                          onClick={() => handleClaimDirective(mission)}
+                          className="px-2.5 py-0.5 bg-gradient-to-r from-emerald-500 to-teal-400 hover:brightness-110 text-black font-mono font-black text-[10px] rounded-md shadow-[0_0_10px_rgba(16,185,129,0.5)] transition-all animate-pulse active:scale-95 flex items-center gap-1 uppercase"
+                        >
+                          <Sparkles size={11} />
+                          Collect
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -1104,6 +1154,16 @@ export const DashboardPage = () => {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Quest / Directive Collection Celebration Modal */}
+      <RewardCelebrationModal
+        isOpen={directiveCelebration.isOpen}
+        onClose={() => setDirectiveCelebration((prev) => ({ ...prev, isOpen: false }))}
+        xp={directiveCelebration.xp}
+        cp={0}
+        title={directiveCelebration.title}
+        message={directiveCelebration.message}
+      />
     </motion.div>
   );
 };

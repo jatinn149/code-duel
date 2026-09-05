@@ -41,12 +41,14 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     isOpen: boolean;
     xp: number;
     cp: number;
+    tierUpgrade?: string;
     title: string;
     message: string;
   }>({
     isOpen: false,
     xp: 0,
     cp: 0,
+    tierUpgrade: undefined,
     title: '',
     message: '',
   });
@@ -74,13 +76,14 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
       });
     }
 
-    useAuthStore.getState().refresh().catch(() => {});
+    useAuthStore.getState().fetchCurrentUser().catch(() => {});
     markRead(n.id);
 
     setCelebrationData({
       isOpen: true,
       xp: giftXp,
       cp: giftCp,
+      tierUpgrade: (n.data?.tierUpgrade as string) || (n.data?.newTier as string) || undefined,
       title: n.title,
       message: n.message,
     });
@@ -368,6 +371,7 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
         onClose={() => setCelebrationData((prev) => ({ ...prev, isOpen: false }))}
         xp={celebrationData.xp}
         cp={celebrationData.cp}
+        tierUpgrade={celebrationData.tierUpgrade}
         title={celebrationData.title}
         message={celebrationData.message}
       />

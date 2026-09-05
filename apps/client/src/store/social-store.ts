@@ -6,11 +6,23 @@ import {
   User
 } from '@code-duel/types';
 
+export interface DirectMessage {
+  id: string;
+  fromUserId: string;
+  fromUsername: string;
+  toUserId: string;
+  text: string;
+  timestamp: string;
+}
+
 interface SocialState {
   friends: (Partial<User> & { status: PresenceStatus })[];
   notifications: Notification[];
   activities: ActivityEvent[];
   unreadNotificationsCount: number;
+  unreadMessageFriendIds: string[];
+  chatMessages: Record<string, DirectMessage[]>;
+  activeChatFriendId: string | null;
   
   setFriends: (friends: (Partial<User> & { status: PresenceStatus })[]) => void;
   updateFriendStatus: (userId: string, status: PresenceStatus) => void;
@@ -20,6 +32,10 @@ interface SocialState {
   markAllNotificationsRead: () => void;
   setActivities: (activities: ActivityEvent[]) => void;
   addActivity: (activity: ActivityEvent) => void;
+
+  addDirectMessage: (msg: DirectMessage, currentUserId: string) => void;
+  setActiveChatFriendId: (friendId: string | null) => void;
+  markChatRead: (friendId: string) => void;
 }
 
 export const useSocialStore = create<SocialState>((set) => ({
@@ -27,6 +43,9 @@ export const useSocialStore = create<SocialState>((set) => ({
   notifications: [],
   activities: [],
   unreadNotificationsCount: 0,
+  unreadMessageFriendIds: [],
+  chatMessages: {},
+  activeChatFriendId: null,
 
   setFriends: (friends) => set({ friends }),
   updateFriendStatus: (userId, status) => 
@@ -83,5 +102,40 @@ export const useSocialStore = create<SocialState>((set) => ({
   setActivities: (activities) => set({ activities }),
   addActivity: (activity) => set((state) => ({
     activities: [activity, ...state.activities].slice(0, 50)
+  })),
+
+  addDirectMessage: (msg, currentUserId) => set((state) => {
+    const partnerId = msg.fromUserId === currentUserId ? msg.toUserId : msg.fromUserId;
+    const currentList = state.chatMessages[partnerId] || [];
+    const messageExists = currentList.some((m) => m.id === msg.id);
+    const updatedMessages = {
+      ...state.chatMessages,
+      [partnerId]: messageExists ? currentList : [...currentList, msg],
+    };
+
+    let updatedUnread = state.unreadMessageFriendIds;
+    // If incoming message is from a friend (not sent by myself)
+    // and we are NOT currently chatting with this friend:
+    if (msg.fromUserId !== currentUserId && state.activeChatFriendId !== msg.fromUserId) {
+      if (!updatedUnread.includes(msg.fromUserId)) {
+        updatedUnread = [...updatedUnread, msg.fromUserId];
+      }
+    }
+
+    return {
+      chatMessages: updatedMessages,
+      unreadMessageFriendIds: updatedUnread,
+    };
+  }),
+
+  setActiveChatFriendId: (friendId) => set((state) => ({
+    activeChatFriendId: friendId,
+    unreadMessageFriendIds: friendId
+      ? state.unreadMessageFriendIds.filter((id) => id !== friendId)
+      : state.unreadMessageFriendIds,
+  })),
+
+  markChatRead: (friendId) => set((state) => ({
+    unreadMessageFriendIds: state.unreadMessageFriendIds.filter((id) => id !== friendId),
   })),
 }));

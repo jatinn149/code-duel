@@ -66,11 +66,19 @@ export const useSocialSubscription = () => {
       }
     };
 
+    const onDirectMessageReceive = (msg: any) => {
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser?.id && msg) {
+        useSocialStore.getState().addDirectMessage(msg, currentUser.id);
+      }
+    };
+
     socket.on(SocketEvents.SOCIAL_INITIAL_SYNC, onInitialSync);
     socket.on(SocketEvents.PRESENCE_UPDATE, onPresenceUpdate);
     socket.on(SocketEvents.PRESENCE_UPDATED, onPresenceUpdate);
     socket.on(SocketEvents.NOTIFICATION_RECEIVED, onNotificationReceived);
     socket.on('social:notification_received' as any, onNotificationReceived);
+    socket.on('social:direct_message_receive' as any, onDirectMessageReceive);
     socket.on(SocketEvents.ACTIVITY_FEED_UPDATE, onActivityFeedUpdate);
     socket.on(SocketEvents.MATCH_FOUND, onMatchFound);
     socket.on('user:profile_updated' as any, onProfileUpdated);
@@ -81,6 +89,7 @@ export const useSocialSubscription = () => {
       socket.off(SocketEvents.PRESENCE_UPDATED, onPresenceUpdate);
       socket.off(SocketEvents.NOTIFICATION_RECEIVED, onNotificationReceived);
       socket.off('social:notification_received' as any, onNotificationReceived);
+      socket.off('social:direct_message_receive' as any, onDirectMessageReceive);
       socket.off(SocketEvents.ACTIVITY_FEED_UPDATE, onActivityFeedUpdate);
       socket.off(SocketEvents.MATCH_FOUND, onMatchFound);
       socket.off('user:profile_updated' as any, onProfileUpdated);
