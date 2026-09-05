@@ -1,22 +1,24 @@
 import React, { useRef } from 'react';
 import { motion, useScroll, useTransform, useSpring, useMotionValue } from 'framer-motion';
-import { Cpu, Sparkles, Code2, CheckCircle } from 'lucide-react';
+import { Sparkles, Code2, CheckCircle, Clock } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface LanguageWeapon {
-  id: 'python' | 'javascript' | 'cpp';
+  id: 'python' | 'java';
   name: string;
   tagline: string;
+  status: 'READY' | 'COMING_SOON';
+  statusBadge: string;
   badge: string;
   accentColor: string;
   glowColor: string;
   gradient: string;
   borderHover: string;
   stats: {
-    compileSpeed: string;
-    memoryEfficiency: string;
-    arenaWinRate: string;
-    popularity: string;
+    speed: string;
+    learningCurve: string;
+    battleStyle: string;
+    statusText: string;
   };
   features: string[];
   codeSnippet: string;
@@ -27,99 +29,67 @@ const LANGUAGES: LanguageWeapon[] = [
   {
     id: 'python',
     name: 'Python 3.12',
-    tagline: 'Velocity, Algorithmic Purity & Rapid Prototyping',
-    badge: 'PY_INTERPRETER_V3',
+    tagline: 'Clean, readable syntax & super fast to write',
+    status: 'READY',
+    statusBadge: 'READY TO PLAY',
+    badge: 'ACTIVE IN ARENA',
     accentColor: 'text-[#FFD438]',
     glowColor: 'rgba(255, 212, 56, 0.25)',
     gradient: 'from-[#3776AB]/30 via-[#FFD438]/20 to-transparent',
     borderHover: 'hover:border-[#FFD438]/50',
     stats: {
-      compileSpeed: '< 18ms (JIT)',
-      memoryEfficiency: 'High-Level GC',
-      arenaWinRate: '54.2%',
-      popularity: '42% of Duels',
+      speed: 'Instant Execution',
+      learningCurve: 'Beginner Friendly',
+      battleStyle: 'Quick Solutions',
+      statusText: '100% Ready',
     },
     features: [
-      'Concise list comprehensions for blitz round speed',
-      'Built-in heapq, collections, and bisect libraries',
-      'Zero boilerplate syntax for split-second submissions',
+      'Simple, clean syntax that reads almost like plain English',
+      'Built-in helpers for lists, sorting, sets, and math',
+      'Minimal typing so you can code your ideas faster than the clock',
     ],
-    codeSnippet: `def solve_chaos_arena(stream: list[int], target: int) -> int:
-    seen = set()
-    for val in stream:
-        complement = target - val
-        if complement in seen:
-            return val * complement
-        seen.add(val)
-    return -1  # Optimized O(N) dual lookup`,
-    description:
-      'The premier weapon for rapid algorithmic composition. Clean syntax allows operatives to write solutions with minimal keystrokes, capturing early-submission time bonuses.',
-  },
-  {
-    id: 'javascript',
-    name: 'JavaScript / TypeScript',
-    tagline: 'Asynchronous Concurrency & The Modern Web Titan',
-    badge: 'NODE_V20_TURBOFAN',
-    accentColor: 'text-[#F7DF1E]',
-    glowColor: 'rgba(247, 223, 30, 0.25)',
-    gradient: 'from-[#F7DF1E]/25 via-[#3178C6]/20 to-transparent',
-    borderHover: 'hover:border-[#F7DF1E]/50',
-    stats: {
-      compileSpeed: '< 12ms (V8)',
-      memoryEfficiency: 'Generational GC',
-      arenaWinRate: '51.8%',
-      popularity: '35% of Duels',
-    },
-    features: [
-      'Event loop mastery for high-throughput stream processing',
-      'Flexible closures and modern ES2024 array operations',
-      'Strict TypeScript static checking prevents runtime traps',
-    ],
-    codeSnippet: `export function maxSubarraySum(nums: number[], k: number): number {
-  let maxSum = 0, current = 0;
-  for (let i = 0; i < nums.length; i++) {
-    current += nums[i];
-    if (i >= k) current -= nums[i - k];
-    if (i >= k - 1) maxSum = Math.max(maxSum, current);
-  }
-  return maxSum; // Sub-millisecond sliding window
-}`,
-    description:
-      'Lightning-fast V8 execution combined with dynamic typing or strict TypeScript guarantees. The battle weapon of choice for full-stack engineers and web gladiators.',
-  },
-  {
-    id: 'cpp',
-    name: 'C++ 20',
-    tagline: 'Raw Bare-Metal Silicon & Zero-Overhead Dominance',
-    badge: 'GCC_O3_ULTRA_NATIVE',
-    accentColor: 'text-[#00599C]',
-    glowColor: 'rgba(0, 89, 156, 0.35)',
-    gradient: 'from-[#00599C]/30 via-[#659AD2]/20 to-transparent',
-    borderHover: 'hover:border-[#659AD2]/50',
-    stats: {
-      compileSpeed: 'Native Native',
-      memoryEfficiency: 'Direct Stack/Heap (Manual)',
-      arenaWinRate: '56.9%',
-      popularity: '23% of Duels',
-    },
-    features: [
-      'Zero-cost abstractions with standard template library (STL)',
-      'Direct pointer arithmetic & SIMD vectorization',
-      'Undisputed fastest execution time in tight compute loops',
-    ],
-    codeSnippet: `#include <vector>
-#include <algorithm>
+    codeSnippet: `def count_even_numbers(numbers: list[int]) -> int:
+    # Count all numbers divisible by 2
+    return sum(1 for num in numbers if num % 2 == 0)
 
-long long solveSpeedRun(std::vector<int>& arr) {
-    std::sort(arr.begin(), arr.end());
-    long long ans = 0;
-    for (size_t i = 0; i < arr.size(); ++i) {
-        ans += 1LL * arr[i] * (i + 1);
+# Example: [1, 2, 3, 4, 5, 6] -> 3 even numbers`,
+    description:
+      'The most popular language in Code Duel. Python lets you focus purely on problem-solving logic without worrying about complex setup or difficult boilerplate.',
+  },
+  {
+    id: 'java',
+    name: 'Java 21',
+    tagline: 'Strongly typed, structured & industry standard',
+    status: 'COMING_SOON',
+    statusBadge: 'COMING SOON',
+    badge: 'IN ENGINE TESTING',
+    accentColor: 'text-[#F89820]',
+    glowColor: 'rgba(248, 152, 32, 0.3)',
+    gradient: 'from-[#5382A1]/30 via-[#F89820]/20 to-transparent',
+    borderHover: 'hover:border-[#F89820]/50',
+    stats: {
+      speed: 'High Performance',
+      learningCurve: 'Structured & Clear',
+      battleStyle: 'Object-Oriented',
+      statusText: 'Next Arena Update',
+    },
+    features: [
+      'Strict variable types catch bugs before you even submit',
+      'Standard language taught in CS universities and AP Computer Science',
+      'High-speed virtual machine optimized for complex algorithms',
+    ],
+    codeSnippet: `public class Solution {
+    // Java support arriving in the next major patch!
+    public static int countEvenNumbers(int[] numbers) {
+        int count = 0;
+        for (int num : numbers) {
+            if (num % 2 == 0) count++;
+        }
+        return count;
     }
-    return ans; // Pure hardware-accelerated throughput
 }`,
     description:
-      'The heavyweight warhorse of competitive programming. When memory constraints are punishing and every nanosecond counts toward the tiebreaker, C++ reigns supreme.',
+      'The gold standard of computer science education and enterprise software. Java brings rigid structure and high-speed execution to competitive coding matches.',
   },
 ];
 
@@ -129,8 +99,8 @@ const Interactive3DLogoCard: React.FC<{ lang: LanguageWeapon }> = ({ lang }) => 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [18, -18]), { stiffness: 200, damping: 20 });
-  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-18, 18]), { stiffness: 200, damping: 20 });
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [16, -16]), { stiffness: 200, damping: 20 });
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-16, 16]), { stiffness: 200, damping: 20 });
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
@@ -152,100 +122,118 @@ const Interactive3DLogoCard: React.FC<{ lang: LanguageWeapon }> = ({ lang }) => 
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{
-        perspective: 1200,
+        rotateX,
+        rotateY,
+        transformStyle: 'preserve-3d',
       }}
-      className="relative w-full group cursor-pointer"
+      className={clsx(
+        "relative rounded-3xl bg-gradient-to-b from-neutral-900/95 via-neutral-950 to-black p-6 sm:p-8 border border-neutral-800 transition-all duration-300 shadow-2xl flex flex-col justify-between group",
+        lang.borderHover
+      )}
     >
+      {/* Specular Interactive Cursor Highlight */}
       <motion.div
+        className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
         style={{
-          rotateX,
-          rotateY,
-          transformStyle: 'preserve-3d',
+          background: useTransform(
+            [mouseX, mouseY],
+            ([x, y]) =>
+              `radial-gradient(550px circle at ${(Number(x) + 0.5) * 100}% ${(Number(y) + 0.5) * 100}%, ${lang.glowColor}, transparent 70%)`
+          ),
         }}
-        transition={{ type: 'spring', damping: 25, stiffness: 250 }}
-        className={clsx(
-          "relative rounded-3xl bg-gradient-to-b from-neutral-900/90 via-black to-neutral-950 p-6 sm:p-8 border border-neutral-800 transition-colors duration-300 shadow-2xl",
-          lang.borderHover
-        )}
-      >
-        {/* Specular Glare Effect */}
-        <div
-          className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-          style={{
-            background: `radial-gradient(circle at 50% 0%, ${lang.glowColor}, transparent 70%)`,
-          }}
-        />
+      />
 
-        {/* 3D Content Wrapper with transformZ */}
-        <div style={{ transform: 'translateZ(35px)' }} className="relative z-10 flex flex-col h-full justify-between">
-          {/* Header & 3D Logo Visualization */}
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <span className="text-[10px] font-mono tracking-widest px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-neutral-400 uppercase font-semibold">
-                {lang.badge}
-              </span>
-              <div className="flex items-center gap-1 text-[11px] font-mono text-neutral-400">
-                <Sparkles size={13} className={lang.accentColor} />
-                <span>Tier 1 Native</span>
-              </div>
-            </div>
-
-            {/* 3D Geometric Logo Centerpiece */}
-            <div className="h-44 sm:h-48 w-full flex items-center justify-center relative my-2 overflow-visible">
-              {lang.id === 'python' && <Python3DLogo />}
-              {lang.id === 'javascript' && <JavaScript3DLogo />}
-              {lang.id === 'cpp' && <Cpp3DLogo />}
-            </div>
-
-            {/* Title & Tagline */}
-            <div className="text-center mt-3">
-              <h3 className="text-2xl font-black text-white tracking-tight flex items-center justify-center gap-2">
-                <span>{lang.name}</span>
-                <span className={clsx("text-xs font-mono px-2 py-0.5 rounded bg-white/[0.06] border border-white/10", lang.accentColor)}>
-                  READY
+      <div className="relative z-10">
+        {/* Header Badges */}
+        <div className="flex items-center justify-between gap-3 mb-6">
+          <div className="flex items-center gap-2">
+            <span className={clsx(
+              "px-3 py-1 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase border",
+              lang.status === 'READY'
+                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                : "bg-amber-500/10 border-amber-500/30 text-amber-300"
+            )}>
+              {lang.status === 'READY' ? (
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  {lang.statusBadge}
                 </span>
-              </h3>
-              <p className="text-xs text-neutral-400 font-medium mt-1">
-                {lang.tagline}
-              </p>
-            </div>
+              ) : (
+                <span className="flex items-center gap-1.5">
+                  <Clock size={11} className="text-amber-400" />
+                  {lang.statusBadge}
+                </span>
+              )}
+            </span>
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 gap-2.5 my-6 pt-5 border-t border-neutral-800/80 text-left">
-            <div className="p-2.5 rounded-xl bg-neutral-900/60 border border-neutral-800/60">
-              <span className="text-[10px] font-mono text-neutral-450 uppercase block">Execution Speed</span>
-              <span className="text-xs font-mono font-bold text-white mt-0.5 block">{lang.stats.compileSpeed}</span>
-            </div>
-            <div className="p-2.5 rounded-xl bg-neutral-900/60 border border-neutral-800/60">
-              <span className="text-[10px] font-mono text-neutral-450 uppercase block">Arena Win Rate</span>
-              <span className={clsx("text-xs font-mono font-bold mt-0.5 block", lang.accentColor)}>{lang.stats.arenaWinRate}</span>
-            </div>
-            <div className="p-2.5 rounded-xl bg-neutral-900/60 border border-neutral-800/60">
-              <span className="text-[10px] font-mono text-neutral-450 uppercase block">Memory Archetype</span>
-              <span className="text-xs font-mono font-bold text-neutral-300 mt-0.5 block truncate">{lang.stats.memoryEfficiency}</span>
-            </div>
-            <div className="p-2.5 rounded-xl bg-neutral-900/60 border border-neutral-800/60">
-              <span className="text-[10px] font-mono text-neutral-450 uppercase block">Match Share</span>
-              <span className="text-xs font-mono font-bold text-emerald-400 mt-0.5 block">{lang.stats.popularity}</span>
-            </div>
+          <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider font-semibold">
+            {lang.badge}
+          </span>
+        </div>
+
+        {/* 3D Floating Logo Stage */}
+        <div className="py-6 flex flex-col items-center justify-center relative">
+          <div style={{ transform: 'translateZ(50px)' }}>
+            {lang.id === 'python' ? <Python3DLogo /> : <Java3DLogo />}
           </div>
 
-          {/* Code Snippet Card */}
-          <div className="rounded-xl bg-black/80 border border-neutral-800/90 p-3.5 text-left font-mono text-[11px] text-neutral-300 overflow-x-auto scrollbar-hide shadow-inner">
-            <div className="flex items-center justify-between pb-2 mb-2 border-b border-neutral-800/60 text-[10px] text-neutral-400">
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                Live Arena Solution
-              </span>
-              <span>UTF-8</span>
-            </div>
-            <pre className="text-neutral-300 leading-relaxed overflow-x-auto">
-              <code>{lang.codeSnippet}</code>
-            </pre>
+          <div style={{ transform: 'translateZ(30px)' }} className="text-center mt-5">
+            <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              {lang.name}
+            </h3>
+            <p className={clsx("text-xs font-semibold mt-1", lang.accentColor)}>
+              {lang.tagline}
+            </p>
           </div>
         </div>
-      </motion.div>
+
+        {/* Description in simple friendly English */}
+        <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed mt-2 mb-6">
+          {lang.description}
+        </p>
+
+        {/* Key Features */}
+        <div className="space-y-2 mb-6">
+          {lang.features.map((feature, i) => (
+            <div key={i} className="flex items-start gap-2.5 text-xs text-neutral-300">
+              <span className={clsx("mt-0.5 shrink-0", lang.accentColor)}>•</span>
+              <span className="leading-snug">{feature}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Code Preview Stage */}
+        <div className="rounded-xl bg-black/90 border border-neutral-800 p-4 font-mono text-xs overflow-hidden relative group/code">
+          <div className="flex items-center justify-between pb-2 mb-2 border-b border-neutral-900 text-[10px] text-neutral-400">
+            <span>Sample Solution</span>
+            <span className="text-neutral-500 font-sans">
+              {lang.status === 'READY' ? 'Interactive Python' : 'Java Preview'}
+            </span>
+          </div>
+          <pre className="text-[11px] leading-relaxed text-neutral-300 overflow-x-auto scrollbar-hide">
+            <code>{lang.codeSnippet}</code>
+          </pre>
+        </div>
+      </div>
+
+      {/* Card Footer: Quick Stats */}
+      <div className="relative z-10 mt-6 pt-5 border-t border-neutral-850 grid grid-cols-3 gap-3 font-mono text-center">
+        <div className="bg-neutral-900/50 rounded-lg p-2">
+          <span className="text-[9px] text-neutral-400 uppercase block">Execution</span>
+          <span className="text-xs font-bold text-white mt-0.5 block">{lang.stats.speed}</span>
+        </div>
+        <div className="bg-neutral-900/50 rounded-lg p-2">
+          <span className="text-[9px] text-neutral-400 uppercase block">Learning</span>
+          <span className="text-xs font-bold text-neutral-200 mt-0.5 block">{lang.stats.learningCurve}</span>
+        </div>
+        <div className="bg-neutral-900/50 rounded-lg p-2">
+          <span className="text-[9px] text-neutral-400 uppercase block">Arena Status</span>
+          <span className={clsx("text-xs font-bold mt-0.5 block", lang.accentColor)}>
+            {lang.stats.statusText}
+          </span>
+        </div>
+      </div>
     </motion.div>
   );
 };
@@ -255,8 +243,8 @@ const Python3DLogo = () => {
   return (
     <motion.div
       animate={{
-        rotateY: [0, 15, -15, 0],
-        rotateX: [0, -8, 8, 0],
+        rotateY: [0, 14, -14, 0],
+        rotateX: [0, -6, 6, 0],
         y: [0, -6, 0],
       }}
       transition={{
@@ -271,7 +259,7 @@ const Python3DLogo = () => {
       <div className="absolute inset-0 bg-[#3776AB]/30 rounded-full blur-2xl animate-pulse" />
       <div className="absolute inset-4 bg-[#FFD438]/25 rounded-full blur-xl animate-pulse" style={{ animationDelay: '1s' }} />
 
-      {/* Handcrafted High-Precision 3D Python Emblem SVG */}
+      {/* 3D Python Emblem SVG */}
       <svg
         viewBox="0 0 128 128"
         className="w-24 h-24 drop-shadow-[0_15px_25px_rgba(0,0,0,0.8)] filter transition-transform hover:scale-105"
@@ -312,68 +300,28 @@ const Python3DLogo = () => {
   );
 };
 
-// 3D Visualized JavaScript / TypeScript Logo Component
-const JavaScript3DLogo = () => {
+// 3D Visualized Java Coffee Cup Logo Component
+const Java3DLogo = () => {
   return (
     <motion.div
       animate={{
-        rotateY: [0, -18, 18, 0],
-        rotateZ: [0, -4, 4, 0],
-        y: [0, -8, 0],
+        rotateY: [0, 16, -16, 0],
+        rotateX: [0, -6, 6, 0],
+        y: [0, -6, 0],
       }}
       transition={{
-        duration: 7.5,
+        duration: 7,
         repeat: Infinity,
         ease: 'easeInOut',
       }}
       style={{ transformStyle: 'preserve-3d' }}
       className="relative w-28 h-28 flex items-center justify-center"
     >
-      {/* Glowing backdrop halo */}
-      <div className="absolute inset-0 bg-[#F7DF1E]/20 rounded-3xl blur-2xl animate-pulse" />
-      <div className="absolute inset-3 bg-[#3178C6]/25 rounded-2xl blur-xl" />
+      {/* Radiant Amber & Red Aura */}
+      <div className="absolute inset-0 bg-[#F89820]/25 rounded-full blur-2xl animate-pulse" />
+      <div className="absolute inset-2 bg-[#5382A1]/20 rounded-full blur-xl" />
 
-      {/* 3D Isometric Dual Tile (JS + TS) */}
-      <div className="relative w-24 h-24 rounded-2xl bg-gradient-to-tr from-[#C9B310] via-[#F7DF1E] to-[#FFF176] p-1 shadow-[0_20px_40px_rgba(0,0,0,0.9)] flex items-end justify-end overflow-hidden border border-yellow-200/50">
-        {/* Metallic Bevel Inset */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
-
-        {/* Diagonal TS Companion Strip */}
-        <div className="absolute top-0 left-0 bg-gradient-to-br from-[#3178C6] to-[#1E4F8A] px-2 py-0.5 rounded-br-lg text-[9px] font-mono font-black text-white shadow-md border-r border-b border-blue-400/40">
-          TS + JS
-        </div>
-
-        {/* Classic Embossed JS Logo Glyph */}
-        <span className="text-4xl font-black font-sans text-black pr-2 pb-1 tracking-tighter drop-shadow-sm select-none">
-          JS
-        </span>
-      </div>
-    </motion.div>
-  );
-};
-
-// 3D Visualized C++ Logo Component
-const Cpp3DLogo = () => {
-  return (
-    <motion.div
-      animate={{
-        rotateY: [0, 20, -20, 0],
-        rotateX: [0, 10, -10, 0],
-        y: [0, -7, 0],
-      }}
-      transition={{
-        duration: 9,
-        repeat: Infinity,
-        ease: 'easeInOut',
-      }}
-      style={{ transformStyle: 'preserve-3d' }}
-      className="relative w-28 h-28 flex items-center justify-center"
-    >
-      {/* Radiant Cyan & Blue Aura */}
-      <div className="absolute inset-0 bg-[#00599C]/35 rounded-full blur-2xl animate-pulse" />
-      <div className="absolute inset-2 bg-[#659AD2]/25 rounded-full blur-lg" />
-
-      {/* 3D Shield Crest SVG */}
+      {/* 3D Java Coffee Cup & Heat Plumes SVG */}
       <svg
         viewBox="0 0 128 128"
         className="w-24 h-24 drop-shadow-[0_15px_30px_rgba(0,0,0,0.85)] filter transition-transform hover:scale-105"
@@ -381,48 +329,69 @@ const Cpp3DLogo = () => {
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          <linearGradient id="cppMetallic3D" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#1E78C2" />
-            <stop offset="50%" stopColor="#00599C" />
-            <stop offset="100%" stopColor="#003561" />
+          <linearGradient id="javaSteam1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#EA2D2E" />
+            <stop offset="100%" stopColor="#F89820" />
           </linearGradient>
-          <linearGradient id="cppCyanAccent" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#A4D2FF" />
-            <stop offset="100%" stopColor="#4A9BF5" />
+          <linearGradient id="javaSteam2" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#F89820" />
+            <stop offset="100%" stopColor="#FFC837" />
+          </linearGradient>
+          <linearGradient id="javaCupBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#6C9BBF" />
+            <stop offset="50%" stopColor="#4178A3" />
+            <stop offset="100%" stopColor="#1E4766" />
           </linearGradient>
         </defs>
 
-        {/* Shield Outer Bevel */}
-        <polygon
-          points="64,12 114,32 114,76 64,116 14,76 14,32"
-          fill="url(#cppMetallic3D)"
-          stroke="#5FA8E6"
+        {/* Steam Plume 1 (Curving Red/Orange) */}
+        <path
+          d="M62 14 C68 20, 56 26, 63 35 C66 39, 72 41, 70 47 C68 52, 60 55, 58 60"
+          stroke="url(#javaSteam1)"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+          fill="none"
+        />
+
+        {/* Steam Plume 2 (Left Flame S-Curve) */}
+        <path
+          d="M50 20 C55 26, 44 32, 51 42 C54 46, 58 49, 56 54"
+          stroke="url(#javaSteam2)"
           strokeWidth="3"
+          strokeLinecap="round"
+          fill="none"
         />
 
-        {/* Inner Shield Facet */}
-        <polygon
-          points="64,22 104,38 104,72 64,104 24,72 24,38"
-          fill="#002447"
-          opacity="0.85"
-        />
-
-        {/* Stylized 'C' Emblem */}
+        {/* Coffee Cup Body */}
         <path
-          d="M62 45 C48 45, 40 54, 40 64 C40 74, 48 83, 62 83 C69 83, 75 79, 78 74 L69 69 C67 72, 65 73, 62 73 C54 73, 50 67, 50 64 C50 61, 54 55, 62 55 C65 55, 67 56, 69 59 L78 54 C75 49, 69 45, 62 45 Z"
-          fill="url(#cppCyanAccent)"
+          d="M36 62 H82 L78 92 C77 99, 71 104, 63 104 H55 C47 104, 41 99, 40 92 Z"
+          fill="url(#javaCupBlue)"
+          stroke="#87B4D4"
+          strokeWidth="1.5"
         />
 
-        {/* First Plus '+' */}
+        {/* Cup Rim Highlight */}
+        <ellipse cx="59" cy="62" rx="23" ry="5" fill="#1C4763" stroke="#87B4D4" strokeWidth="1.5" />
+
+        {/* Cup Handle */}
         <path
-          d="M84 57 H88 V62 H93 V66 H88 V71 H84 V66 H79 V62 H84 Z"
-          fill="#FFF"
+          d="M79 68 C88 68, 92 76, 90 84 C88 90, 82 92, 76 90"
+          stroke="url(#javaCupBlue)"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+          fill="none"
         />
 
-        {/* Second Plus '+' */}
+        {/* Saucer Base Under Cup */}
         <path
-          d="M98 57 H102 V62 H107 V66 H102 V71 H98 V66 H93 V62 H98 Z"
-          fill="#659AD2"
+          d="M28 106 C42 114, 76 114, 90 106 C84 113, 34 113, 28 106 Z"
+          fill="#3E6B89"
+        />
+        <path
+          d="M34 113 C48 119, 70 119, 84 113"
+          stroke="#F89820"
+          strokeWidth="2"
+          strokeLinecap="round"
         />
       </svg>
     </motion.div>
@@ -436,63 +405,63 @@ export const ThreeDLanguagesShowcase: React.FC = () => {
     offset: ['start end', 'end start'],
   });
 
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ['-60px', '60px']);
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ['-50px', '50px']);
   const titleOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.4, 1, 1, 0.4]);
 
   return (
     <section
       ref={containerRef}
       id="languages-dimension"
-      className="relative py-24 sm:py-32 px-4 sm:px-6 lg:px-8 bg-black overflow-hidden border-t border-b border-neutral-900"
+      className="relative py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-black overflow-hidden border-t border-b border-neutral-900"
     >
-      {/* Ambient Parallax Grid Canvas Background */}
+      {/* Ambient Parallax Grid Background */}
       <motion.div
         style={{ y: backgroundY }}
         className="absolute inset-0 bg-[linear-gradient(to_right,#141414_1px,transparent_1px),linear-gradient(to_bottom,#141414_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-30 pointer-events-none"
       />
 
-      {/* Decorative Glow Nodes */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-gradient-to-r from-blue-600/10 via-amber-500/10 to-emerald-500/10 rounded-full blur-[140px] pointer-events-none" />
+      {/* Decorative Glow */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[300px] bg-gradient-to-r from-blue-600/10 via-amber-500/10 to-emerald-500/10 rounded-full blur-[130px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Section Header */}
-        <motion.div style={{ opacity: titleOpacity }} className="text-center max-w-3xl mx-auto mb-16 sm:mb-20">
+        <motion.div style={{ opacity: titleOpacity }} className="text-center max-w-3xl mx-auto mb-14 sm:mb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-neutral-300 text-xs font-mono font-semibold uppercase tracking-widest mb-4">
-            <Cpu size={13} className="text-indigo-400" />
-            <span>POLYGLOT ARENA ARSENAL</span>
+            <Sparkles size={13} className="text-amber-400" />
+            <span>SUPPORTED CODING LANGUAGES</span>
           </div>
 
-          <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-none mb-5">
-            CHOOSE YOUR WEAPON.{' '}
-            <span className="bg-gradient-to-r from-neutral-200 via-white to-neutral-450 bg-clip-text text-transparent">
-              DOMINATE IN 3D.
+          <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-none mb-4">
+            YOUR CODE,{' '}
+            <span className="bg-gradient-to-r from-amber-400 via-yellow-300 to-emerald-400 bg-clip-text text-transparent">
+              EVALUATED IN REAL TIME.
             </span>
           </h2>
 
           <p className="text-sm sm:text-base text-neutral-400 font-normal leading-relaxed">
-            Every coding language is a unique battle class with dedicated execution runtimes, native telemetry, and time-tested algorithmic libraries. Master your syntax and out-think opponents in real-time.
+            Write code directly in our built-in browser editor. Python is fully active and ready for duels today, with Java rolling out in our next release.
           </p>
         </motion.div>
 
-        {/* 3-Column Responsive 3D Showcase Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-10">
+        {/* 2-Column Responsive 3D Showcase Grid (Python + Java) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 max-w-5xl mx-auto gap-8 sm:gap-10">
           {LANGUAGES.map((lang) => (
             <Interactive3DLogoCard key={lang.id} lang={lang} />
           ))}
         </div>
 
-        {/* Polyglot Runtimes Telemetry Footer */}
-        <div className="mt-16 sm:mt-20 p-6 rounded-2xl bg-neutral-950/80 border border-neutral-800/80 flex flex-col md:flex-row items-center justify-between gap-6 backdrop-blur-md">
+        {/* Clean Execution Feature Bar */}
+        <div className="mt-14 sm:mt-16 max-w-5xl mx-auto p-5 rounded-2xl bg-neutral-950/80 border border-neutral-850 flex flex-col md:flex-row items-center justify-between gap-5 backdrop-blur-md">
           <div className="flex items-center gap-4">
-            <div className="w-11 h-11 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
-              <Code2 size={22} />
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+              <Code2 size={20} />
             </div>
             <div>
               <h4 className="text-sm font-bold text-white tracking-tight">
-                Sandboxed Docker Real-Time Execution Cluster
+                Lightning Fast Cloud Execution
               </h4>
-              <p className="text-xs text-neutral-400 font-mono mt-0.5">
-                Each submission runs isolated with rlimit memory capping, wall-clock timing, and zero cold starts.
+              <p className="text-xs text-neutral-400 mt-0.5">
+                Each submission runs safely in milliseconds with automatic test verification.
               </p>
             </div>
           </div>
@@ -500,10 +469,11 @@ export const ThreeDLanguagesShowcase: React.FC = () => {
           <div className="flex items-center gap-4 shrink-0 text-xs font-mono">
             <span className="inline-flex items-center gap-1.5 text-emerald-400">
               <CheckCircle size={14} />
-              <span>Judge0 Core Active</span>
+              <span>Python 3.12 Active</span>
             </span>
-            <span className="inline-flex items-center gap-1.5 text-neutral-400 border-l border-neutral-800 pl-4">
-              <span>99.99% Execution Reliability</span>
+            <span className="inline-flex items-center gap-1.5 text-amber-400 border-l border-neutral-800 pl-4">
+              <Clock size={14} />
+              <span>Java 21 Coming Soon</span>
             </span>
           </div>
         </div>

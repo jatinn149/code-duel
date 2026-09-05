@@ -4,49 +4,120 @@ import {
   Swords,
   Flame,
   Zap,
-  ShieldAlert,
   Users,
   Layers,
+  CheckCircle2,
+  Clock,
+  Sparkles,
+  ArrowRight,
+  Shield,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export const BentoFeatures: React.FC = () => {
+  const navigate = useNavigate();
+
   return (
-    <section id="game-modes" className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8 bg-[#030303] relative overflow-hidden">
+    <section id="game-modes" className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-[#030303] relative overflow-hidden">
       {/* Background Decorative Gradients */}
-      <div className="absolute top-1/2 left-0 w-96 h-96 bg-purple-600/10 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-600/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute top-1/3 left-0 w-96 h-96 bg-purple-600/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-10 right-0 w-96 h-96 bg-indigo-600/10 rounded-full blur-[140px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 sm:mb-20">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-neutral-300 text-xs font-mono font-semibold uppercase tracking-widest mb-4">
             <Layers size={13} className="text-indigo-400" />
-            <span>MISSION SPECIFICATIONS</span>
+            <span>CHOOSE YOUR BATTLEFIELD</span>
           </div>
 
           <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-none mb-4">
-            BUILT FOR ESPORTS CODING.{' '}
+            3 EXCITING MODES.{' '}
             <span className="bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">
-              ENGINEERED FOR PRESSURE.
+              ENDLESS ACTION.
             </span>
           </h2>
 
           <p className="text-sm sm:text-base text-neutral-400 font-normal leading-relaxed">
-            Every match mode tests a unique facet of software engineering: raw algorithmic knowledge, composure under real-time chaos, daily consistency, and tactical speed.
+            Whether you have 5 minutes for a quick speed run or want a high-stakes best-of-3 showdown, Code Duel gives you the perfect match format.
           </p>
         </div>
 
-        {/* Bento Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-12 gap-5 sm:gap-6">
-          {/* Card 1: 1v1 Ranked Duels (Large Col 8) */}
+        {/* 3 Main Battle Modes Grid (Quickode, Multi-Round, Chaos Arena) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-8">
+          {/* Mode 1: Quickode (1v1 Sprint) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="lg:col-span-8 p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-neutral-900/90 to-neutral-950 border border-neutral-800 hover:border-neutral-700 transition-all flex flex-col justify-between shadow-2xl relative overflow-hidden group"
+            transition={{ duration: 0.4 }}
+            className="p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-neutral-900/90 to-neutral-950 border border-neutral-800 hover:border-emerald-500/50 transition-all duration-300 flex flex-col justify-between shadow-2xl relative overflow-hidden group"
           >
-            <div className="absolute -top-24 -right-24 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-indigo-500/20 transition-colors" />
+            <div className="absolute -top-20 -right-20 w-56 h-56 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-emerald-500/20 transition-colors" />
+
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                  <Zap size={24} />
+                </div>
+                <span className="text-[10px] font-mono tracking-widest px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold uppercase">
+                  FAST 1v1 SPRINT
+                </span>
+              </div>
+
+              <h3 className="text-2xl font-black text-white tracking-tight mb-2">
+                Quickode
+              </h3>
+
+              <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed mb-6">
+                A rapid head-to-head sprint. Both players get the exact same coding question. First to write clean code and pass all test cases takes the win!
+              </p>
+
+              {/* Mode Highlights Pill List */}
+              <div className="space-y-2 font-mono text-xs mb-6">
+                <div className="p-3 rounded-xl bg-black/60 border border-neutral-800/80 flex items-center justify-between text-neutral-300">
+                  <span className="flex items-center gap-2 text-white font-medium">
+                    <Clock size={13} className="text-emerald-400" />
+                    <span>Duration</span>
+                  </span>
+                  <span className="text-emerald-400 font-bold">5 Minutes</span>
+                </div>
+                <div className="p-3 rounded-xl bg-black/60 border border-neutral-800/80 flex items-center justify-between text-neutral-300">
+                  <span className="flex items-center gap-2 text-white font-medium">
+                    <CheckCircle2 size={13} className="text-emerald-400" />
+                    <span>Problem Count</span>
+                  </span>
+                  <span className="text-white font-bold">1 Problem</span>
+                </div>
+              </div>
+
+              {/* Match Card Preview */}
+              <div className="p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-500/25 text-[11px] font-mono text-emerald-300 space-y-1">
+                <div className="flex items-center justify-between font-bold">
+                  <span>Match Pacing</span>
+                  <span className="text-emerald-400">⚡ High Speed</span>
+                </div>
+                <p className="text-[10px] text-neutral-400 font-sans">
+                  Ideal for casual breaks, daily practice, and fast CP gains.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-5 border-t border-neutral-850 mt-6 font-mono text-xs flex justify-between items-center text-neutral-400">
+              <span>Match Format</span>
+              <span className="text-emerald-400 font-bold">Single Round Blitz</span>
+            </div>
+          </motion.div>
+
+          {/* Mode 2: Multi-Round Battle (Best of 3 Clash) */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-neutral-900/90 to-neutral-950 border border-neutral-800 hover:border-indigo-500/50 transition-all duration-300 flex flex-col justify-between shadow-2xl relative overflow-hidden group"
+          >
+            <div className="absolute -top-20 -right-20 w-56 h-56 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-indigo-500/20 transition-colors" />
 
             <div>
               <div className="flex items-center justify-between mb-6">
@@ -54,84 +125,71 @@ export const BentoFeatures: React.FC = () => {
                   <Swords size={24} />
                 </div>
                 <span className="text-[10px] font-mono tracking-widest px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 font-bold uppercase">
-                  COMPETITIVE ELO RANKED
+                  BEST OF 3 SERIES
                 </span>
               </div>
 
-              <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-2">
-                1v1 Head-to-Head Ranked Duels
+              <h3 className="text-2xl font-black text-white tracking-tight mb-2">
+                Multi-Round Battle
               </h3>
 
-              <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed max-w-2xl mb-6">
-                Enter algorithmic matchmaking and battle peer developers in real-time. Gain or lose Coder Points (CP) based on submission correctness, test execution speed, and solution efficiency.
+              <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed mb-6">
+                The true tournament format. Compete across 3 separate rounds with increasing problem difficulty. First player to claim 2 rounds wins the match.
               </p>
 
-              {/* Visual Match Representation */}
-              <div className="p-4 rounded-2xl bg-black/60 border border-neutral-800/80 font-mono text-xs space-y-3">
-                <div className="flex items-center justify-between text-neutral-400 text-[11px] pb-2 border-b border-neutral-850">
-                  <span>MATCHMAKING QUEUE: FAST ESTIMATE &lt; 5s</span>
-                  <span className="text-emerald-400 font-bold flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    MATCHED
+              {/* Mode Highlights Pill List */}
+              <div className="space-y-2 font-mono text-xs mb-6">
+                <div className="p-3 rounded-xl bg-black/60 border border-neutral-800/80 flex items-center justify-between text-neutral-300">
+                  <span className="flex items-center gap-2 text-white font-medium">
+                    <Clock size={13} className="text-indigo-400" />
+                    <span>Duration</span>
                   </span>
+                  <span className="text-indigo-400 font-bold">Up to 15 Mins</span>
                 </div>
-                <div className="flex items-center justify-between pt-1">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-neutral-800 flex items-center justify-center text-white font-bold text-xs">
-                      O
-                    </div>
-                    <span className="text-white font-bold">Operative #810</span>
-                    <span className="text-[10px] text-amber-400 bg-amber-500/10 px-1.5 py-0.2 rounded border border-amber-500/20">
-                      Coder (750 CP)
-                    </span>
-                  </div>
-                  <span className="text-neutral-500 font-bold">VS</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-indigo-400 bg-indigo-500/10 px-1.5 py-0.2 rounded border border-indigo-500/20">
-                      Coder (780 CP)
-                    </span>
-                    <span className="text-white font-bold">Challenger #422</span>
-                    <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-xs">
-                      C
-                    </div>
-                  </div>
+                <div className="p-3 rounded-xl bg-black/60 border border-neutral-800/80 flex items-center justify-between text-neutral-300">
+                  <span className="flex items-center gap-2 text-white font-medium">
+                    <Shield size={13} className="text-indigo-400" />
+                    <span>Round Format</span>
+                  </span>
+                  <span className="text-white font-bold">Best of 3 Rounds</span>
                 </div>
+              </div>
+
+              {/* Match Card Preview */}
+              <div className="p-3.5 rounded-xl bg-indigo-950/20 border border-indigo-500/25 text-[11px] font-mono text-indigo-300 space-y-1">
+                <div className="flex items-center justify-between font-bold">
+                  <span>Match Stakes</span>
+                  <span className="text-indigo-300">🏆 High Rating (CP)</span>
+                </div>
+                <p className="text-[10px] text-neutral-400 font-sans">
+                  Rewards stamina, problem-solving depth, and comeback skills.
+                </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 mt-6 pt-5 border-t border-neutral-850 text-left font-mono">
-              <div>
-                <span className="text-[10px] text-neutral-450 uppercase block">Round Format</span>
-                <span className="text-xs font-bold text-white mt-0.5 block">Best of 1 or 3</span>
-              </div>
-              <div>
-                <span className="text-[10px] text-neutral-450 uppercase block">Time Control</span>
-                <span className="text-xs font-bold text-amber-400 mt-0.5 block">5 - 15 Minutes</span>
-              </div>
-              <div>
-                <span className="text-[10px] text-neutral-450 uppercase block">Stake</span>
-                <span className="text-xs font-bold text-emerald-400 mt-0.5 block">Rank Elo (CP)</span>
-              </div>
+            <div className="pt-5 border-t border-neutral-850 mt-6 font-mono text-xs flex justify-between items-center text-neutral-400">
+              <span>Match Format</span>
+              <span className="text-indigo-400 font-bold">Strategic 3-Round Clash</span>
             </div>
           </motion.div>
 
-          {/* Card 2: Chaos Arena (Col 4) */}
+          {/* Mode 3: Chaos Arena (Mutator Matches) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="lg:col-span-4 p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-neutral-900/90 to-neutral-950 border border-neutral-800 hover:border-neutral-700 transition-all flex flex-col justify-between shadow-2xl relative overflow-hidden group"
+            transition={{ duration: 0.4, delay: 0.2 }}
+            className="p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-neutral-900/90 to-neutral-950 border border-neutral-800 hover:border-rose-500/50 transition-all duration-300 flex flex-col justify-between shadow-2xl relative overflow-hidden group"
           >
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-rose-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-rose-500/20 transition-colors" />
+            <div className="absolute -top-20 -right-20 w-56 h-56 bg-rose-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-rose-500/20 transition-colors" />
 
             <div>
               <div className="flex items-center justify-between mb-6">
                 <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
                   <Flame size={24} />
                 </div>
-                <span className="text-[10px] font-mono tracking-widest px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-300 font-bold uppercase">
-                  UNSTABLE
+                <span className="text-[10px] font-mono tracking-widest px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 font-bold uppercase">
+                  WILD MODIFIERS
                 </span>
               </div>
 
@@ -140,158 +198,145 @@ export const BentoFeatures: React.FC = () => {
               </h3>
 
               <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed mb-6">
-                Survival under extreme environmental adversity. Solve problems while handling randomized in-game mutators like screen inversion, time dilations, and memory starvation.
+                Competitive coding with unpredictable twists! Random match modifiers trigger live—such as blindfold syntax, speed surges, and sudden death.
               </p>
 
-              <div className="space-y-2 font-mono text-xs">
-                <div className="p-2.5 rounded-xl bg-black/60 border border-neutral-800 flex items-center justify-between text-neutral-300">
-                  <span className="text-rose-400 font-bold">⚡ Blind Syntax</span>
-                  <span className="text-[10px] text-neutral-450">Linter Disabled</span>
-                </div>
-                <div className="p-2.5 rounded-xl bg-black/60 border border-neutral-800 flex items-center justify-between text-neutral-300">
-                  <span className="text-amber-400 font-bold">⏱️ Sudden Death</span>
-                  <span className="text-[10px] text-neutral-450">Half-Time Clock</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-5 border-t border-neutral-850 mt-6 font-mono text-xs flex justify-between items-center text-neutral-400">
-              <span>Dynamic Match Mutators</span>
-              <span className="text-rose-400 font-bold">High Risk / High Reward</span>
-            </div>
-          </motion.div>
-
-          {/* Card 3: Daily Directives (Col 4) */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="lg:col-span-4 p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-neutral-900/90 to-neutral-950 border border-neutral-800 hover:border-neutral-700 transition-all flex flex-col justify-between shadow-2xl relative overflow-hidden group"
-          >
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
-                  <Zap size={24} />
-                </div>
-                <span className="text-[10px] font-mono tracking-widest px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-bold uppercase">
-                  24H CADENCE
-                </span>
-              </div>
-
-              <h3 className="text-2xl font-black text-white tracking-tight mb-2">
-                Daily Directives
-              </h3>
-
-              <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed mb-6">
-                Rotated every midnight UTC. Maintain your coding streak, preserve streak grace days, and claim bonus CP and XP resources to climb the daily leaderboard.
-              </p>
-
-              <div className="p-4 rounded-xl bg-black/60 border border-neutral-800 font-mono text-xs flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] text-neutral-450 uppercase block">Active Streak</span>
-                  <span className="text-lg font-black text-amber-400 mt-0.5 block flex items-center gap-1.5">
-                    14 Days 🔥
+              {/* Mode Highlights Pill List */}
+              <div className="space-y-2 font-mono text-xs mb-6">
+                <div className="p-3 rounded-xl bg-black/60 border border-neutral-800/80 flex items-center justify-between text-neutral-300">
+                  <span className="flex items-center gap-2 text-white font-medium">
+                    <Flame size={13} className="text-rose-400" />
+                    <span>Surprise Element</span>
                   </span>
+                  <span className="text-rose-400 font-bold">Random Mutators</span>
                 </div>
-                <div className="text-right">
-                  <span className="text-[10px] text-neutral-450 uppercase block">Streak Grace</span>
-                  <span className="text-xs font-bold text-emerald-400 mt-1 block">
-                    3 Charges Available
+                <div className="p-3 rounded-xl bg-black/60 border border-neutral-800/80 flex items-center justify-between text-neutral-300">
+                  <span className="flex items-center gap-2 text-white font-medium">
+                    <Sparkles size={13} className="text-amber-400" />
+                    <span>Bonus Rewards</span>
                   </span>
+                  <span className="text-amber-400 font-bold">+25% Bonus CP</span>
                 </div>
               </div>
-            </div>
 
-            <div className="pt-5 border-t border-neutral-850 mt-6 font-mono text-xs flex justify-between items-center text-neutral-400">
-              <span>Automatic Reset Engine</span>
-              <span className="text-amber-400 font-bold">Midnight UTC</span>
-            </div>
-          </motion.div>
-
-          {/* Card 4: God Mode & Cloaked Spectator (Col 4) */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="lg:col-span-4 p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-neutral-900/90 to-neutral-950 border border-neutral-800 hover:border-neutral-700 transition-all flex flex-col justify-between shadow-2xl relative overflow-hidden group"
-          >
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
-                  <ShieldAlert size={24} />
+              {/* Match Card Preview */}
+              <div className="p-3.5 rounded-xl bg-rose-950/20 border border-rose-500/25 text-[11px] font-mono text-rose-300 space-y-1">
+                <div className="flex items-center justify-between font-bold">
+                  <span>Mutator Intensity</span>
+                  <span className="text-rose-400">⚡ Unpredictable</span>
                 </div>
-                <span className="text-[10px] font-mono tracking-widest px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 font-bold uppercase">
-                  INVISIBLE SPECTATOR
-                </span>
-              </div>
-
-              <h3 className="text-2xl font-black text-white tracking-tight mb-2">
-                God Mode & Spectate
-              </h3>
-
-              <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed mb-6">
-                Admins and tournament referees can spectate any live match invisibly without detection. Instant room termination and real-time fraud inspection ensure tournament integrity.
-              </p>
-
-              <div className="p-3.5 rounded-xl bg-purple-950/20 border border-purple-500/30 font-mono text-xs space-y-1.5">
-                <span className="text-purple-300 font-bold block flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-purple-400 animate-ping" />
-                  Cloaked Stealth Protocol
-                </span>
-                <p className="text-[11px] text-neutral-400">
-                  Referee connections emit zero presence footprint to active battle gladiators.
+                <p className="text-[10px] text-neutral-400 font-sans">
+                  Tests how fast you can adapt and stay calm under pressure.
                 </p>
               </div>
             </div>
 
             <div className="pt-5 border-t border-neutral-850 mt-6 font-mono text-xs flex justify-between items-center text-neutral-400">
-              <span>Tournament Referee</span>
-              <span className="text-purple-400 font-bold">100% Unobtrusive</span>
+              <span>Match Format</span>
+              <span className="text-rose-400 font-bold">Twist Rules Battlefield</span>
             </div>
           </motion.div>
+        </div>
 
-          {/* Card 5: Real-Time Social & Mailbox (Col 4) */}
+        {/* Secondary Row: Daily Directives & Social Friend Matchmaking */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Card: Daily Directives */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="lg:col-span-4 p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-neutral-900/90 to-neutral-950 border border-neutral-800 hover:border-neutral-700 transition-all flex flex-col justify-between shadow-2xl relative overflow-hidden group"
+            transition={{ duration: 0.4, delay: 0.3 }}
+            className="p-6 sm:p-7 rounded-3xl bg-neutral-950 border border-neutral-800 flex flex-col justify-between"
           >
             <div>
-              <div className="flex items-center justify-between mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
-                  <Users size={24} />
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                    <Sparkles size={20} />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-white tracking-tight">
+                      Daily Directives & Streaks
+                    </h4>
+                    <span className="text-[10px] font-mono text-neutral-400">
+                      Refreshes Every 24 Hours
+                    </span>
+                  </div>
                 </div>
-                <span className="text-[10px] font-mono tracking-widest px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 font-bold uppercase">
-                  INSTANT SYNC
+                <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/20">
+                  DAILY CP
                 </span>
               </div>
 
-              <h3 className="text-2xl font-black text-white tracking-tight mb-2">
-                Live Operative Network
-              </h3>
-
-              <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed mb-6">
-                Direct friend challenges, inbox reward claims with animations, and real-time presence indicators. Challenge any friend directly from your lobby with instant push delivery.
+              <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed mb-4">
+                Solve fresh daily coding puzzles to keep your streak alive. Fulfilling your daily mission unlocks an instant reward claim button with bonus Coder Points (CP) and XP.
               </p>
 
-              <div className="p-3.5 rounded-xl bg-cyan-950/20 border border-cyan-500/30 font-mono text-xs space-y-1.5">
-                <span className="text-cyan-300 font-bold block flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-                  Instant Direct Transmissions
-                </span>
-                <p className="text-[11px] text-neutral-400">
-                  Dual-socket event mesh ensures notifications and duel invites land with zero refresh.
-                </p>
+              <div className="p-3.5 rounded-xl bg-black/60 border border-neutral-850 flex items-center justify-between font-mono text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                  <span className="text-neutral-300">Daily Mission: Solve 1 Match</span>
+                </div>
+                <span className="text-emerald-400 font-bold">+50 CP Reward</span>
               </div>
             </div>
 
-            <div className="pt-5 border-t border-neutral-850 mt-6 font-mono text-xs flex justify-between items-center text-neutral-400">
-              <span>Dual Socket Protocol</span>
-              <span className="text-cyan-400 font-bold">&lt; 15ms Broadcast</span>
+            <div className="pt-4 border-t border-neutral-850 mt-5 flex items-center justify-between text-xs font-mono text-neutral-400">
+              <span>Preserve streak grace days</span>
+              <span className="text-amber-400 font-semibold">Automatic Tracker</span>
+            </div>
+          </motion.div>
+
+          {/* Card: Play With Friends */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.4 }}
+            className="p-6 sm:p-7 rounded-3xl bg-neutral-950 border border-neutral-800 flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                    <Users size={20} />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-white tracking-tight">
+                      Friends & Private Lobbies
+                    </h4>
+                    <span className="text-[10px] font-mono text-neutral-400">
+                      Real-Time Social Network
+                    </span>
+                  </div>
+                </div>
+                <span className="text-[10px] font-mono font-bold text-blue-400 bg-blue-500/10 px-2.5 py-1 rounded-full border border-blue-500/20">
+                  INSTANT INVITE
+                </span>
+              </div>
+
+              <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed mb-4">
+                Challenge your friends directly. Send match invitations that appear instantly in their inbox, check who is currently online, and chat in private room lobbies.
+              </p>
+
+              <div className="p-3.5 rounded-xl bg-black/60 border border-neutral-850 flex items-center justify-between font-mono text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span className="text-neutral-300">Direct Friend Challenge</span>
+                </div>
+                <span className="text-indigo-400 font-bold">1-Click Join</span>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-neutral-850 mt-5 flex items-center justify-between text-xs font-mono text-neutral-400">
+              <span>Custom room passwords</span>
+              <button 
+                onClick={() => navigate('/signup')} 
+                className="text-white hover:text-indigo-400 font-semibold flex items-center gap-1 transition-colors"
+              >
+                <span>Join Arena</span>
+                <ArrowRight size={12} />
+              </button>
             </div>
           </motion.div>
         </div>

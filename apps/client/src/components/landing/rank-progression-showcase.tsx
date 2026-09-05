@@ -10,86 +10,86 @@ const TIERS_META: Record<string, { color: string; badgeBg: string; border: strin
     badgeBg: 'bg-zinc-800',
     border: 'border-zinc-700',
     glow: 'shadow-[0_0_15px_rgba(161,161,170,0.1)]',
-    perk: 'Starter calibration duels and basic sandboxed challenges.',
+    perk: 'Starter calibration matches and fundamental coding puzzles.',
   },
   Coder: {
     color: 'text-emerald-400',
     badgeBg: 'bg-emerald-500/20',
     border: 'border-emerald-500/40',
     glow: 'shadow-[0_0_20px_rgba(16,185,129,0.15)]',
-    perk: 'Unlocks Ranked Queue and Multi-Round Best-of-3 format.',
+    perk: 'Unlocks Ranked Matchmaking and Multi-Round Best-of-3 format.',
   },
   Specialist: {
     color: 'text-indigo-400',
     badgeBg: 'bg-indigo-500/20',
     border: 'border-indigo-500/40',
     glow: 'shadow-[0_0_20px_rgba(99,102,241,0.2)]',
-    perk: 'Access to custom private lobby host controls and wager stakes.',
+    perk: 'Access to private custom room lobbies and friend duels.',
   },
   Expert: {
     color: 'text-cyan-400',
     badgeBg: 'bg-cyan-500/20',
     border: 'border-cyan-500/40',
     glow: 'shadow-[0_0_25px_rgba(6,182,212,0.2)]',
-    perk: 'Unlocks Chaos Arena unstable mutator matches and timed speed runs.',
+    perk: 'Unlocks Chaos Arena twist modifiers and timed speed challenges.',
   },
   Elite: {
     color: 'text-amber-400',
     badgeBg: 'bg-amber-500/20',
     border: 'border-amber-500/40',
     glow: 'shadow-[0_0_25px_rgba(245,158,11,0.25)]',
-    perk: 'Leaderboard badge highlight and guaranteed daily streak grace day.',
+    perk: 'Global leaderboard highlight and guaranteed daily streak grace day.',
   },
   Master: {
     color: 'text-purple-400',
     badgeBg: 'bg-purple-500/20',
     border: 'border-purple-500/40',
     glow: 'shadow-[0_0_30px_rgba(168,85,247,0.25)]',
-    perk: 'Regional tournament entry invitations and live match spectate access.',
+    perk: 'Special Master tournament invitations and exclusive profile badge glow.',
   },
   Grandmaster: {
     color: 'text-rose-400',
     badgeBg: 'bg-rose-500/20',
     border: 'border-rose-500/40',
     glow: 'shadow-[0_0_35px_rgba(244,63,94,0.3)]',
-    perk: 'Global top 100 standing and live community broadcasts.',
+    perk: 'Top 100 global standing and featured community spotlight.',
   },
   Codebreaker: {
     color: 'text-orange-400',
     badgeBg: 'bg-orange-500/20',
     border: 'border-orange-500/40',
     glow: 'shadow-[0_0_40px_rgba(249,115,22,0.35)]',
-    perk: 'Verified Master Operative status with custom avatar holographic ring.',
+    perk: 'Legendary status with custom holographic avatar border.',
   },
   'Apex Coder': {
     color: 'text-amber-300',
     badgeBg: 'bg-gradient-to-r from-amber-500/25 to-pink-500/25',
     border: 'border-amber-400/60',
     glow: 'shadow-[0_0_50px_rgba(251,191,36,0.4)]',
-    perk: 'The pinnacle of competitive programming. Hall of Fame immortalization.',
+    perk: 'The ultimate pinnacle of coding mastery. Immortalized in the Hall of Fame.',
   },
 };
 
 export const RankProgressionShowcase: React.FC = () => {
   return (
-    <section id="tier-ladder" className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8 bg-[#030303] relative border-t border-neutral-900">
+    <section id="tier-ladder" className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-[#030303] relative border-t border-neutral-900">
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16 sm:mb-20">
+        <div className="text-center max-w-3xl mx-auto mb-14 sm:mb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-neutral-300 text-xs font-mono font-semibold uppercase tracking-widest mb-4">
             <Trophy size={13} className="text-amber-400" />
-            <span>COMPETITIVE LADDER ARCHITECTURE</span>
+            <span>PLAYER PROGRESSION & RANKS</span>
           </div>
 
           <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-none mb-4">
-            9 TIERS OF MASTERY.{' '}
+            9 COMPETITIVE TIERS.{' '}
             <span className="bg-gradient-to-r from-amber-400 via-orange-300 to-rose-400 bg-clip-text text-transparent">
-              PROVE YOUR METTLE.
+              CLIMB TO THE TOP.
             </span>
           </h2>
 
           <p className="text-sm sm:text-base text-neutral-400 font-normal leading-relaxed">
-            Starting from Initiate, every correct solution and speed bonus awards Coder Points (CP). Break through division thresholds to trigger full-screen promotions and unlock competitive arena perks.
+            Every match you win and every daily challenge you solve awards Coder Points (CP). Level up through 9 distinct ranks, unlock division perks, and celebrate promotions with full-screen animations.
           </p>
         </div>
 
@@ -130,18 +130,18 @@ export const RankProgressionShowcase: React.FC = () => {
                         {item.rank}
                       </h4>
                       <span className="text-[10px] font-mono text-neutral-450 block">
-                        Base Entry: {item.min} CP
+                        Unlock Threshold: {item.min} CP
                       </span>
                     </div>
                   </div>
 
-                  <p className="text-xs text-neutral-400 font-normal leading-relaxed mt-2">
+                  <p className="text-xs text-neutral-400 font-normal leading-relaxed mt-2 font-sans">
                     {meta.perk}
                   </p>
                 </div>
 
                 <div className="pt-4 mt-4 border-t border-neutral-900 flex items-center justify-between text-[11px] font-mono text-neutral-500 group-hover:text-neutral-300 transition-colors">
-                  <span>Seasonal Threshold</span>
+                  <span>Seasonal Target</span>
                   <ChevronRight size={14} className={meta.color} />
                 </div>
               </motion.div>
