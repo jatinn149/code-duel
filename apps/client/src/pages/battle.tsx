@@ -70,6 +70,13 @@ export const BattlePage = () => {
   useEffect(() => {
     if (!currentRoom || !user) return;
 
+    if (user.role === 'ADMIN') {
+      if (currentRoom.state === MatchState.RESULTS) {
+        navigate(`/results/${normalizeRoomCode(roomId || '')}`, { replace: true });
+      }
+      return;
+    }
+
     const roundIndex = currentRoom.currentRound || 1;
     const currentRound = currentRoom.rounds?.find((r) => r.roundIndex === roundIndex) || (currentRoom.rounds && currentRoom.rounds.length > 0 ? currentRoom.rounds[currentRoom.rounds.length - 1] : undefined);
     const hasSubmitted = !!currentRound?.submissions?.[user.id]?.submittedAt;
@@ -271,7 +278,7 @@ export const BattlePage = () => {
   }, [currentRoom, socket, navigate]);
 
   const handleRunCode = async () => {
-    if (!socket || isRunningCode) return;
+    if (!socket || isRunningCode || user?.role === 'ADMIN') return;
     setIsRunningCode(true);
     setDryRunResult(null);
 
@@ -292,7 +299,7 @@ export const BattlePage = () => {
   };
 
   const handleSubmitCode = async () => {
-    if (!socket || isSubmitting) return;
+    if (!socket || isSubmitting || user?.role === 'ADMIN') return;
     setIsSubmitting(true);
 
     setTimeout(() => {
@@ -392,6 +399,23 @@ export const BattlePage = () => {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-[#0a0a0a] relative">
+      {/* Cloaked Admin Spectator HUD Banner */}
+      {user?.role === 'ADMIN' && (
+        <div className="w-full bg-rose-950/40 border-b border-rose-500/30 px-4 py-2 flex items-center justify-between gap-3 text-xs font-mono z-30 shrink-0 shadow-md">
+          <div className="flex items-center gap-2 text-rose-300">
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping shrink-0" />
+            <span className="font-black tracking-wider">👁️ CLOAKED ADMIN SPECTATOR MODE</span>
+            <span className="text-zinc-400 hidden sm:inline">• Observing live arena match invisibly. Combat actions & submissions are disabled.</span>
+          </div>
+          <button
+            onClick={() => navigate('/admin')}
+            className="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-[11px] shrink-0 font-bold"
+          >
+            Back to HQ
+          </button>
+        </div>
+      )}
+
       <BattleComponent
         currentRoom={currentRoom}
         currentPlayer={currentPlayer}

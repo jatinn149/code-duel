@@ -9,8 +9,12 @@ import {
   User
 } from '@code-duel/types';
 
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/auth-store';
+
 export const useSocialSubscription = () => {
   const socket = useSocket();
+  const navigate = useNavigate();
   const { 
     setFriends, 
     updateFriendStatus, 
@@ -38,6 +42,10 @@ export const useSocialSubscription = () => {
     };
 
     const onNotificationReceived = (notification: Notification) => {
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser && notification.userId && notification.userId !== currentUser.id) {
+        return;
+      }
       addNotification(notification);
     };
 
@@ -45,18 +53,39 @@ export const useSocialSubscription = () => {
       addActivity(event);
     };
 
+    const onMatchFound = (data: { matchId: string }) => {
+      if (data?.matchId) {
+        navigate(`/lobby/${data.matchId}`);
+      }
+    };
+
+    const onProfileUpdated = (updatedUser: Partial<User>) => {
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser && updatedUser && (!updatedUser.id || updatedUser.id === currentUser.id)) {
+        useAuthStore.getState().setUser({ ...currentUser, ...updatedUser });
+      }
+    };
+
     socket.on(SocketEvents.SOCIAL_INITIAL_SYNC, onInitialSync);
     socket.on(SocketEvents.PRESENCE_UPDATE, onPresenceUpdate);
+    socket.on(SocketEvents.PRESENCE_UPDATED, onPresenceUpdate);
     socket.on(SocketEvents.NOTIFICATION_RECEIVED, onNotificationReceived);
+    socket.on('social:notification_received' as any, onNotificationReceived);
     socket.on(SocketEvents.ACTIVITY_FEED_UPDATE, onActivityFeedUpdate);
+    socket.on(SocketEvents.MATCH_FOUND, onMatchFound);
+    socket.on('user:profile_updated' as any, onProfileUpdated);
 
     return () => {
       socket.off(SocketEvents.SOCIAL_INITIAL_SYNC, onInitialSync);
       socket.off(SocketEvents.PRESENCE_UPDATE, onPresenceUpdate);
+      socket.off(SocketEvents.PRESENCE_UPDATED, onPresenceUpdate);
       socket.off(SocketEvents.NOTIFICATION_RECEIVED, onNotificationReceived);
+      socket.off('social:notification_received' as any, onNotificationReceived);
       socket.off(SocketEvents.ACTIVITY_FEED_UPDATE, onActivityFeedUpdate);
+      socket.off(SocketEvents.MATCH_FOUND, onMatchFound);
+      socket.off('user:profile_updated' as any, onProfileUpdated);
     };
-  }, [socket, setFriends, setNotifications, setActivities, updateFriendStatus, addNotification, addActivity]);
+  }, [socket, navigate, setFriends, setNotifications, setActivities, updateFriendStatus, addNotification, addActivity]);
 };
 
 export const useSocial = () => {

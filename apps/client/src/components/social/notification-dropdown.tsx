@@ -19,6 +19,9 @@ import {
   CheckCheck
 } from 'lucide-react';
 import { clsx } from 'clsx';
+import { RewardCelebrationModal } from './reward-celebration-modal';
+import { useAuthStore } from '@/store/auth-store';
+import { calculateCpRank } from '@code-duel/shared';
 
 interface NotificationDropdownProps {
   isOpenControlled?: boolean;
@@ -34,9 +37,54 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   const { notifications, unreadNotificationsCount } = useSocialStore();
   const { markRead, markAllRead, respondToFriendRequest, respondToDuelInvite } = useSocial();
   const [internalOpen, setInternalOpen] = useState(false);
+  const [celebrationData, setCelebrationData] = useState<{
+    isOpen: boolean;
+    xp: number;
+    cp: number;
+    title: string;
+    message: string;
+  }>({
+    isOpen: false,
+    xp: 0,
+    cp: 0,
+    title: '',
+    message: '',
+  });
 
   const isControlled = typeof isOpenControlled === 'boolean';
   const isOpen = isControlled ? isOpenControlled : internalOpen;
+
+  const handleClaimReward = (n: Notification) => {
+    const giftXp = n.data?.giftXp ? Number(n.data.giftXp) : 0;
+    const giftCp = n.data?.giftCp ? Number(n.data.giftCp) : 0;
+
+    const currentUser = useAuthStore.getState().user;
+    if (currentUser) {
+      const newRating = (currentUser.rating || 0) + giftCp;
+      const newXp = (currentUser.xp || 0) + giftXp;
+      const newRank = calculateCpRank(newRating);
+      const newLevel = Math.max(currentUser.level || 1, Math.floor(newXp / 500) + 1);
+
+      useAuthStore.getState().setUser({
+        ...currentUser,
+        rating: newRating,
+        xp: newXp,
+        rank: newRank as any,
+        level: newLevel,
+      });
+    }
+
+    useAuthStore.getState().refresh().catch(() => {});
+    markRead(n.id);
+
+    setCelebrationData({
+      isOpen: true,
+      xp: giftXp,
+      cp: giftCp,
+      title: n.title,
+      message: n.message,
+    });
+  };
 
   const handleClose = () => {
     if (isControlled && onCloseControlled) {
@@ -238,20 +286,32 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                               {n.message}
                             </p>
 
-                            {/* Attached Gift/Resource Badges */}
+                            {/* Attached Gift/Resource Badges & Claim Button */}
                             {hasRewards && (
-                              <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                                {Boolean(n.data?.giftXp) && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-mono font-bold text-emerald-400">
-                                    <Sparkles size={10} />
-                                    +{String(n.data?.giftXp)} XP
-                                  </span>
-                                )}
-                                {Boolean(n.data?.giftCp) && (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-[10px] font-mono font-bold text-amber-400">
-                                    <Zap size={10} />
-                                    +{String(n.data?.giftCp)} CP
-                                  </span>
+                              <div className="mt-2 space-y-2">
+                                <div className="flex flex-wrap items-center gap-1.5">
+                                  {Boolean(n.data?.giftXp) && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-mono font-bold text-emerald-400">
+                                      <Sparkles size={10} />
+                                      +{String(n.data?.giftXp)} XP
+                                    </span>
+                                  )}
+                                  {Boolean(n.data?.giftCp) && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-[10px] font-mono font-bold text-amber-400">
+                                      <Zap size={10} />
+                                      +{String(n.data?.giftCp)} CP
+                                    </span>
+                                  )}
+                                </div>
+
+                                {!n.isRead && (
+                                  <button
+                                    onClick={() => handleClaimReward(n)}
+                                    className="w-full py-1.5 px-3 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:brightness-110 text-black font-black text-[11px] rounded-lg shadow-[0_0_12px_rgba(245,158,11,0.35)] transition-all active:scale-95 flex items-center justify-center gap-1.5 tracking-wider font-mono"
+                                  >
+                                    <Sparkles size={12} className="animate-spin" />
+                                    <span>CLAIM REWARDS</span>
+                                  </button>
                                 )}
                               </div>
                             )}
@@ -301,6 +361,16 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
           </>
         )}
       </AnimatePresence>
+
+      {/* Interactive Reward Collection Celebration */}
+      <RewardCelebrationModal
+        isOpen={celebrationData.isOpen}
+        onClose={() => setCelebrationData((prev) => ({ ...prev, isOpen: false }))}
+        xp={celebrationData.xp}
+        cp={celebrationData.cp}
+        title={celebrationData.title}
+        message={celebrationData.message}
+      />
     </div>
   );
 };

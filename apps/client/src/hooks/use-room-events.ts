@@ -51,11 +51,27 @@ export const useRoomEvents = (socket: Socket | null, roomId: string | undefined)
         error.includes('No need to resubmit') ||
         error.includes('rejected');
 
+      if (error.includes('Room disbanded by admin')) {
+        alert('Room disbanded by admin');
+        setRoom(null);
+        setMatchSummary(null);
+        window.location.href = '/';
+        return;
+      }
+
       if (isTransient) {
         setTransientError(formatted);
       } else {
         setError(formatted);
       }
+    };
+
+    const handleRoomDisbanded = (data?: { message?: string }) => {
+      const msg = data?.message || 'Room disbanded by admin';
+      alert(msg);
+      setRoom(null);
+      setMatchSummary(null);
+      window.location.href = '/';
     };
 
     const handleGameStart = () => updateMatchState(MatchState.PLAYING);
@@ -72,6 +88,7 @@ export const useRoomEvents = (socket: Socket | null, roomId: string | undefined)
     socket.on(SocketEvents.START_COUNTDOWN, handleStartCountdown);
     socket.on(SocketEvents.GAME_END, handleGameEnd);
     socket.on(SocketEvents.ROOM_ERROR, handleRoomError);
+    socket.on('room:disbanded' as any, handleRoomDisbanded);
     // Future judge result event
     socket.on('judge:progress', handleJudgeResult);
 
@@ -81,6 +98,7 @@ export const useRoomEvents = (socket: Socket | null, roomId: string | undefined)
       socket.off(SocketEvents.START_COUNTDOWN, handleStartCountdown);
       socket.off(SocketEvents.GAME_END, handleGameEnd);
       socket.off(SocketEvents.ROOM_ERROR, handleRoomError);
+      socket.off('room:disbanded' as any, handleRoomDisbanded);
       socket.off('judge:progress', handleJudgeResult);
     };
   }, [socket, roomId, setRoom, updateMatchState, setJudgeResult, setError, setTransientError, setMatchSummary]);

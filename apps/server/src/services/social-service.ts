@@ -4,7 +4,6 @@ import {
   FriendRequestStatus, 
   DuelInvite, 
   ActivityEvent,
-  PresenceStatus,
   NotificationType
 } from '@code-duel/types';
 import { 
@@ -151,16 +150,12 @@ export class SocialService {
     const fromUser = await this.userRepo.findById(fromUserId);
     if (!fromUser) throw new Error('User not found');
 
-    const toUserStatus = await this.presenceService.getStatus(toUserId);
-    if (toUserStatus === PresenceStatus.OFFLINE) throw new Error('User is offline');
-    if (toUserStatus === PresenceStatus.IN_GAME) throw new Error('User is already in a game');
-
     const invite: DuelInvite = {
       id: uuidv4(),
       fromUserId,
       toUserId,
       status: 'PENDING',
-      expiresAt: new Date(Date.now() + 60000).toISOString(), // 1 minute expiry
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(), // 10 minutes expiry window
       createdAt: new Date().toISOString(),
     };
 
@@ -171,7 +166,7 @@ export class SocialService {
       NotificationType.DUEL_INVITE,
       'Duel Invitation',
       `${fromUser.username} invited you to a duel!`,
-      { inviteId: saved.id }
+      { inviteId: saved.id, fromUserId, fromUsername: fromUser.username }
     );
 
     return saved;

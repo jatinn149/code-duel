@@ -17,11 +17,13 @@ import {
   Check,
   Loader2,
   MessageSquare,
+  UserPlus,
 } from 'lucide-react';
 import { useLatency } from '@/hooks/use-latency';
 import { useCountdown } from '@/hooks/use-countdown';
 import { useRoomEvents } from '@/hooks/use-room-events';
 import { PlayerHoverCard } from '@/components/lobby/player-hover-card';
+import { InviteFriendsModal } from '@/components/lobby/invite-friends-modal';
 
 interface ChatMessage {
   userId: string;
@@ -40,6 +42,7 @@ export const LobbyPage = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [isCopied, setIsCopied] = useState(false);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Register lobby network hooks
@@ -269,6 +272,13 @@ export const LobbyPage = () => {
           <p className="text-[10px] text-neutral-700 mt-1 font-mono">
             Invite players to slot #{index + 1}
           </p>
+          <button
+            onClick={() => setInviteModalOpen(true)}
+            className="mt-3 px-3 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-indigo-400 hover:text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-sm relative z-10"
+          >
+            <UserPlus size={13} />
+            <span>Invite Friend</span>
+          </button>
         </div>
       );
     }
@@ -292,6 +302,23 @@ export const LobbyPage = () => {
       {/* Background glow effects */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[70%] h-[30%] bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none" />
 
+      {/* Cloaked Admin Spectator Banner */}
+      {user?.role === 'ADMIN' && (
+        <div className="w-full bg-rose-950/40 border border-rose-500/40 rounded-2xl p-3 px-4 flex items-center justify-between gap-3 text-xs font-mono mb-4 shadow-lg shadow-rose-950/20">
+          <div className="flex items-center gap-2 text-rose-300 min-w-0">
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping shrink-0" />
+            <span className="font-black tracking-wider">👁️ CLOAKED ADMIN SPECTATOR MODE</span>
+            <span className="text-zinc-400 hidden sm:inline">• Observing this sector invisibly. Combat actions & matchmaking are disabled.</span>
+          </div>
+          <button
+            onClick={() => navigate('/admin')}
+            className="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-[11px] shrink-0 font-bold"
+          >
+            Back to HQ
+          </button>
+        </div>
+      )}
+
       {/* Top Navigation HUD */}
       <div className="flex items-center justify-between border-b border-neutral-900 pb-4 mb-6">
         <div
@@ -312,6 +339,15 @@ export const LobbyPage = () => {
         </div>
 
         <div className="flex items-center space-x-2 sm:space-x-3">
+          <button
+            onClick={() => setInviteModalOpen(true)}
+            className="flex items-center space-x-1.5 sm:space-x-2 bg-indigo-600/15 hover:bg-indigo-600/25 border border-indigo-500/30 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-mono text-indigo-300 hover:text-white transition-all active:scale-95 shrink-0"
+            title="Invite Friends to Lobby"
+          >
+            <UserPlus className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+            <span className="hidden sm:inline">Invite Friends</span>
+          </button>
+
           <button
             onClick={handleCopyRoomCode}
             className="flex items-center space-x-1.5 sm:space-x-2 bg-neutral-950 border border-neutral-900 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-mono text-neutral-400 hover:text-white hover:border-neutral-800 transition-all active:scale-95 max-w-[160px] sm:max-w-none"
@@ -523,8 +559,15 @@ export const LobbyPage = () => {
                   Waiting for challenger...
                 </span>
                 <p className="text-[10px] text-neutral-700 mt-1 font-mono">
-                  Share Deployment ID to invite
+                  Share Deployment ID or invite from friends list
                 </p>
+                <button
+                  onClick={() => setInviteModalOpen(true)}
+                  className="mt-3 px-3 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-indigo-400 hover:text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-sm relative z-10"
+                >
+                  <UserPlus size={13} />
+                  <span>Invite Friend</span>
+                </button>
               </div>
             )}
           </div>
@@ -621,7 +664,12 @@ export const LobbyPage = () => {
           </div>
 
           <div className="space-y-3">
-            {isHost ? (
+            {user?.role === 'ADMIN' ? (
+              <div className="w-full py-3.5 bg-rose-950/20 border border-rose-500/30 rounded-lg text-rose-400 font-mono text-xs flex items-center justify-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                <span>SPECTATOR MODE: COMBAT ACTIONS LOCKED</span>
+              </div>
+            ) : isHost ? (
               <motion.button
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
@@ -682,6 +730,13 @@ export const LobbyPage = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Lobby Friend Invitation Modal */}
+      <InviteFriendsModal
+        isOpen={inviteModalOpen}
+        onClose={() => setInviteModalOpen(false)}
+        roomCode={roomId || ''}
+      />
     </div>
   );
 };

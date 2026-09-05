@@ -6,6 +6,7 @@ import { calculateCpRank, SocketEvents } from '@code-duel/shared';
 import { clearUserDatabase, flushAllRedisCache } from '@/services/admin-service';
 import { redisCache } from '@/utils/redis-cache';
 import { DailyResetEngine } from '@/services/daily-reset-engine';
+import { roomManager } from '@/socket/room-manager';
 import { logger } from '@/utils/logger';
 
 export const createAdminRouter = (
@@ -144,6 +145,9 @@ export const createAdminRouter = (
 
       const updatedUser = await userRepository.update(id, updates);
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { passwordHash: _p, ...safe } = updatedUser;
+
       if (notificationRepository) {
         const giftDesc = [
           xp ? `+${xp} XP` : null,
@@ -172,11 +176,11 @@ export const createAdminRouter = (
         const io = getIo?.();
         if (io) {
           io.to(`user:${id}`).emit(SocketEvents.NOTIFICATION_RECEIVED, notif);
+          io.to(`user:${id}`).emit('social:notification_received', notif);
+          io.to(`user:${id}`).emit('user:profile_updated', safe);
         }
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { passwordHash: _p, ...safe } = updatedUser;
       res.json({
         success: true,
         message: `Successfully granted rewards to @${updatedUser.username}`,
@@ -233,6 +237,15 @@ export const createAdminRouter = (
         const io = getIo?.();
         if (io) {
           io.to(`user:${id}`).emit(SocketEvents.NOTIFICATION_RECEIVED, notif);
+          io.to(`user:${id}`).emit('social:notification_received', notif);
+          if (Object.keys(updates).length > 0) {
+            const freshUser = await userRepository.findById(id);
+            if (freshUser) {
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              const { passwordHash: _ph, ...safeFresh } = freshUser;
+              io.to(`user:${id}`).emit('user:profile_updated', safeFresh);
+            }
+          }
         }
       }
 
@@ -290,6 +303,15 @@ export const createAdminRouter = (
           const io = getIo?.();
           if (io) {
             io.to(`user:${u.id}`).emit(SocketEvents.NOTIFICATION_RECEIVED, notif);
+            io.to(`user:${u.id}`).emit('social:notification_received', notif);
+            if (Object.keys(updates).length > 0) {
+              const freshU = await userRepository.findById(u.id);
+              if (freshU) {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { passwordHash: _ph, ...safeU } = freshU;
+                io.to(`user:${u.id}`).emit('user:profile_updated', safeU);
+              }
+            }
           }
         }
       }
@@ -330,6 +352,11 @@ export const createAdminRouter = (
 
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { passwordHash: _p, ...safe } = updated;
+      const io = getIo?.();
+      if (io) {
+        io.to(`user:${id}`).emit('user:profile_updated', safe);
+      }
+
       res.json({
         success: true,
         message: `Progression stats for @${targetUser.username} have been reset to starter values`,
@@ -358,16 +385,7 @@ export const createAdminRouter = (
   // 6. Active Live Rooms
   router.get('/rooms', async (_req, res, next) => {
     try {
-      const roomKeys = await redisCache.keys('room:*');
-      const rooms: any[] = [];
-      for (const key of roomKeys) {
-        try {
-          const raw = await redisCache.get(key);
-          if (raw) rooms.push(JSON.parse(raw));
-        } catch {
-          // ignore corrupted keys
-        }
-      }
+      const rooms = await roomManager.getAllRooms();
       res.json({ success: true, data: rooms });
     } catch (error) {
       next(error);
@@ -378,18 +396,25 @@ export const createAdminRouter = (
   router.post('/rooms/:roomId/terminate', async (req, res, next) => {
     try {
       const { roomId } = req.params;
-      const roomKey = `room:${roomId}`;
-      const raw = await redisCache.get(roomKey);
-      if (raw) {
-        const room = JSON.parse(raw);
+      const room = await roomManager.getRoom(roomId);
+      if (room) {
         if (room.players) {
           for (const p of room.players) {
             await redisCache.del(`player_to_room:${p.id}`);
           }
         }
-        await redisCache.del(roomKey);
+        await redisCache.del(`room:${roomId}`);
+        await redisCache.del(`room_lock:${roomId}`);
+        await redisCache.del(`room_epoch:${roomId}`);
+        await redisCache.del(`room_seq:${roomId}`);
+
         const io = getIo?.();
         if (io) {
+          // Instantly alert and disband all players in the room
+          io.to(roomId).emit(SocketEvents.ROOM_ERROR, 'Room disbanded by admin');
+          io.to(roomId).emit('room:disbanded' as any, { message: 'Room disbanded by admin' });
+          io.to(roomId).emit(SocketEvents.ROOM_UPDATED as any, null as any);
+          io.in(roomId).socketsLeave(roomId);
           io.to('admin:channel').emit('admin:rooms_changed');
         }
       }

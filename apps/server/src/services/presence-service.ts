@@ -13,12 +13,8 @@ export class PresenceService {
   async setUserStatus(userId: string, socketId: string, status: PresenceStatus) {
     await redisCache.hset(this.SOCKET_TO_USER_KEY, socketId, userId);
     await redisCache.sadd(`${this.USER_SOCKETS_PREFIX}${userId}`, socketId);
-
-    const oldStatus = await redisCache.hget(this.STATUS_KEY, userId);
-    if (oldStatus !== status) {
-      await redisCache.hset(this.STATUS_KEY, userId, status);
-      this.broadcastPresence(userId, status);
-    }
+    await redisCache.hset(this.STATUS_KEY, userId, status);
+    this.broadcastPresence(userId, status);
   }
 
   async handleDisconnect(socketId: string) {
@@ -44,6 +40,7 @@ export class PresenceService {
   private broadcastPresence(userId: string, status: PresenceStatus) {
     // Socket.io Redis adapter will broadcast this to all nodes
     this.io.emit('social:presence_update', { userId, status });
+    this.io.emit('presence:updated' as any, { userId, status });
   }
 
   async getAllOnlineUsers(): Promise<string[]> {

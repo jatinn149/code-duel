@@ -26,6 +26,7 @@ import {
   RoundType,
   ExecutionVerdict,
   MissionType,
+  PresenceStatus,
 } from '@code-duel/types';
 import { roomManager, sanitizeRoomForUser } from './room-manager';
 import {
@@ -257,6 +258,7 @@ export const initSocket = (
     create: _repositories?.notificationRepository?.create?.bind(_repositories.notificationRepository) || (async (n: any) => n),
     getByUserId: _repositories?.notificationRepository?.getByUserId?.bind(_repositories.notificationRepository) || (async () => []),
     markAsRead: _repositories?.notificationRepository?.markAsRead?.bind(_repositories.notificationRepository) || (async () => {}),
+    markAllAsRead: _repositories?.notificationRepository?.markAllAsRead?.bind(_repositories.notificationRepository) || (async () => {}),
     delete: _repositories?.notificationRepository?.delete?.bind(_repositories.notificationRepository) || (async () => {}),
     getUnreadCount: _repositories?.notificationRepository?.getUnreadCount?.bind(_repositories.notificationRepository) || (async () => 0),
   };
@@ -766,6 +768,8 @@ export const initSocket = (
   };
 
   const emitRoomUpdated = (roomId: string, room: Room) => {
+    io.to('admin:channel').emit('admin:rooms_changed');
+
     const clients = io.sockets.adapter.rooms.get(roomId);
     if (!clients) {
       io.to(roomId).emit(SocketEvents.ROOM_UPDATED, room);
@@ -948,7 +952,7 @@ export const initSocket = (
         .catch((err) => next(err));
     });
 
-    // Register active socket for the user (Issue 1)
+    // Register active socket for the user
     let socketSet = userActiveSockets.get(user.id);
     const isFirstSocket = !socketSet || socketSet.size === 0;
     if (!socketSet) {
@@ -957,10 +961,8 @@ export const initSocket = (
     }
     socketSet.add(socket.id);
 
-    if (isFirstSocket) {
-      // Sync presence on first connection
-      io.emit(SocketEvents.PRESENCE_UPDATED, { userId: user.id, status: 'ONLINE' });
-    }
+    // Sync presence distributed
+    await presenceService.setUserStatus(user.id, socket.id, PresenceStatus.ONLINE);
 
     // Handle Reconnect / Room sync
     const existingRoom = await roomManager.getRoomByPlayerId(user.id);
@@ -994,6 +996,10 @@ export const initSocket = (
     // Create Room
     socket.on(SocketEvents.CREATE_ROOM, async (data: { maxPlayers: number; gameMode?: any; options?: any }) => {
       try {
+        if (user.role === 'ADMIN') {
+          socket.emit(SocketEvents.ROOM_ERROR, 'Admin accounts cannot initiate matches. Use Cloaked Spectate Mode instead.');
+          return;
+        }
         const parsed = createRoomSchema.parse(data);
         const room = await roomManager.createRoom(user, parsed.maxPlayers, parsed.gameMode as any, parsed.options);
         socket.join(room.id);
@@ -1010,8 +1016,19 @@ export const initSocket = (
       const startTime = Date.now();
       try {
         const parsed = joinRoomSchema.parse(data);
-        
-        const existingRoom = await roomManager.getRoom(parsed.roomId);
+
+        // CLOAKED ADMIN SPECTATOR MODE: Admin never participates as a player!
+        if (user.role === 'ADMIN') {
+          const room = await roomManager.getRoom(parsed.roomId);
+          if (!room) {
+            socket.emit(SocketEvents.ROOM_ERROR, 'ROOM_NOT_FOUND');
+            return;
+          }
+          socket.join(room.id);
+          socket.emit(SocketEvents.ROOM_UPDATED, sanitizeRoomForUser(room, user.id));
+          logger.info({ adminId: user.id, roomId: room.id }, 'Admin connected as cloaked spectator');
+          return;
+        }
         const playerInRoom = existingRoom?.players.find(p => p.id === user.id);
         const wasConnected = playerInRoom?.connected;
 
@@ -1058,6 +1075,10 @@ export const initSocket = (
 
     // Toggle Ready
     socket.on(SocketEvents.TOGGLE_READY, async () => {
+      if (user.role === 'ADMIN') {
+        socket.emit(SocketEvents.ROOM_ERROR, 'Admins cannot toggle ready state.');
+        return;
+      }
       const room = await roomManager.toggleReady(user.id);
       if (room) {
         emitRoomUpdated(room.id, room);
@@ -1085,6 +1106,10 @@ export const initSocket = (
 
     // Start Countdown
     socket.on(SocketEvents.START_COUNTDOWN, async () => {
+      if (user.role === 'ADMIN') {
+        socket.emit(SocketEvents.ROOM_ERROR, 'Admins cannot start countdown.');
+        return;
+      }
       const room = await roomManager.startCountdown(user.id);
       if (!room) return;
 
@@ -1209,6 +1234,10 @@ export const initSocket = (
     // Submit Code
     socket.on(SocketEvents.SUBMIT_CODE, async (data: { code: string; keystrokes?: number }) => {
       try {
+        if (user.role === 'ADMIN') {
+          socket.emit(SocketEvents.ROOM_ERROR, 'Admins cannot submit code in competitive matches.');
+          return;
+        }
         const parsed = submitCodeSchema.parse(data);
         const room = await roomManager.getRoomByPlayerId(user.id);
         if (!room || room.state !== MatchState.PLAYING) return;
@@ -1477,6 +1506,9 @@ export const initSocket = (
     // Run Code
     socket.on(SocketEvents.RUN_CODE as any, async (data: { code: string }) => {
       try {
+        if (user.role === 'ADMIN') {
+          return socket.emit(SocketEvents.ROOM_ERROR, 'Admins cannot execute code in competitive matches.');
+        }
         const parsed = runCodeSchema.parse(data);
         const room = await roomManager.getRoomByPlayerId(user.id);
         if (!room || room.state !== MatchState.PLAYING) {
@@ -1660,7 +1692,9 @@ export const initSocket = (
       }
 
       // Sync presence
+      await presenceService.handleDisconnect(socket.id);
       io.emit(SocketEvents.PRESENCE_UPDATED, { userId: user.id, status: 'OFFLINE' });
+      io.emit('social:presence_update' as any, { userId: user.id, status: 'OFFLINE' });
     });
 
     socket.on(SocketEvents.FRIEND_REQUEST_SEND, async (data: { toUserId?: string; toPlayerId?: string; toUsername?: string }) => {
@@ -1831,9 +1865,29 @@ export const initSocket = (
           const u1 = await userRepository.findById(invite.fromUserId);
           const u2 = await userRepository.findById(invite.toUserId);
           if (u1 && u2) {
-            const room = await roomManager.createRoom(u1, 2);
-            await roomManager.joinRoom(room.id, u2);
-            io.to(room.id).emit(SocketEvents.ROOM_UPDATED, room);
+            const existingRoom = await roomManager.getRoomByPlayerId(invite.fromUserId);
+            let targetRoomId: string;
+            if (existingRoom && existingRoom.state === MatchState.WAITING && existingRoom.players.length < existingRoom.maxPlayers) {
+              await roomManager.joinRoom(existingRoom.id, u2);
+              targetRoomId = existingRoom.id;
+              const updatedRoom = await roomManager.getRoom(existingRoom.id);
+              if (updatedRoom) {
+                emitRoomUpdated(existingRoom.id, updatedRoom);
+                io.to('admin:channel').emit('admin:rooms_changed');
+              }
+            } else {
+              const room = await roomManager.createRoom(u1, 2);
+              await roomManager.joinRoom(room.id, u2);
+              targetRoomId = room.id;
+              const updatedRoom = await roomManager.getRoom(room.id);
+              if (updatedRoom) {
+                emitRoomUpdated(room.id, updatedRoom);
+                io.to('admin:channel').emit('admin:rooms_changed');
+              }
+            }
+
+            io.to(`user:${invite.fromUserId}`).emit(SocketEvents.MATCH_FOUND, { matchId: targetRoomId });
+            io.to(`user:${invite.toUserId}`).emit(SocketEvents.MATCH_FOUND, { matchId: targetRoomId });
           }
         }
       } catch (err: any) {

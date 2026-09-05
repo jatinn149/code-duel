@@ -596,6 +596,33 @@ export class DistributedRoomManager {
     // Relying on Redis TTL.
   }
 
+  async getAllRooms(): Promise<Room[]> {
+    const keys = await redisCache.keys(`${this.ROOM_PREFIX}*`);
+    const rooms: Room[] = [];
+    for (const key of keys) {
+      if (
+        key.includes(':events:') ||
+        key.startsWith(this.LOCK_PREFIX) ||
+        key.startsWith(this.EPOCH_PREFIX) ||
+        key.startsWith(this.EVENT_SEQ_PREFIX)
+      ) {
+        continue;
+      }
+      try {
+        const raw = await redisCache.get(key);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.id && parsed.players) {
+            rooms.push(parsed);
+          }
+        }
+      } catch {
+        // ignore malformed keys
+      }
+    }
+    return rooms;
+  }
+
   /**
    * Event Sequencing - Atomically increments and returns the next event sequence for a room.
    * Crucial for replay-safe event logging and deterministic ordering.

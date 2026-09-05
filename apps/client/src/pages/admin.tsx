@@ -28,6 +28,7 @@ import {
   RotateCcw,
   BookOpen,
   ShieldCheck,
+  Eye,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -819,12 +820,30 @@ export const AdminPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="pt-2 flex justify-end">
+                    <div className="pt-2 flex items-center justify-between gap-2 border-t border-zinc-800/80">
+                      <button
+                        onClick={() => {
+                          const modePath = room.gameMode === 'MULTI_ROUND'
+                            ? 'multi-round'
+                            : room.gameMode === 'CHAOS_ARENA'
+                            ? 'chaos-arena'
+                            : 'quickode';
+                          if (room.state === 'WAITING' || room.state === 'WAITING_FOR_PLAYERS' || room.state === 'COUNTDOWN') {
+                            navigate(`/lobby/${room.id}`);
+                          } else {
+                            navigate(`/battle/${modePath}/${room.id}`);
+                          }
+                        }}
+                        className="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 text-xs font-mono font-bold rounded-lg transition-colors flex items-center gap-1.5 active:scale-95"
+                      >
+                        <Eye size={13} /> Spectate (Cloaked)
+                      </button>
+
                       <button
                         onClick={() => handleTerminateRoom(room.id)}
-                        className="px-3 py-1 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 text-xs font-mono rounded transition-colors flex items-center gap-1.5"
+                        className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 text-xs font-mono rounded-lg transition-colors flex items-center gap-1.5 active:scale-95"
                       >
-                        <Trash2 size={13} /> Terminate Arena
+                        <Trash2 size={13} /> Disband Arena
                       </button>
                     </div>
                   </div>
