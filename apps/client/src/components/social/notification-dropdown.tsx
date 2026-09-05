@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { useSocialStore } from '../../store/social-store';
 import { useSocial } from '../../hooks/use-social';
 import { Notification, NotificationType } from '@code-duel/types';
@@ -187,15 +186,6 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
             </span>
           )}
         </button>
-      )}
-
-      {/* Global Full-Screen Dimmer Backdrop via Portal (immune to any ancestor backdrop-filter/containment) */}
-      {isOpen && typeof document !== 'undefined' && createPortal(
-        <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-[2px]"
-          onClick={handleClose}
-        />,
-        document.body
       )}
 
       <AnimatePresence>
