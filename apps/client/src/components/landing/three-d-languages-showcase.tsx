@@ -99,8 +99,9 @@ const Interactive3DLogoCard: React.FC<{ lang: LanguageWeapon }> = ({ lang }) => 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [16, -16]), { stiffness: 200, damping: 20 });
-  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-16, 16]), { stiffness: 200, damping: 20 });
+  // High-precision smooth springs for instantaneous, tactile 3D tilt
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [18, -18]), { stiffness: 320, damping: 28 });
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-18, 18]), { stiffness: 320, damping: 28 });
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
@@ -117,33 +118,36 @@ const Interactive3DLogoCard: React.FC<{ lang: LanguageWeapon }> = ({ lang }) => 
   };
 
   return (
-    <motion.div
-      ref={cardRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      style={{
-        rotateX,
-        rotateY,
-        transformStyle: 'preserve-3d',
-      }}
-      className={clsx(
-        "relative rounded-3xl bg-gradient-to-b from-neutral-900/95 via-neutral-950 to-black p-6 sm:p-8 border border-neutral-800 transition-all duration-300 shadow-2xl flex flex-col justify-between group",
-        lang.borderHover
-      )}
-    >
-      {/* Specular Interactive Cursor Highlight */}
+    <div style={{ perspective: 1200 }} className="w-full h-full">
       <motion.div
-        className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        ref={cardRef}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        whileHover={{ scale: 1.02 }}
         style={{
-          background: useTransform(
-            [mouseX, mouseY],
-            ([x, y]) =>
-              `radial-gradient(550px circle at ${(Number(x) + 0.5) * 100}% ${(Number(y) + 0.5) * 100}%, ${lang.glowColor}, transparent 70%)`
-          ),
+          rotateX,
+          rotateY,
+          transformStyle: 'preserve-3d',
+          transformPerspective: 1200,
         }}
-      />
+        className={clsx(
+          "relative rounded-3xl bg-gradient-to-b from-neutral-900/95 via-neutral-950 to-black p-6 sm:p-8 border border-neutral-800 shadow-2xl flex flex-col justify-between group h-full cursor-pointer transition-colors duration-200",
+          lang.borderHover
+        )}
+      >
+        {/* Specular Interactive Cursor Highlight */}
+        <motion.div
+          className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          style={{
+            background: useTransform(
+              [mouseX, mouseY],
+              ([x, y]) =>
+                `radial-gradient(600px circle at ${(Number(x) + 0.5) * 100}% ${(Number(y) + 0.5) * 100}%, ${lang.glowColor}, transparent 65%)`
+            ),
+          }}
+        />
 
-      <div className="relative z-10">
+        <div className="relative z-10" style={{ transform: 'translateZ(25px)' }}>
         {/* Header Badges */}
         <div className="flex items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-2">
@@ -235,6 +239,7 @@ const Interactive3DLogoCard: React.FC<{ lang: LanguageWeapon }> = ({ lang }) => 
         </div>
       </div>
     </motion.div>
+  </div>
   );
 };
 
