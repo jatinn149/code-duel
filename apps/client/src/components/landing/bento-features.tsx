@@ -36,13 +36,31 @@ const QuickodeCard: React.FC = () => {
     mouseY.set(0);
   };
 
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!cardRef.current || e.touches.length === 0) return;
+    const touch = e.touches[0];
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = (touch.clientX - rect.left) / rect.width - 0.5;
+    const y = (touch.clientY - rect.top) / rect.height - 0.5;
+    mouseX.set(Math.max(-0.5, Math.min(0.5, x)));
+    mouseY.set(Math.max(-0.5, Math.min(0.5, y)));
+  };
+
+  const handleTouchEnd = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
+
   return (
     <div style={{ perspective: 1000 }} className="w-full h-full">
       <motion.div
         ref={cardRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         whileHover={{ scale: 1.025, y: -6 }}
+        whileTap={{ scale: 0.98 }}
         style={{
           rotateX,
           rotateY,
@@ -50,9 +68,9 @@ const QuickodeCard: React.FC = () => {
         }}
         className="p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-neutral-900/90 to-neutral-950 border border-neutral-800 hover:border-emerald-500/60 shadow-2xl flex flex-col justify-between relative overflow-hidden group h-full cursor-pointer transition-colors duration-200"
       >
-        {/* Dynamic Electric Laser Cursor Spotlight */}
+        {/* Dynamic Electric Laser Cursor Spotlight (subtle on mobile, intense on hover/touch) */}
         <motion.div
-          className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          className="pointer-events-none absolute -inset-px rounded-3xl opacity-35 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           style={{
             background: useTransform(
               [mouseX, mouseY],
@@ -67,8 +85,16 @@ const QuickodeCard: React.FC = () => {
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-6">
             <motion.div
-              whileHover={{ rotate: [-10, 10, -5, 5, 0], scale: 1.15 }}
-              transition={{ duration: 0.5 }}
+              animate={{
+                scale: [1, 1.15, 1],
+                rotate: [0, -8, 8, 0],
+              }}
+              transition={{
+                duration: 2.8,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+              whileHover={{ rotate: [-12, 12, -6, 6, 0], scale: 1.25 }}
               className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-shadow"
             >
               <Zap size={24} />
@@ -147,18 +173,36 @@ const MultiRoundCard: React.FC = () => {
     mouseY.set(0);
   };
 
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!cardRef.current || e.touches.length === 0) return;
+    const touch = e.touches[0];
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = (touch.clientX - rect.left) / rect.width - 0.5;
+    const y = (touch.clientY - rect.top) / rect.height - 0.5;
+    mouseX.set(Math.max(-0.5, Math.min(0.5, x)));
+    mouseY.set(Math.max(-0.5, Math.min(0.5, y)));
+  };
+
+  const handleTouchEnd = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
+
   return (
     <div style={{ perspective: 1000 }} className="w-full h-full">
       <motion.div
         ref={cardRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         whileHover={{ y: -8, scale: 1.025 }}
+        whileTap={{ scale: 0.98 }}
         className="p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-neutral-900/90 to-neutral-950 border border-neutral-800 hover:border-indigo-500/60 shadow-2xl flex flex-col justify-between relative overflow-hidden group h-full cursor-pointer transition-colors duration-200"
       >
-        {/* Deep Indigo/Purple Cursor Spotlight */}
+        {/* Deep Indigo/Purple Cursor Spotlight (subtle on mobile, intense on hover/touch) */}
         <motion.div
-          className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          className="pointer-events-none absolute -inset-px rounded-3xl opacity-35 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           style={{
             background: useTransform(
               [mouseX, mouseY],
@@ -173,8 +217,16 @@ const MultiRoundCard: React.FC = () => {
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-6">
             <motion.div
-              whileHover={{ rotate: 15, scale: 1.2 }}
-              transition={{ duration: 0.3 }}
+              animate={{
+                rotate: [0, 8, -4, 0],
+                scale: [1, 1.08, 1],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+              whileHover={{ rotate: 18, scale: 1.25 }}
               className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:shadow-[0_0_20px_rgba(99,102,241,0.3)] transition-shadow"
             >
               <Swords size={24} />
@@ -254,13 +306,31 @@ const ChaosArenaCard: React.FC = () => {
     mouseY.set(0);
   };
 
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!cardRef.current || e.touches.length === 0) return;
+    const touch = e.touches[0];
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = (touch.clientX - rect.left) / rect.width - 0.5;
+    const y = (touch.clientY - rect.top) / rect.height - 0.5;
+    mouseX.set(Math.max(-0.5, Math.min(0.5, x)));
+    mouseY.set(Math.max(-0.5, Math.min(0.5, y)));
+  };
+
+  const handleTouchEnd = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
+
   return (
     <div style={{ perspective: 1000 }} className="w-full h-full">
       <motion.div
         ref={cardRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         whileHover={{ scale: 1.025, y: -6 }}
+        whileTap={{ scale: 0.98 }}
         style={{
           rotateZ,
           rotateX,
@@ -268,9 +338,9 @@ const ChaosArenaCard: React.FC = () => {
         }}
         className="p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-neutral-900/90 to-neutral-950 border border-neutral-800 hover:border-rose-500/60 shadow-2xl flex flex-col justify-between relative overflow-hidden group h-full cursor-pointer transition-colors duration-200"
       >
-        {/* Dynamic Fiery Crimson/Amber Cursor Spotlight */}
+        {/* Dynamic Fiery Crimson/Amber Cursor Spotlight (subtle on mobile, intense on hover/touch) */}
         <motion.div
-          className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          className="pointer-events-none absolute -inset-px rounded-3xl opacity-35 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           style={{
             background: useTransform(
               [mouseX, mouseY],
@@ -285,11 +355,19 @@ const ChaosArenaCard: React.FC = () => {
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-6">
             <motion.div
-              whileHover={{
-                scale: [1, 1.25, 0.95, 1.2, 1],
-                rotate: [-8, 8, -6, 6, 0],
+              animate={{
+                scale: [1, 1.2, 0.95, 1.15, 1],
+                rotate: [-6, 6, -4, 4, 0],
               }}
-              transition={{ duration: 0.6 }}
+              transition={{
+                duration: 3.2,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+              whileHover={{
+                scale: [1, 1.3, 0.9, 1.25, 1],
+                rotate: [-10, 10, -6, 6, 0],
+              }}
               className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 group-hover:shadow-[0_0_20px_rgba(244,63,94,0.3)] transition-shadow"
             >
               <Flame size={24} />

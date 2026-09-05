@@ -117,13 +117,41 @@ const Interactive3DLogoCard: React.FC<{ lang: LanguageWeapon }> = ({ lang }) => 
     mouseY.set(0);
   };
 
+  // Mobile Touch Support: Allows users on phones and tablets to tilt cards with their finger
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!cardRef.current || e.touches.length === 0) return;
+    const touch = e.touches[0];
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = (touch.clientX - rect.left) / rect.width - 0.5;
+    const y = (touch.clientY - rect.top) / rect.height - 0.5;
+    mouseX.set(Math.max(-0.5, Math.min(0.5, x)));
+    mouseY.set(Math.max(-0.5, Math.min(0.5, y)));
+  };
+
+  const handleTouchEnd = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
+
   return (
     <div style={{ perspective: 1200 }} className="w-full h-full">
       <motion.div
         ref={cardRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        animate={{
+          y: [0, -6, 0],
+        }}
+        transition={{
+          duration: 5,
+          repeat: Infinity,
+          ease: 'easeInOut',
+          delay: lang.id === 'python' ? 0 : 0.6,
+        }}
         style={{
           rotateX,
           rotateY,
@@ -135,9 +163,9 @@ const Interactive3DLogoCard: React.FC<{ lang: LanguageWeapon }> = ({ lang }) => 
           lang.borderHover
         )}
       >
-        {/* Specular Interactive Cursor Highlight */}
+        {/* Specular Interactive Cursor & Touch Highlight (subtly active on mobile, intense on hover/touch) */}
         <motion.div
-          className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          className="pointer-events-none absolute -inset-px rounded-3xl opacity-35 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           style={{
             background: useTransform(
               [mouseX, mouseY],

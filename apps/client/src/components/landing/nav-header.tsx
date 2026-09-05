@@ -38,21 +38,22 @@ export const LandingNavHeader: React.FC = () => {
         </div>
 
         {/* Action CTAs */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
           {isAuthenticated ? (
             <button
               onClick={() => navigate('/')}
-              className="px-4 py-2 bg-gradient-to-r from-indigo-600 via-indigo-500 to-blue-600 hover:brightness-110 text-white text-xs font-mono font-bold tracking-wide rounded-xl shadow-lg shadow-indigo-600/30 flex items-center gap-2 active:scale-95 transition-all"
+              className="px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-indigo-600 via-indigo-500 to-blue-600 hover:brightness-110 text-white text-xs font-mono font-bold tracking-wide rounded-xl shadow-lg shadow-indigo-600/30 flex items-center gap-1.5 sm:gap-2 active:scale-95 transition-all"
             >
-              <Terminal size={14} />
-              <span>RETURN TO DASHBOARD (@{user?.username || 'PLAYER'})</span>
+              <Terminal size={14} className="hidden xs:block" />
+              <span className="hidden sm:inline">RETURN TO DASHBOARD (@{user?.username || 'PLAYER'})</span>
+              <span className="sm:hidden">DASHBOARD</span>
               <ArrowRight size={13} />
             </button>
           ) : (
             <>
               <button
                 onClick={() => navigate('/login')}
-                className="px-3.5 py-2 text-xs font-mono text-neutral-350 hover:text-white transition-colors"
+                className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-xs font-mono text-neutral-350 hover:text-white transition-colors"
               >
                 Sign In
               </button>
@@ -61,7 +62,7 @@ export const LandingNavHeader: React.FC = () => {
                 className="relative group p-[1px] rounded-xl overflow-hidden shadow-lg shadow-indigo-500/20 active:scale-95 transition-all"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 animate-gradient-x" />
-                <div className="relative px-4 py-2 bg-neutral-950 rounded-[11px] flex items-center gap-2 group-hover:bg-opacity-80 transition-colors">
+                <div className="relative px-3 sm:px-4 py-1.5 sm:py-2 bg-neutral-950 rounded-[11px] flex items-center gap-1.5 group-hover:bg-opacity-80 transition-colors">
                   <span className="text-xs font-mono font-bold text-white tracking-wide">
                     PLAY NOW
                   </span>

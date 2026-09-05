@@ -143,43 +143,43 @@ export const HeroSection: React.FC = () => {
             </div>
 
             {/* Duelists Head-to-Head HUD Banner */}
-            <div className="p-4 sm:p-5 bg-gradient-to-r from-indigo-950/40 via-neutral-900/50 to-emerald-950/30 border-b border-neutral-800/80 grid grid-cols-7 items-center gap-2">
+            <div className="p-3 sm:p-5 bg-gradient-to-r from-indigo-950/40 via-neutral-900/50 to-emerald-950/30 border-b border-neutral-800/80 flex items-center justify-between gap-2">
               {/* Player 1 */}
-              <div className="col-span-3 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center font-bold text-white font-mono shadow-md">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center font-bold text-white font-mono shadow-md shrink-0 text-xs sm:text-base">
                   A
                 </div>
                 <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs sm:text-sm font-black text-white truncate">AlexCoder</span>
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+                  <div className="flex items-center gap-1 sm:gap-1.5">
+                    <span className="text-xs sm:text-sm font-black text-white truncate max-w-[85px] xs:max-w-[120px] sm:max-w-none">AlexCoder</span>
+                    <span className="text-[8px] sm:text-[9px] font-mono px-1 sm:px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
                       Coder
                     </span>
                   </div>
-                  <span className="text-[10px] font-mono text-neutral-400 block">580 CP • Python 3.12</span>
+                  <span className="text-[9px] sm:text-[10px] font-mono text-neutral-400 block truncate">580 CP • Python</span>
                 </div>
               </div>
 
               {/* VS Timer Center */}
-              <div className="col-span-1 text-center flex flex-col items-center">
-                <span className="text-xs font-black font-mono text-neutral-500">VS</span>
-                <span className="text-xs font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 mt-0.5">
+              <div className="text-center flex flex-col items-center shrink-0 px-1 sm:px-2">
+                <span className="text-[10px] sm:text-xs font-black font-mono text-neutral-500">VS</span>
+                <span className="text-[10px] sm:text-xs font-mono font-bold text-amber-400 bg-amber-500/10 px-1.5 sm:px-2 py-0.5 rounded border border-amber-500/20 mt-0.5">
                   02:15
                 </span>
               </div>
 
               {/* Player 2 */}
-              <div className="col-span-3 flex items-center justify-end gap-3 text-right">
+              <div className="flex items-center justify-end gap-2 sm:gap-3 text-right min-w-0">
                 <div className="min-w-0">
-                  <div className="flex items-center justify-end gap-1.5">
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/30">
+                  <div className="flex items-center justify-end gap-1 sm:gap-1.5">
+                    <span className="text-[8px] sm:text-[9px] font-mono px-1 sm:px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/30">
                       Coder
                     </span>
-                    <span className="text-xs sm:text-sm font-black text-white truncate">KaiDev</span>
+                    <span className="text-xs sm:text-sm font-black text-white truncate max-w-[85px] xs:max-w-[120px] sm:max-w-none">KaiDev</span>
                   </div>
-                  <span className="text-[10px] font-mono text-neutral-400 block">560 CP • Python 3.12</span>
+                  <span className="text-[9px] sm:text-[10px] font-mono text-neutral-400 block truncate">560 CP • Python</span>
                 </div>
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center font-bold text-white font-mono shadow-md">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center font-bold text-white font-mono shadow-md shrink-0 text-xs sm:text-base">
                   K
                 </div>
               </div>
